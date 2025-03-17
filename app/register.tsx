@@ -12,9 +12,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const LoginScreen: React.FC = () => {
+const RegisterScreen: React.FC = () => {
   const router = useRouter();
-  const handleNavigate = (): void => {
+
+  const handleNavigate = () => {
     router.push("/customer/home");
   };
 
@@ -48,23 +49,38 @@ const LoginScreen: React.FC = () => {
 
             <View className='bg-white rounded-t-3xl p-8 pb-10 w-full items-center shadow-lg'>
               <Text className='text-4xl font-bold text-gray-800 mb-8'>
-                Welcome Back!
+                Create new account
               </Text>
 
               <InputField
-                label='Username'
-                placeholder='Enter your username'
+                label='Name'
+                placeholder='Enter your name'
                 icon='person-outline'
               />
-
+              <InputField
+                label='Email'
+                placeholder='Enter your email'
+                icon='mail-outline'
+              />
+              <InputField
+                label='Phone number'
+                placeholder='Enter your phone number'
+                icon='call-outline'
+              />
               <InputField
                 label='Password'
                 placeholder='Enter your password'
                 icon='lock-closed-outline'
                 secure
               />
+              <InputField
+                label='Confirm password'
+                placeholder='Confirm your password'
+                icon='lock-closed-outline'
+                secure
+              />
 
-              <View className='w-4/5'>
+              <View className='flex-row justify-end items-center w-4/5'>
                 <TouchableOpacity onPress={() => {}} className='self-end mb-6'>
                   <Text className='text-blue-500'>Forgot password?</Text>
                 </TouchableOpacity>
@@ -72,9 +88,9 @@ const LoginScreen: React.FC = () => {
 
               <TouchableOpacity
                 onPress={handleNavigate}
-                className='w-4/5 p-4 rounded-lg bg-[#FFC515] shadow-sm active:opacity-80'>
+                className='w-4/5 p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-sm active:opacity-80'>
                 <Text className='text-white text-center font-medium'>
-                  Login
+                  Sign up
                 </Text>
               </TouchableOpacity>
 
@@ -88,7 +104,7 @@ const LoginScreen: React.FC = () => {
 
               <Link href='/login' className='mt-8'>
                 <Text className='text-blue-500'>
-                  Don't have an account? Sign up
+                  Already have an account? Log in
                 </Text>
               </Link>
             </View>
@@ -99,4 +115,4 @@ const LoginScreen: React.FC = () => {
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
