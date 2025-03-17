@@ -1,15 +1,16 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import "./global.css";
-import { useEffect } from "react";
+import { SafeAreaView } from "react-native";
 export default function RootLayout() {
-  const router = useRouter();
-  useEffect(() => {
-    router.replace("/login");
-  }, []);
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name='login' />
-      <Stack.Screen name='index' />
-    </Stack>
+    <SafeAreaView className='flex-1'>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name='start' />
+        <Stack.Screen name='(restaurant)' />
+        <Stack.Screen name='(customer)' />
+        <Stack.Screen name='login' />
+        <Stack.Screen name='register' />
+      </Stack>
+    </SafeAreaView>
   );
 }
