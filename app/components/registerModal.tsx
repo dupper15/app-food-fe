@@ -26,15 +26,15 @@ const RegisterModal: React.FC<{
   const buyerMutation = useMutation({
     mutationFn: registerCustomer,
     onSuccess: (data) => {
-      console.log(data);
       setLoading(false);
       toast.success("Register successfully🎉");
       setShowModal(false);
       router.push("/login");
     },
     onError: (data) => {
-      console.log(data);
       toast.error("Register failed 😢");
+      setLoading(false);
+      setShowModal(false);
     },
   });
   const sellerMutation = useMutation({
@@ -56,7 +56,6 @@ const RegisterModal: React.FC<{
   const handelSeller = (): void => {
     setLoading(true);
     sellerMutation.mutate({ name, email, phone, password, confirmPassword });
-    setShowModal(false);
   };
   return (
     <Modal transparent animationType='fade' visible={true}>
