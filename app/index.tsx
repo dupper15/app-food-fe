@@ -13,7 +13,7 @@ const Start: React.FC = () => {
       className='flex-1 object-cover'>
       <View className='flex-1 justify-end p-10 items-center'>
         <TouchableHighlight
-          className='bg-[#FFC515] rounded-lg p-4 text-gray-900 focus:border-[#FFC515] focus:ring-2 focus:ring-[#FFC515]'
+          className='bg-customYellow rounded-lg p-4 text-gray-900 focus:border-[#FFC515] focus:ring-2 focus:ring-[#FFC515]'
           onPress={handleGetStarted}>
           <Text className='font-semibold text-white text-2xl '>
             Get started

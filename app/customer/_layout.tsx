@@ -13,6 +13,7 @@ export default function CustomerLayout() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarActiveTintColor: "#FFC515",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = "home";
 

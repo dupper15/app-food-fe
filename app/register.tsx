@@ -1,5 +1,5 @@
 import { Link, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   TextInput,
@@ -11,28 +11,25 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import toast from "react-hot-toast";
+import RegisterModal from "./components/registerModal";
 
 const RegisterScreen: React.FC = () => {
   const router = useRouter();
 
-  const handleNavigate = () => {
-    router.push("/customer/home");
+  const handleSignUp = () => {
+    if (password == confirmPassword) {
+      setShowModal(true);
+    } else {
+      toast.error("Password not match");
+    }
   };
-
-  const InputField = ({ label, placeholder, icon, secure = false }) => (
-    <View className='w-4/5 mb-5'>
-      <Text className='text-lg mb-2 text-gray-700'>{label}</Text>
-      <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
-        <Ionicons name={icon} size={20} color='#a1a1aa' className='mr-3' />
-        <TextInput
-          placeholder={placeholder}
-          placeholderTextColor='#a1a1aa'
-          secureTextEntry={secure}
-          className='flex-1 text-gray-900'
-        />
-      </View>
-    </View>
-  );
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -52,43 +49,108 @@ const RegisterScreen: React.FC = () => {
                 Create new account
               </Text>
 
-              <InputField
-                label='Name'
-                placeholder='Enter your name'
-                icon='person-outline'
-              />
-              <InputField
-                label='Email'
-                placeholder='Enter your email'
-                icon='mail-outline'
-              />
-              <InputField
-                label='Phone number'
-                placeholder='Enter your phone number'
-                icon='call-outline'
-              />
-              <InputField
-                label='Password'
-                placeholder='Enter your password'
-                icon='lock-closed-outline'
-                secure
-              />
-              <InputField
-                label='Confirm password'
-                placeholder='Confirm your password'
-                icon='lock-closed-outline'
-                secure
-              />
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Name</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
+                  <Ionicons
+                    name='person-outline'
+                    size={20}
+                    color='#a1a1aa'
+                    className='mr-3'
+                  />
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder='Enter your name'
+                    placeholderTextColor='#a1a1aa'
+                    className='flex-1 text-gray-900'
+                  />
+                </View>
+              </View>
 
-              <View className='flex-row justify-end items-center w-4/5'>
-                <TouchableOpacity onPress={() => {}} className='self-end mb-6'>
-                  <Text className='text-blue-500'>Forgot password?</Text>
-                </TouchableOpacity>
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Email</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
+                  <Ionicons
+                    name='mail-outline'
+                    size={20}
+                    color='#a1a1aa'
+                    className='mr-3'
+                  />
+                  <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder='Enter your email'
+                    placeholderTextColor='#a1a1aa'
+                    className='flex-1 text-gray-900'
+                  />
+                </View>
+              </View>
+
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Phone number</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
+                  <Ionicons
+                    name='call-outline'
+                    size={20}
+                    color='#a1a1aa'
+                    className='mr-3'
+                  />
+                  <TextInput
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder='Enter your phone number'
+                    placeholderTextColor='#a1a1aa'
+                    className='flex-1 text-gray-900'
+                  />
+                </View>
+              </View>
+
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Password</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
+                  <Ionicons
+                    name='lock-closed-outline'
+                    size={20}
+                    color='#a1a1aa'
+                    className='mr-3'
+                  />
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder='Enter your password'
+                    placeholderTextColor='#a1a1aa'
+                    secureTextEntry
+                    className='flex-1 text-gray-900'
+                  />
+                </View>
+              </View>
+
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>
+                  Confirm password
+                </Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
+                  <Ionicons
+                    name='lock-closed-outline'
+                    size={20}
+                    color='#a1a1aa'
+                    className='mr-3'
+                  />
+                  <TextInput
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    placeholder='Confirm your password'
+                    placeholderTextColor='#a1a1aa'
+                    secureTextEntry
+                    className='flex-1 text-gray-900'
+                  />
+                </View>
               </View>
 
               <TouchableOpacity
-                onPress={handleNavigate}
-                className='w-4/5 p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-sm active:opacity-80'>
+                onPress={handleSignUp}
+                className='w-4/5 p-4 rounded-lg bg-customYellow shadow-sm active:opacity-80'>
                 <Text className='text-white text-center font-medium'>
                   Sign up
                 </Text>
@@ -111,6 +173,16 @@ const RegisterScreen: React.FC = () => {
           </View>
         </ImageBackground>
       </ScrollView>
+      {showModal && (
+        <RegisterModal
+          setShowModal={setShowModal}
+          name={name}
+          phone={phone}
+          email={email}
+          password={password}
+          confirmPassword={confirmPassword}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
