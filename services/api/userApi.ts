@@ -15,7 +15,6 @@ export const registerCustomer = async (
   data: UserInterface.RegisterData
 ): Promise<any> => {
   const { name, email, phone, password, confirmPassword } = data;
-  console.log(data);
   if (!name || !email || !phone || !password || !confirmPassword) {
     throw new Error("All fields are required");
   }
@@ -26,7 +25,6 @@ export const registerRestaurantOwner = async (
   data: UserInterface.RegisterData
 ): Promise<any> => {
   const { name, email, phone, password, confirmPassword } = data;
-  console.log(data);
   if (!name || !email || !phone || !password || !confirmPassword) {
     throw new Error("All fields are required");
   }
