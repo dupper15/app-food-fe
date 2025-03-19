@@ -10,9 +10,9 @@ import {
   registerCustomer,
   registerRestaurantOwner,
 } from "./../../services/api/userApi";
-import toast from "react-hot-toast";
 import { router } from "expo-router";
 import { useState } from "react";
+import { CustomToast } from "./toast";
 
 const RegisterModal: React.FC<{
   setShowModal: (value: boolean) => void;
@@ -27,12 +27,12 @@ const RegisterModal: React.FC<{
     mutationFn: registerCustomer,
     onSuccess: (data) => {
       setLoading(false);
-      toast.success("Register successfully🎉");
+      CustomToast("success", "Successfull", "Register successfully🎉");
       setShowModal(false);
-      router.push("/login");
+      router.push("/auth/login");
     },
     onError: (data) => {
-      toast.error("Register failed 😢");
+      CustomToast("error", "Error", "Register failed 😢");
       setLoading(false);
       setShowModal(false);
     },
@@ -40,12 +40,12 @@ const RegisterModal: React.FC<{
   const sellerMutation = useMutation({
     mutationFn: registerRestaurantOwner,
     onSuccess: () => {
-      toast.success("Register successfully🎉");
+      CustomToast("success", "Successfull", "Register successfully");
       setLoading(false);
-      router.push("/login");
+      router.push("/auth/login");
     },
     onError: () => {
-      toast.error("Register failed 😢");
+      CustomToast("error", "Error", "Register failed 😢");
       setLoading(false);
     },
   });

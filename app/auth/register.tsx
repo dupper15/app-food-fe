@@ -11,8 +11,8 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import toast from "react-hot-toast";
-import RegisterModal from "./components/registerModal";
+import RegisterModal from "../components/registerModal";
+import { CustomToast } from "../components/toast";
 
 const RegisterScreen: React.FC = () => {
   const router = useRouter();
@@ -21,7 +21,7 @@ const RegisterScreen: React.FC = () => {
     if (password == confirmPassword) {
       setShowModal(true);
     } else {
-      toast.error("Password not match");
+      CustomToast("error", "Error", "Password does not match");
     }
   };
   const [name, setName] = useState("");
@@ -164,7 +164,7 @@ const RegisterScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
 
-              <Link href='/login' className='mt-8'>
+              <Link href='/auth/login' className='mt-8'>
                 <Text className='text-blue-500'>
                   Already have an account? Log in
                 </Text>

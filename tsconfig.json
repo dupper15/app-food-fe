@@ -1,11 +1,10 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "module": "esnext",
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -16,6 +15,7 @@
     "core/config/nativewind-env.d.ts",
     "src/**/*",
     "nativewind-env.d.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "services/toastConfig.js"
   ]
 }
