@@ -10,29 +10,37 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/features/counter/userSlice";
+import { getUserIdFromToken } from "@/utils/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "@/services/api/userApi";
-import toast from "react-hot-toast";
+import { CustomToast } from "../components/toast";
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const dispatch = useDispatch();
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data: any) => {
-      toast.success("Đăng nhập thành công 🎉");
+      const { accessToken, refreshToken } = data;
+      const userId = getUserIdFromToken(accessToken);
+
+      dispatch(setUser({ userId, refreshToken }));
+      CustomToast("success", "Success", "Login success");
       if (data.userType === "restaurantOwner") {
-        router.push("/restaurant/order");
+        router.push("/auth/createRestaurant");
       }
       if (data.userType === "customer") {
         router.push("/customer/home");
       }
     },
-    onError: () => {
-      toast.error("Đăng nhập thất bại 😢");
+    onError: (data: any) => {
+      console.log(data);
+      CustomToast("error", "Error", "Login failed");
     },
   });
 
@@ -116,7 +124,7 @@ const LoginScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
 
-              <Link href='/register' className='mt-8'>
+              <Link href='/auth/register' className='mt-8'>
                 <Text className='text-blue-500'>
                   Don't have an account? Sign up
                 </Text>

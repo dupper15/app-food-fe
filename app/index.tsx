@@ -5,7 +5,7 @@ import { ImageBackground, TouchableHighlight, Text, View } from "react-native";
 const Start: React.FC = () => {
   const router = useRouter();
   const handleGetStarted = (): void => {
-    router.push("/login");
+    router.push("/auth/login");
   };
   return (
     <ImageBackground
