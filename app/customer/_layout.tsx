@@ -30,12 +30,13 @@ export default function CustomerLayout() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-      })}>
-      <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Favorite' component={Favorite} />
-      <Tab.Screen name='History' component={History} />
-      <Tab.Screen name='Notification' component={Notification} />
-      <Tab.Screen name='Personal' component={Personal} />
+      })}
+    >
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Favorite" component={Favorite} />
+      <Tab.Screen name="History" component={History} />
+      <Tab.Screen name="Notification" component={Notification} />
+      <Tab.Screen name="Personal" component={Personal} />
     </Tab.Navigator>
   );
 }
