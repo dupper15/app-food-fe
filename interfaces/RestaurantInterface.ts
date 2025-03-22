@@ -6,3 +6,20 @@ export type CreateRestaurantData = {
   avatar: File;
   ownerId: string;
 };
+export type RestaurantData = {
+  id: string;
+  name: string;
+  total_reviews: number;
+  total_orders: number;
+  description: string;
+  address: string;
+  banner: string;
+  avatar: string;
+  owner_id: {
+    avatar: string;
+    phone: string;
+  };
+  isDelete: boolean;
+  status: string;
+  rating: number;
+};

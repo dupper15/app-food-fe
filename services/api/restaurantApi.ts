@@ -1,3 +1,4 @@
+import { RestaurantData } from "@/interfaces/RestaurantInterface";
 import axiosInstance from "./axiosInstance";
 
 export const createRestaurant = async (data: FormData): Promise<any> => {
@@ -35,5 +36,18 @@ export const setAvatarRes = async (data: FormData): Promise<any> => {
   const id = data.get("owner_id");
   console.log(id);
   const response = await axiosInstance.put(`restaurant_owners/${id}`, data);
+  return response.data;
+};
+export const getRestaurantHistory = async (
+  userId: any
+): Promise<RestaurantData> => {
+  const response = await axiosInstance.get(`restaurants/history/${userId}`);
+  return response.data;
+};
+export const getRcmRestaurant = async (
+  userId: any
+): Promise<RestaurantData> => {
+  console.log("test lan 1");
+  const response = await axiosInstance.get(`restaurants/rcm/${userId}`);
   return response.data;
 };
