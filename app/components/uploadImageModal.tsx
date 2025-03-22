@@ -1,23 +1,20 @@
-import {
-  Modal,
-  View,
-  TouchableHighlight,
-  Text,
-  Platform,
-  ActionSheetIOS,
-} from "react-native";
-import { useState } from "react";
+import { Modal, View, TouchableHighlight, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { CustomToast } from "./toast";
 
 const UploadImageModal: React.FC<{
   setShowModal: (value: boolean) => void;
-  handleImagePicker: (value: File) => void;
-}> = ({ setShowModal, handleImagePicker }) => {
-  const createFileFromUri = async (uri: string): Promise<File> => {
+  type: string;
+  handleImagePicker: (file: File) => void;
+}> = ({ setShowModal, handleImagePicker, type }) => {
+  const createFileFromUri = async (uri: string) => {
     const response = await fetch(uri);
     const blob = await response.blob();
-    return new File([blob], "image.jpg", { type: blob.type });
+
+    const fileExtension = uri.split(".").pop() || "jpg";
+    const finalFileName = `${type}_${Date.now()}.${fileExtension}`;
+
+    return new File([blob], finalFileName, { type: blob.type });
   };
 
   const openCamera = async () => {
@@ -54,7 +51,8 @@ const UploadImageModal: React.FC<{
 
     if (!result.canceled) {
       const file = await createFileFromUri(result.assets[0].uri);
-      handleImagePicker(file);
+      console.log("alo4");
+      handleImagePicker(file); // Truyền File thay vì object thường
       setShowModal(false);
     }
   };
