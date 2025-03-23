@@ -1,5 +1,5 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import ListSetting from "../components/settingItem";
+import ListSetting from "@/app/components/settingItem";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface User {
