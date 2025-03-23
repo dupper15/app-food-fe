@@ -12,18 +12,8 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import * as ResApi from "../../services/api/restaurantApi";
-import { Asset } from "./../../node_modules/expo-asset/build/Asset";
 import Category from "../components/category";
-import RestaurantBox from "../components/restaurant";
-const imageMap = {
-  "Món nước": require("../../assets/images/monNuoc.png"),
-  Cơm: require("../../assets/images/com.png"),
-  "Thức ăn nhanh": require("../../assets/images/thucAnNhanh.png"),
-  "Lẩu & nướng": require("../../assets/images/lau.png"),
-  "Đồ ăn nhẹ": require("../../assets/images/doAnNhe.png"),
-  "Món chay": require("../../assets/images/monChay.png"),
-  Khác: require("../../assets/images/monKhac.png"),
-};
+import RestaurantBox from "../components/restaurantBox";
 export default function Home() {
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId

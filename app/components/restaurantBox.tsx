@@ -2,20 +2,24 @@ import { useEffect } from "react";
 import { Image, Text, TouchableHighlight, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Res from "../../interfaces/RestaurantInterface";
+import { useRouter } from "expo-router";
 
 const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   restaurant,
 }) => {
-  useEffect(() => {
-    console.log("1", restaurant.name);
-    console.log("2", restaurant.owner_id?.avatar);
-    console.log("3", restaurant.rating);
-  }, [restaurant]);
-
+  const route = useRouter();
+  const handleNavigate = () => {
+    route.push({
+      pathname: "../screen/restaurantPage",
+      params: {
+        data: JSON.stringify(restaurant),
+      },
+    });
+  };
   return (
     <TouchableHighlight
       className='rounded-lg bg-white shadow-md w-48'
-      onPress={() => console.log("Clicked on", restaurant.name)}>
+      onPress={() => handleNavigate()}>
       <View style={{ minHeight: 180 }}>
         <Image
           source={{ uri: restaurant.owner_id?.avatar }}
