@@ -1,10 +1,10 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Order from "./order";
+import Order from "./orderScreen/order";
 import History from "./history";
 import Notification from "./notification";
 import Revenue from "./revenue";
-import Restaurant from "./restaurant";
+import { RestaurantStackNavigator } from "./restaurantScreen/_layout";
 
 const Tab = createBottomTabNavigator();
 
@@ -31,12 +31,13 @@ export default function CustomerLayout() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-      })}>
-      <Tab.Screen name='Order' component={Order} />
-      <Tab.Screen name='History' component={History} />
-      <Tab.Screen name='Notification' component={Notification} />
-      <Tab.Screen name='Revenue' component={Revenue} />
-      <Tab.Screen name='Restaurant' component={Restaurant} />
+      })}
+    >
+      <Tab.Screen name="Order" component={Order} />
+      <Tab.Screen name="History" component={History} />
+      <Tab.Screen name="Notification" component={Notification} />
+      <Tab.Screen name="Revenue" component={Revenue} />
+      <Tab.Screen name="Restaurant" component={RestaurantStackNavigator} />
     </Tab.Navigator>
   );
 }

@@ -23,6 +23,13 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "We need access to your gallery to upload images.",
+          "cameraPermission": "We need access to your camera to take photos."
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
