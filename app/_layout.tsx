@@ -21,12 +21,12 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <SafeAreaView className='flex-1'>
+        <SafeAreaView className="flex-1">
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name='index' />
-            <Stack.Screen name='(restaurant)' />
-            <Stack.Screen name='(customer)' />
-            <Stack.Screen name='(auth)' />
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(restaurant)" />
+            <Stack.Screen name="(customer)" />
+            <Stack.Screen name="(auth)" />
           </Stack>
         </SafeAreaView>
         <Toast config={toastConfig} />

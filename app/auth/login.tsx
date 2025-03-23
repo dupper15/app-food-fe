@@ -32,7 +32,7 @@ const LoginScreen: React.FC = () => {
       dispatch(setUser({ userId, refreshToken }));
       CustomToast("success", "Success", "Login success");
       if (data.userType === "restaurantOwner") {
-        router.push("/auth/createRestaurant");
+        router.push("/restaurant/orderScreen/order");
       }
       if (data.userType === "customer") {
         router.push("/customer/home");
