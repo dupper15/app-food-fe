@@ -1,0 +1,370 @@
+import { getAllConversations, getMessage } from "@/services/api/chatApi";
+import { router, useFocusEffect } from "expo-router";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store";
+import { getRestaurantDetail } from "@/services/api/restaurantApi";
+
+interface Conversation {
+  _id: string;
+  user1: string;
+  user2: string;
+  is_seen: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  last_message: string;
+}
+
+interface UserNames {
+  [key: string]: string;
+}
+
+interface MessageContents {
+  [key: string]: string;
+}
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
+export default function Chat() {
+  const userId = useSelector((state: RootState) => state.user.userId);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredConversations, setFilteredConversations] = useState<
+    Conversation[]
+  >([]);
+  const [userNames, setUserNames] = useState<UserNames>({});
+  const [messageContents, setMessageContents] = useState<MessageContents>({});
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Extract fetch logic to a separate function to reuse
+  const fetchData = async () => {
+    if (userId) {
+      try {
+        setLoading(true);
+        const data = await getAllConversations(userId);
+        setConversations(data);
+        setFilteredConversations(data);
+
+        // Collect all user IDs that need name resolution
+        const userIds = new Set<string>();
+        data.forEach((conv: Conversation) => {
+          userIds.add(conv.user1);
+          userIds.add(conv.user2);
+        });
+
+        // Fetch usernames for all users
+        const namesMap: UserNames = {};
+        await Promise.all(
+          Array.from(userIds).map(async (id) => {
+            try {
+              const name = await getRestaurantDetail(id).then(
+                (res) => res.name
+              );
+              namesMap[id] = name;
+            } catch (error) {
+              console.error(`Error fetching name for user ${id}:`, error);
+              namesMap[id] = "Unknown User";
+            }
+          })
+        );
+
+        // Fetch all last message contents
+        const messageIds = data
+          .filter((conv: Conversation) => conv.last_message)
+          .map((conv: Conversation) => conv.last_message);
+
+        const messagesMap: MessageContents = {};
+        await Promise.all(
+          messageIds.map(async (msgId: string) => {
+            try {
+              if (msgId) {
+                const messageData = await getMessage(msgId);
+                messagesMap[msgId] = messageData.content || "No content";
+              }
+            } catch (error) {
+              console.error(`Error fetching message ${msgId}:`, error);
+              messagesMap[msgId] = "Unable to load message";
+            }
+          })
+        );
+
+        setMessageContents(messagesMap);
+        setUserNames(namesMap);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, [userId]);
+
+  // Refresh data when screen comes into focus (e.g., navigating back)
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      return () => {
+        // Optional cleanup
+      };
+    }, [userId])
+  );
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredConversations(conversations);
+    } else {
+      const filtered = conversations.filter((conversation) => {
+        // Get the other user's ID
+        const otherUserId = getOtherUserId(conversation);
+        // Get their username and check if it includes the search query
+        const otherUserName = userNames[otherUserId] || otherUserId;
+        return otherUserName.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+      setFilteredConversations(filtered);
+    }
+  }, [searchQuery, conversations, userId, userNames]);
+
+  const navigateToChatDetail = (conversationId: string): void => {
+    router.push({
+      pathname: "/customer/chat/[id]",
+      params: { id: conversationId },
+    });
+  };
+
+  const getOtherUserId = (conversation: Conversation): string => {
+    return conversation.user1 === userId
+      ? conversation.user2
+      : conversation.user1;
+  };
+
+  const getOtherUserName = (conversation: Conversation): string => {
+    const otherUserId = getOtherUserId(conversation);
+    return userNames[otherUserId] || "Loading...";
+  };
+
+  const getLastMessageContent = (msgId: string): string => {
+    if (!msgId) return "No messages yet";
+    return messageContents[msgId] || "Loading message...";
+  };
+
+  const truncateMessage = (message: string, maxLength: number = 30): string => {
+    if (message.length <= maxLength) return message;
+    return message.substring(0, maxLength) + "...";
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
+      <Text style={styles.chatTitle}>chat</Text>
+
+      <View style={styles.chatContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Chat</Text>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#999"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FFC515" />
+            <Text style={styles.loadingText}>Loading conversations...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredConversations}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => {
+              const otherUserName = getOtherUserName(item);
+              const lastMessageContent = getLastMessageContent(
+                item.last_message
+              );
+
+              return (
+                <TouchableOpacity
+                  style={styles.chatItem}
+                  onPress={() => navigateToChatDetail(item._id)}
+                >
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {otherUserName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.chatContent}>
+                    <Text style={styles.chatName}>{otherUserName}</Text>
+                    <Text style={styles.chatMessage}>
+                      {truncateMessage(lastMessageContent)}
+                    </Text>
+                  </View>
+                  <Text style={styles.chatTime}>
+                    {formatDate(item.updatedAt)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No conversations found</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#1A1A1A",
+  },
+  chatTitle: {
+    color: "#999",
+    fontSize: 16,
+    marginLeft: 16,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  chatContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
+    textAlign: "center",
+    marginRight: 40, // To center the title accounting for the back button
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 20,
+    margin: 16,
+    paddingHorizontal: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 14,
+    color: "#333",
+  },
+  chatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#f0f0f0",
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#555",
+  },
+  chatContent: {
+    flex: 1,
+  },
+  chatName: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  chatMessage: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 2,
+  },
+  chatTime: {
+    fontSize: 12,
+    color: "#999",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+});

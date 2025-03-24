@@ -51,3 +51,7 @@ export const getRcmRestaurant = async (
   const response = await axiosInstance.get(`restaurants/rcm/${userId}`);
   return response.data;
 };
+export const getRestaurantDetail = async (restaurantId: string) => {
+  const response = await axiosInstance.get(`restaurants/${restaurantId}`);
+  return response.data;
+};
