@@ -22,7 +22,11 @@ export const RestaurantStackNavigator = () => {
         component={Menu}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="Voucher" component={Voucher} />
+      <Stack.Screen
+        name="Voucher"
+        component={Voucher}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="Rating" component={Rating} />
       <Stack.Screen name="DarkMode" component={DarkMode} />
     </Stack.Navigator>
