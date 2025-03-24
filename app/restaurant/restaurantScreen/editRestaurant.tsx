@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 
-export default function Restaurant() {
+export default function EditRestaurant() {
   return (
     <View>
-      <Text>home customer</Text>
+      <Text>edit restaun</Text>
     </View>
   );
 }

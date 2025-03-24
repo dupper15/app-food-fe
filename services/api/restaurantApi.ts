@@ -42,5 +42,9 @@ export const getDishesOfRestaurant = async (data: any) => {
 };
 export const getCategory = async () => {
   const response = await axiosInstance.get("categories/fetchall-category");
+   return response.data;
+};
+export const getRestaurantDetail = async (restaurantId: string) => {
+  const response = await axiosInstance.get(`restaurants/${restaurantId}`);
   return response.data;
 };
