@@ -6,12 +6,16 @@ import {
   Text,
   View,
   Dimensions,
-  Touchable,
   TouchableHighlight,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DishBox from "../components/dishBox";
+import { useMutation } from "@tanstack/react-query";
+import {
+  getDishesOfRestaurant,
+  getCategory,
+} from "@/services/api/restaurantApi";
 
 const { width } = Dimensions.get("window");
 
@@ -19,45 +23,62 @@ const RestaurantPage = () => {
   const { data } = useLocalSearchParams();
   const [restaurant, setRestaurant] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [dishes, setDishes] = useState([
-    {
-      id: 1,
-      name: "Bún bò Huế",
-      price: 50000,
-      image:
-        "https://th.bing.com/th/id/OIP._iu9kozRYB1qE0GH4ucRiwAAAA?rs=1&pid=ImgDetMain",
-    },
-    {
-      id: 2,
-      name: "Phở bò",
-      price: 40000,
-      image:
-        "https://th.bing.com/th/id/OIP._iu9kozRYB1qE0GH4ucRiwAAAA?rs=1&pid=ImgDetMain",
-    },
-    {
-      id: 3,
-      name: "Bún riêu",
-      price: 30000,
-      image:
-        "https://th.bing.com/th/id/OIP._iu9kozRYB1qE0GH4ucRiwAAAA?rs=1&pid=ImgDetMain",
-    },
-  ]);
-  const [categories, setCategories] = useState([
-    "All",
-    "Breakfast",
-    "Lunch",
-    "Dinner",
-    "Snacks",
-    "Drinks",
-    "Desserts",
-  ]);
-  const [currentCategory, setCurrentCategory] = useState(0);
+  const [dishes, setDishes] = useState([]);
+  const [categories, setCategories] = useState<{ _id: String; name: string }[]>(
+    [
+      {
+        _id: "",
+        name: "All",
+      },
+    ]
+  );
+  const [currentCategory, setCurrentCategory] = useState(categories[0]);
   useEffect(() => {
     if (data) {
       setRestaurant(JSON.parse(data));
     }
   }, [data]);
+  const dishesMutation = useMutation({
+    mutationFn: getDishesOfRestaurant,
+    onSuccess: (data) => {
+      setDishes(data);
+    },
+    onError: (error) => {
+      console.log(error);
+      setDishes([]);
+    },
+  });
+  const changeCategory = () => {
+    const data = {
+      categoryId: currentCategory._id,
+      restaurantId: restaurant?._id,
+    };
+    dishesMutation.mutate(data);
+  };
+  const getCategoryMutation = useMutation({
+    mutationFn: getCategory,
+    onSuccess: (data) => {
+      setCategories([{ _id: "", name: "All" }, ...data]);
+      setCurrentCategory(categories[0]);
+      if (restaurant) {
+        changeCategory();
+      }
+    },
 
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+  useEffect(() => {
+    if (categories.length == 1) {
+      getCategoryMutation.mutate();
+    }
+  }, []);
+  useEffect(() => {
+    if (restaurant && currentCategory) {
+      changeCategory();
+    }
+  }, [currentCategory]);
   return (
     <ScrollView className='bg-gray-100'>
       <View className='relative'>
@@ -126,16 +147,22 @@ const RestaurantPage = () => {
         {categories.map((category, index) => (
           <TouchableHighlight
             key={index}
-            onPress={() => setCurrentCategory(index)}
+            onPress={() => {
+              setCurrentCategory(category);
+            }}
             underlayColor='#FACC15'
             className={`rounded-lg px-4 py-2 transition-all border mx-1 border-customYellow duration-300 ${
-              index === currentCategory ? "bg-customYellow" : "bg-white"
+              category._id == currentCategory._id
+                ? "bg-customYellow"
+                : "bg-white"
             }`}>
             <Text
               className={`text-sm font-semibold ${
-                index === currentCategory ? "text-white" : "text-customYellow"
+                category._id == currentCategory._id
+                  ? "text-white"
+                  : "text-customYellow"
               }`}>
-              {category}
+              {category.name}
             </Text>
           </TouchableHighlight>
         ))}
