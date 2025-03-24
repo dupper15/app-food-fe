@@ -94,7 +94,7 @@ export default function ListMenuItem() {
       onPress={(e) => e.preventDefault()}
       className="flex-row items-center px-4 py-2"
     >
-      <View className="rounded-lg items-center justify-center bg-[#f8f8f8] w-48 gap-1">
+      <View className="rounded-lg items-center justify-center shadow-sm bg-[#f8f8f8] w-48 gap-1">
         <Image
           source={{ uri: item.image }}
           className="w-48 h-28 rounded-t-lg"

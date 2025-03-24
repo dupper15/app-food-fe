@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import * as ResApi from "@/services/api/restaurantApi";
 import { Asset } from "expo-asset/build/Asset";
 import Category from "@/app/components/category";
-import RestaurantBox from "@/app/components/restaurant";
+import RestaurantBox from "@/app/components/restaurantBox";
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 const imageMap = {
@@ -103,7 +103,7 @@ export default function Home() {
             activeOpacity={0.7}
             onPress={() => {
               console.log("Chat button pressed");
-              router.push("/customer/chat");
+              router.push("/customer/chat/index");
             }}
           >
             <Ionicons
