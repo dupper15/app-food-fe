@@ -6,7 +6,7 @@ const Start: React.FC = () => {
   const router = useRouter();
 
   const handleGetStarted = (): void => {
-    router.push("/screen/paymentPage");
+    router.push("/screen/successPage");
   };
   return (
     <ImageBackground
