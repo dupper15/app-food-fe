@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import ListMenuItem from "@/app/components/menuItem";
 import { useState } from "react";
 import DishModal from "@/app/components/dishModal";
+import { DishData } from "@/interfaces/DishInterface";
 
 export default function Menu() {
   const route = useRouter();

@@ -6,7 +6,7 @@ const Start: React.FC = () => {
   const router = useRouter();
 
   const handleGetStarted = (): void => {
-    router.push("/restaurant/restaurantScreen/menu");
+    router.push("/auth/login");
   };
   return (
     <ImageBackground

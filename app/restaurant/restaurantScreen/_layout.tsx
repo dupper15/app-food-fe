@@ -16,7 +16,11 @@ export const RestaurantStackNavigator = () => {
         component={Restaurant}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="EditRestaurant" component={EditRestaurant} />
+      <Stack.Screen
+        name="EditRestaurant"
+        component={EditRestaurant}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Menu"
         component={Menu}
