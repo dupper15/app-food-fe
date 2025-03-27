@@ -7,6 +7,7 @@ import {
   View,
   Dimensions,
   TouchableHighlight,
+  TouchableOpacity,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -16,6 +17,7 @@ import {
   getDishesOfRestaurant,
   getCategory,
 } from "@/services/api/restaurantApi";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -32,6 +34,7 @@ const RestaurantPage = () => {
       },
     ]
   );
+  const router = useRouter();
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   useEffect(() => {
     if (data) {
@@ -81,6 +84,13 @@ const RestaurantPage = () => {
   }, [currentCategory]);
   return (
     <ScrollView className='bg-gray-100'>
+      <View className='absolute top-5 left-5 z-10'>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className='bg-white rounded-full p-2 shadow-md'>
+          <Icon name='arrow-back' size={24} color='black' />
+        </TouchableOpacity>
+      </View>
       <View className='relative'>
         {restaurant?.banners && restaurant.banners.length > 0 ? (
           <>
@@ -100,7 +110,6 @@ const RestaurantPage = () => {
                 />
               )}
             />
-            {/* Dấu chấm chỉ mục */}
             <View className='absolute bottom-4 left-1/2 -translate-x-1/2 flex-row'>
               {restaurant.banners.map((_, index) => (
                 <View
