@@ -48,3 +48,7 @@ export const getRestaurantDetail = async (restaurantId: string) => {
   const response = await axiosInstance.get(`restaurants/${restaurantId}`);
   return response.data;
 };
+export const fetchRestaurantByOwner = async (id: any): Promise<any> => {
+  console.log("id restaurant", id);
+  return await axiosInstance.get(`restaurants/owner/${id}`);
+};

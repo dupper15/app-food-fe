@@ -1,4 +1,4 @@
-import { formatPrice, formatRatio } from "@/utils/formatPrice";
+import { formatPrice, formatRatio } from "@/utils/format";
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";

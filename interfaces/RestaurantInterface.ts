@@ -13,7 +13,7 @@ export type RestaurantData = {
   total_orders: number;
   description: string;
   address: string;
-  banner: string;
+  banners: string[];
   avatar: string;
   owner_id: {
     avatar: string;

@@ -17,6 +17,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "@/services/api/userApi";
 import { CustomToast } from "../components/toast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchRestaurantByOwner } from "@/services/api/restaurantApi";
+import { setRestaurant } from "@/features/counter/restaurantSlice";
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
@@ -25,16 +28,32 @@ const LoginScreen: React.FC = () => {
   const dispatch = useDispatch();
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       const { accessToken, refreshToken } = data;
       const userId = getUserIdFromToken(accessToken);
 
       dispatch(setUser({ userId, refreshToken }));
       CustomToast("success", "Success", "Login success");
       if (data.userType === "restaurantOwner") {
-        router.push("/restaurant/orderScreen/order");
+        await AsyncStorage.setItem("owner_id", String(userId));
+
+        try {
+          const result = await fetchRestaurantByOwner(userId);
+          if (result?.data?._id) {
+            await AsyncStorage.setItem(
+              "restaurant_id",
+              String(result?.data?._id)
+            );
+            dispatch(setRestaurant(result.data._id));
+          }
+          router.push("/restaurant/orderScreen/order");
+        } catch (error) {
+          console.error("Error fetching restaurant details:", error);
+          CustomToast("error", "Error", "Failed to fetch restaurant details");
+        }
       }
       if (data.userType === "customer") {
+        AsyncStorage.setItem("customer_id", String(userId));
         router.push("/customer/home");
       }
     },
