@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import * as ResApi from "../../services/api/restaurantApi";
 import Category from "../components/category";
 import RestaurantBox from "../components/restaurantBox";
+import { useRouter } from "expo-router";
 export default function Home() {
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
@@ -54,7 +55,7 @@ export default function Home() {
       getRcmRestaurant();
     }
   }, [userId]);
-
+  const router = useRouter();
   return (
     <View className='flex-1 bg-gray-100'>
       <View className='h-40 bg-gradient-to-b from-black to-gray-600 px-4 py-8'>
@@ -71,11 +72,15 @@ export default function Home() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity className='bg-customYellow p-1 rounded-lg'>
+          <TouchableOpacity
+            className='bg-customYellow p-1 rounded-lg'
+            onPress={() => router.push("/screen/cartPage")}>
             <Icon name='cart-outline' size={24} color={"black"} />
           </TouchableOpacity>
 
-          <TouchableOpacity className='bg-black p-1 rounded-lg'>
+          <TouchableOpacity
+            onPress={() => router.push("/customer/chat/index")}
+            className='bg-black p-1 rounded-lg'>
             <Icon
               name='chatbubble-ellipses-outline'
               size={24}
