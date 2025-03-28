@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import * as ResApi from "@/services/api/restaurantApi";
 import Category from "@/app/components/category";
 import RestaurantBox from "@/app/components/restaurantBox";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 export default function Home() {
   const userId = useSelector(
@@ -56,7 +56,10 @@ export default function Home() {
       getRcmRestaurant();
     }
   }, [userId]);
-
+  const navigateCart = () => {
+    console.log("tesst");
+  };
+  const router = useRouter();
   return (
     <View className='flex-1 bg-gray-100'>
       <View
@@ -76,6 +79,7 @@ export default function Home() {
           </View>
 
           <TouchableOpacity
+            onPress={navigateCart}
             className='bg-customYellow p-1 rounded-lg'
             style={{ zIndex: 30 }}>
             <Icon name='cart-outline' size={24} color={"black"} />

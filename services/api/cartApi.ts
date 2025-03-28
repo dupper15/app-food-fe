@@ -11,7 +11,18 @@ export const addToCart = async (data: any) => {
   console.log(response.data);
   return response.data;
 };
-export const editCart = async (data: any) => {};
+export const editCart = async (data: any) => {
+  const { quantity, topping, orderItemId } = data;
+  const newCart = {
+    quantity: quantity,
+    topping: topping,
+  };
+  const response = await axiosInstance.put(
+    `order-item/${orderItemId}`,
+    newCart
+  );
+  return response.data;
+};
 export const getOrderItem = async (data: any) => {
   const { userId, dishId } = data;
   const response = await axiosInstance.get(`order-item/${userId}/${dishId}`);
