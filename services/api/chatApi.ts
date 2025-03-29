@@ -1,6 +1,15 @@
 import axiosInstance from "./axiosInstance";
 
+function isValidObjectId(id: any): boolean {
+  if (!id) return false;
+  // MongoDB ObjectId is a 24-character hex string
+  return /^[0-9a-fA-F]{24}$/.test(String(id));
+}
+
 export const getAllConversations = async (userId: string): Promise<any> => {
+  if (!isValidObjectId(userId)) {
+    throw new Error("Invalid user ID format");
+  }
   const response = await axiosInstance.get(`conversation?userId=${userId}`);
   return response.data;
 };
