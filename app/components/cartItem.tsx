@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, View } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { Stepper } from "react-native-ui-lib";
+import { transPrice } from "./../../utils/transPrice";
 
 const CardItem = ({
   selectedDish,
@@ -12,9 +13,7 @@ const CardItem = ({
   updateQuantity,
 }) => {
   return (
-    <View
-      key={restaurantIndex}
-      className='mb-6 bg-white p-4 rounded-lg shadow-sm'>
+    <View className='mb-6 bg-white p-4 rounded-lg shadow-sm'>
       <View className='flex-row items-center justify-between mb-4'>
         <View className='flex-row gap-2'>
           <Checkbox
@@ -53,7 +52,13 @@ const CardItem = ({
             </Text>
             <View className='flex-row gap-2'>
               <Text className='text-gray-600'>
-                ${(orderItem.dish_id.price * orderItem.quantity).toFixed(2)}
+                {transPrice(
+                  orderItem.dish_id.price * orderItem.quantity +
+                    orderItem.topping.reduce(
+                      (sum: number, topping: any) => sum + topping.price,
+                      0
+                    )
+                )}
               </Text>
               {orderItem.topping && (
                 <Text className='text-gray-500 max-w-[50%] truncate'>
@@ -79,15 +84,18 @@ const CardItem = ({
       <View className='flex-row justify-between items-center mt-4'>
         <Text className='text-lg font-semibold'>Total Price:</Text>
         <Text className='text-lg font-semibold text-green-600'>
-          $
-          {item.order_items
-            .filter((orderItem: any) => orderItem.checked)
-            .reduce(
+          {transPrice(
+            item.order_items.reduce(
               (sum, orderItem) =>
-                sum + orderItem.dish_id.price * orderItem.quantity,
+                sum +
+                orderItem.dish_id.price * orderItem.quantity +
+                (orderItem.topping?.reduce(
+                  (toppingSum, topping) => toppingSum + topping.price,
+                  0
+                ) || 0),
               0
             )
-            .toFixed(2)}
+          )}
         </Text>
       </View>
     </View>
