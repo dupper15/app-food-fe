@@ -56,7 +56,6 @@ const CartPage = () => {
     mutationFn: CartApi.getCart,
     onSuccess: (data) => {
       setCart(data);
-      console.log("Cart fetched successfully");
     },
     onError: (error) => {
       console.error("Error fetching cart:", error);
@@ -84,7 +83,9 @@ const CartPage = () => {
     if (selectedDish.length > 0) {
       router.push({
         pathname: "./paymentPage",
-        params: { selectedDish: JSON.stringify(selectedDish) },
+        params: {
+          selectedDish: JSON.stringify(selectedDish),
+        },
       });
     } else {
       CustomToast("error", "Error", "Please select at least one item");
