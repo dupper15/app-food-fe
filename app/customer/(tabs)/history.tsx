@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   FlatList,
   SafeAreaView,
   StatusBar,
@@ -17,12 +16,13 @@ import {
 } from "@/services/historyService";
 import { useSelector } from "react-redux";
 import { router } from "expo-router";
+import OrderComponent from "@/app/components/orderItem";
 
 // Tab options
 const TABS = ["Ongoing", "History"];
 
 const OrderHistoryScreen = () => {
-  const [activeTab, setActiveTab] = useState(1);
+  const [activeTab, setActiveTab] = useState(0); // Default to Ongoing tab
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
@@ -37,118 +37,77 @@ const OrderHistoryScreen = () => {
     queryFn: () => fetchCompleteHistory(userId),
   });
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Text
-          key={i}
-          style={[styles.star, i <= rating ? styles.filledStar : {}]}
-        >
-          ★
-        </Text>
-      );
-    }
-    return <View style={styles.starsContainer}>{stars}</View>;
+  const ongoingOrders = React.useMemo(() => {
+    if (!historyData) return [];
+
+    // Create a Set to track unique order IDs
+    const uniqueOrderIds = new Set();
+
+    return historyData.filter((item) => {
+      // Only include orders with 'ongoing' status that we haven't seen before
+      if (item.order.status.toLowerCase() === "ongoing") {
+        // If we've already seen this order ID, skip it
+        if (uniqueOrderIds.has(item.order._id)) {
+          return false;
+        }
+        // Otherwise, add it to our set and include it
+        uniqueOrderIds.add(item.order._id);
+        return true;
+      }
+      return false;
+    });
+  }, [historyData]);
+
+  const completedOrders =
+    historyData?.filter(
+      (item) =>
+        item.order.status.toLowerCase() === "completed" ||
+        item.order.status.toLowerCase() === "canceled"
+    ) || [];
+
+  // Handle tracking route for ongoing orders
+  const handleTrackRoute = (orderId: string) => {
+    console.log("Track route for order:", orderId);
+    router.navigate(`/customer/tracking/${orderId}` as any);
   };
 
-  // Helper function to format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate().toString().padStart(2, "0")}/${(
-      date.getMonth() + 1
-    )
-      .toString()
-      .padStart(2, "0")}/${date.getFullYear()}`;
+  // Handle canceling an ongoing order
+  const handleCancelOrder = (orderId: string) => {
+    console.log("Cancel order:", orderId);
+    // Implement cancel order logic
   };
 
-  // Get status color based on order status
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "#129575";
-      case "canceled":
-        return "#FF3B30";
-      case "pending":
-        return "#FF9500";
-      default:
-        return "#757575";
-    }
+  // Handle rating a completed order
+  const handleRateOrder = (orderId: string) => {
+    console.log("Rate order:", orderId);
+    // Implement rate order logic
   };
 
-  const renderOrderItem = ({ item }: { item: CompleteHistoryItem }) => {
-    // Get the first dish as the main dish for display
-    const mainDish = item.orderItems[0]?.dish;
-    const formattedDate = formatDate(item.order.createdAt);
-    const statusColor = getStatusColor(item.order.status);
-
-    // Determine if the order has been rated (you might need to add this field to your data model)
-    const hasRated = false; // Replace with actual logic
-    const handleOrderPress = (item: CompleteHistoryItem) => {
-      console.log("item clicked");
-      router.navigate(`/customer/history/${item.historyItem._id}` as any);
-    };
-
-    return (
-      <TouchableOpacity
-        style={styles.orderCard}
-        onPress={() => handleOrderPress(item)}
-      >
-        <View style={styles.orderCard}>
-          <View style={styles.orderHeader}>
-            <View style={styles.leftSection}>
-              <View style={styles.restaurantImage}>
-                {mainDish?.image && (
-                  <Image
-                    source={{ uri: mainDish.image }}
-                    style={styles.dishImage}
-                    resizeMode="cover"
-                  />
-                )}
-              </View>
-              <View style={styles.orderInfo}>
-                <Text style={styles.restaurantName}>
-                  {/* You might want to fetch restaurant name separately */}
-                  {mainDish?.name || "Restaurant Order"}
-                </Text>
-                <Text style={[styles.statusText, { color: statusColor }]}>
-                  {item.order.status.charAt(0).toUpperCase() +
-                    item.order.status.slice(1)}
-                </Text>
-                <View style={styles.priceContainer}>
-                  <Text style={styles.priceText}>
-                    {item.historyItem.cost.toLocaleString()}₫
-                  </Text>
-                  <Text style={styles.quantityText}>
-                    {" "}
-                    | x{item.historyItem.sum_dishes}
-                  </Text>
-                </View>
-                {hasRated && renderStars(3)} {/* Replace with actual rating */}
-              </View>
-            </View>
-            <View style={styles.rightSection}>
-              <Text style={styles.orderNumber}>
-                #{item.order._id.slice(-5)}
-              </Text>
-              <Text style={styles.dateText}>{formattedDate}</Text>
-            </View>
-          </View>
-
-          <View style={styles.actionButtons}>
-            {!hasRated && item.order.status.toLowerCase() === "completed" && (
-              <TouchableOpacity style={styles.rateButton}>
-                <Text style={styles.rateButtonText}>Rate</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={styles.reorderButton}>
-              <Text style={styles.reorderButtonText}>Re-Order</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
+  // Handle reordering a completed order
+  const handleReorderOrder = (orderId: string) => {
+    console.log("Reorder:", orderId);
+    // Implement reorder logic
   };
+
+  // Render ongoing order item
+  const renderOngoingItem = ({ item }: { item: CompleteHistoryItem }) => (
+    <OrderComponent
+      item={item}
+      mode="ongoing"
+      onTrackRoute={handleTrackRoute}
+      onCancel={handleCancelOrder}
+    />
+  );
+
+  // Render history order item
+  const renderHistoryItem = ({ item }: { item: CompleteHistoryItem }) => (
+    <OrderComponent
+      item={item}
+      mode="history"
+      onRate={handleRateOrder}
+      onReorder={handleReorderOrder}
+    />
+  );
 
   // Show loading state
   if (isLoading) {
@@ -197,19 +156,34 @@ const OrderHistoryScreen = () => {
         ))}
       </View>
 
-      {/* Order List */}
-      <FlatList
-        data={historyData}
-        renderItem={renderOrderItem}
-        keyExtractor={(item) => item.historyItem._id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No orders found</Text>
-          </View>
-        }
-      />
+      {/* Order List - conditionally render based on active tab */}
+      {activeTab === 0 ? (
+        <FlatList
+          data={ongoingOrders}
+          renderItem={renderOngoingItem}
+          keyExtractor={(item) => item.historyItem._id}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No ongoing orders</Text>
+            </View>
+          }
+        />
+      ) : (
+        <FlatList
+          data={completedOrders}
+          renderItem={renderHistoryItem}
+          keyExtractor={(item) => item.historyItem._id}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No order history found</Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -284,111 +258,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-  },
-  orderCard: {
-    marginBottom: 16,
-    borderRadius: 8,
-    backgroundColor: "#F8F8F8",
-    overflow: "hidden",
-  },
-  orderHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  leftSection: {
-    flexDirection: "row",
-  },
-  restaurantImage: {
-    width: 70,
-    height: 70,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  dishImage: {
-    width: "100%",
-    height: "100%",
-  },
-  orderInfo: {
-    marginLeft: 12,
-    justifyContent: "center",
-  },
-  restaurantName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  priceText: {
-    fontSize: 14,
-    color: "#757575",
-  },
-  quantityText: {
-    fontSize: 14,
-    color: "#757575",
-  },
-  rightSection: {
-    alignItems: "flex-end",
-  },
-  orderNumber: {
-    fontSize: 14,
-    color: "#9E9E9E",
-    marginBottom: 4,
-  },
-  dateText: {
-    fontSize: 14,
-    color: "#9E9E9E",
-  },
-  starsContainer: {
-    flexDirection: "row",
-    marginTop: 4,
-  },
-  star: {
-    fontSize: 18,
-    color: "#E0E0E0",
-    marginRight: 2,
-  },
-  filledStar: {
-    color: "#FFCC00",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    padding: 12,
-  },
-  rateButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FFCC00",
-    marginRight: 8,
-  },
-  rateButtonText: {
-    color: "#FFCC00",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  reorderButton: {
-    backgroundColor: "#FFCC00",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  reorderButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 14,
   },
 });
 

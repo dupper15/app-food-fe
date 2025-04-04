@@ -157,7 +157,7 @@ const OrderDetailScreen = () => {
             <Text style={styles.restaurantName}>
               {orderDetail.restaurant.name}
             </Text>
-            <Text style={[styles.statusText, { color: "#129575" }]}>
+            <Text style={[styles.statusText, { color: "#007AFF" }]}>
               {orderDetail.order.status.charAt(0).toUpperCase() +
                 orderDetail.order.status.slice(1)}
             </Text>
@@ -233,7 +233,7 @@ const OrderDetailScreen = () => {
       {/* Re-Order Button */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.reorderButton}>
-          <Text style={styles.reorderButtonText}>Re-Order</Text>
+          <Text style={styles.reorderButtonText}>Payment</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
