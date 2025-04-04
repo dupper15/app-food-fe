@@ -33,4 +33,9 @@ export const fetchVouchers = async (
     console.error("Error fetching vouchers:", error);
     throw error;
   }
+}
+
+export const getVouchers = async (restaurantId) => {
+  const response = await axiosInstance.get(`voucher/available/${restaurantId}`);
+  return response.data;
 };

@@ -78,9 +78,7 @@ export default function Home() {
             <Icon name='cart-outline' size={24} color={"black"} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => router.push("/customer/chat/index")}
-            className='bg-black p-1 rounded-lg'>
+          <TouchableOpacity className='bg-black p-1 rounded-lg'>
             <Icon
               name='chatbubble-ellipses-outline'
               size={24}

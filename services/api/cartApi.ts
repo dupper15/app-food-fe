@@ -28,3 +28,11 @@ export const getOrderItem = async (data: any) => {
   const response = await axiosInstance.get(`order-item/${userId}/${dishId}`);
   return response.data;
 };
+export const getCart = async (userId: string) => {
+  const response = await axiosInstance.get(`cart/${userId}`);
+  return response.data;
+};
+export const completePayment = async (data: any) => {
+  const response = await axiosInstance.post("order/create", data);
+  return response.data;
+};
