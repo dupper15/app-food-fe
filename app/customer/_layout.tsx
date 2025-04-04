@@ -12,6 +12,7 @@ export default function CustomerLayout() {
     >
       <Stack.Screen name="tabs" />
       <Stack.Screen name="chat" />
+      <Stack.Screen name="history" />
     </Stack>
   );
 }

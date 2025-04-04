@@ -61,32 +61,34 @@ export default function Home() {
   };
   const router = useRouter();
   return (
-    <View className='flex-1 bg-gray-100'>
+    <View className="flex-1 bg-gray-100">
       <View
-        className='h-40 bg-gradient-to-b from-black to-gray-600 px-4 py-8'
-        style={{ zIndex: 20 }}>
-        <View className='flex-row justify-between items-center gap-2'>
-          <View className='flex-1 flex-row bg-white rounded-lg px-3 py-1 items-center border border-gray-300'>
-            <Icon name='search' size={20} color={"#94a3b8"} />
+        className="h-40 bg-gradient-to-b from-black to-gray-600 px-4 py-8"
+        style={{ zIndex: 20 }}
+      >
+        <View className="flex-row justify-between items-center gap-2">
+          <View className="flex-1 flex-row bg-white rounded-lg px-3 py-1 items-center border border-gray-300">
+            <Icon name="search" size={20} color={"#94a3b8"} />
             <TextInput
-              placeholder='Search for products...'
+              placeholder="Search for products..."
               placeholderTextColor={"#94a3b8"}
-              className='flex-1 pl-2 text-slate-900'
+              className="flex-1 pl-2 text-slate-900"
             />
             <TouchableOpacity>
-              <Ionicons name='camera' size={24} color={"#FFC515"} />
+              <Ionicons name="camera" size={24} color={"#FFC515"} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
             onPress={navigateCart}
-            className='bg-customYellow p-1 rounded-lg'
-            style={{ zIndex: 30 }}>
-            <Icon name='cart-outline' size={24} color={"black"} />
+            className="bg-customYellow p-1 rounded-lg"
+            style={{ zIndex: 30 }}
+          >
+            <Icon name="cart-outline" size={24} color={"black"} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            className='p-1'
+            className="p-1"
             style={{
               backgroundColor: "black",
               borderRadius: 8,
@@ -95,10 +97,11 @@ export default function Home() {
             activeOpacity={0.7}
             onPress={() => {
               console.log("Chat button pressed");
-              router.push("/customer/chat/index");
-            }}>
+              router.push("/customer/chat");
+            }}
+          >
             <Ionicons
-              name='chatbubble-ellipses-outline'
+              name="chatbubble-ellipses-outline"
               size={24}
               color={"#FFC515"}
             />
@@ -106,85 +109,85 @@ export default function Home() {
         </View>
       </View>
 
-      <View className='absolute top-20 left-1/2 -translate-x-1/2 w-11/12 h-44 rounded-lg shadow-lg bg-white z-10 overflow-hidden'>
+      <View className="absolute top-20 left-1/2 -translate-x-1/2 w-11/12 h-44 rounded-lg shadow-lg bg-white z-10 overflow-hidden">
         <Image
           source={{
             uri: "https://img.freepik.com/premium-vector/social-media-food-design-restaurant-banner-post-template-business-promotion_784890-596.jpg",
           }}
-          className='w-full h-full'
-          resizeMode='cover'
+          className="w-full h-full"
+          resizeMode="cover"
         />
       </View>
 
-      <ScrollView className='flex-1 mt-28 px-4 py-6 pr-0'>
+      <ScrollView className="flex-1 mt-28 px-4 py-6 pr-0">
         <Category />
 
-        <View className='flex-1 gap-4 pr-6 '>
-          <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
-              <Text className='text-black text-lg font-medium'>Near me</Text>
-              <Text className='text-black text-sm font-normal'>
+        <View className="flex-1 gap-4 pr-6 ">
+          <View className="flex-row justify-between items-center gap-4">
+            <TouchableOpacity className="flex-1 bg-customYellow rounded-lg p-4 relative pb-10">
+              <Text className="text-black text-lg font-medium">Near me</Text>
+              <Text className="text-black text-sm font-normal">
                 Just in few minutes
               </Text>
               <Icon
-                name='location-outline'
+                name="location-outline"
                 size={40}
                 color={"black"}
-                className='absolute bottom-2 right-2'
+                className="absolute bottom-2 right-2"
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
-              <Text className='text-customYellow text-lg font-medium'>
+            <TouchableOpacity className="flex-1 bg-black rounded-lg p-4 relative pb-10">
+              <Text className="text-customYellow text-lg font-medium">
                 Recommended
               </Text>
-              <Text className='text-customYellow text-sm font-normal'>
+              <Text className="text-customYellow text-sm font-normal">
                 You may also like
               </Text>
               <Icon
-                name='thumbs-up-outline'
+                name="thumbs-up-outline"
                 size={40}
                 color={"#FFC515"}
-                className='absolute bottom-2 right-2'
+                className="absolute bottom-2 right-2"
               />
             </TouchableOpacity>
           </View>
 
-          <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
-              <Text className='text-customYellow text-lg font-medium'>
+          <View className="flex-row justify-between items-center gap-4">
+            <TouchableOpacity className="flex-1 bg-black rounded-lg p-4 relative pb-10">
+              <Text className="text-customYellow text-lg font-medium">
                 Multiple deals
               </Text>
-              <Text className='text-customYellow text-sm font-normal'>
+              <Text className="text-customYellow text-sm font-normal">
                 Save your money
               </Text>
               <Icon
-                name='pricetag-outline'
+                name="pricetag-outline"
                 size={40}
                 color={"#FFC515"}
-                className='absolute bottom-2 right-2'
+                className="absolute bottom-2 right-2"
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
-              <Text className='text-black text-lg font-medium'>
+            <TouchableOpacity className="flex-1 bg-customYellow rounded-lg p-4 relative pb-10">
+              <Text className="text-black text-lg font-medium">
                 Multiple buyers
               </Text>
-              <Text className='text-black text-sm font-normal'>
+              <Text className="text-black text-sm font-normal">
                 Can be consulted
               </Text>
               <Icon
-                name='people-outline'
+                name="people-outline"
                 size={40}
                 color={"black"}
-                className='absolute bottom-2 right-2'
+                className="absolute bottom-2 right-2"
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View className='mt-32 gap-2'>
-          <Text className='text-slate-900 text-lg font-medium'>
+        <View className="mt-32 gap-2">
+          <Text className="text-slate-900 text-lg font-medium">
             Order again
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -194,8 +197,8 @@ export default function Home() {
           </ScrollView>
         </View>
 
-        <View className='mt-6 gap-2'>
-          <Text className='text-slate-900 text-lg font-medium'>For you</Text>
+        <View className="mt-6 gap-2">
+          <Text className="text-slate-900 text-lg font-medium">For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {rcmRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />

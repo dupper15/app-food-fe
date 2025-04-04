@@ -20,3 +20,8 @@ export const createDish = async (data: FormData): Promise<DishData> => {
 
   return response.data;
 };
+
+export const fetchDishById = async (id: string): Promise<DishData> => {
+  const response = await axiosInstance.get(`dish/fetch-detail-dish/${id}`);
+  return response.data;
+};
