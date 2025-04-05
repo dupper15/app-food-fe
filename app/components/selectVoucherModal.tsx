@@ -24,7 +24,6 @@ const SelectVoucherModal = ({
   const getVoucherMutation = useMutation({
     mutationFn: getVouchers,
     onSuccess: (data) => {
-      console.log("Voucher data:", data);
       setVoucherList(data);
     },
     onError: (error) => {

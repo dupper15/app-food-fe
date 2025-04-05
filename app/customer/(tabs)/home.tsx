@@ -1,6 +1,6 @@
 import { RestaurantData } from "@/interfaces/RestaurantInterface";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Image,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Animated,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
@@ -57,38 +58,59 @@ export default function Home() {
     }
   }, [userId]);
   const navigateCart = () => {
-    console.log("tesst");
+    router.push("/screen/cartPage");
   };
   const router = useRouter();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const bannerTranslateY = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, -50], // trượt lên
+    extrapolate: "clamp",
+  });
+
+  const bannerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+  const blackViewHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [160, 70], // Chiều cao giảm từ 160px xuống 30px khi cuộn
+    extrapolate: "clamp", // Giới hạn không cho giá trị vượt qua 160px và 30px
+  });
+
   return (
-    <View className="flex-1 bg-gray-100">
-      <View
-        className="h-40 bg-gradient-to-b from-black to-gray-600 px-4 py-8"
-        style={{ zIndex: 20 }}
-      >
-        <View className="flex-row justify-between items-center gap-2">
-          <View className="flex-1 flex-row bg-white rounded-lg px-3 py-1 items-center border border-gray-300">
-            <Icon name="search" size={20} color={"#94a3b8"} />
+    <View className='flex-1 bg-gray-100'>
+      <Animated.View
+        style={{
+          background: "linear-gradient(to bottom, black, #333333)",
+          height: blackViewHeight,
+          zIndex: 10,
+          paddingTop: 16,
+          paddingHorizontal: 16,
+        }}>
+        <View className='flex-row justify-between items-center gap-2'>
+          <View className='flex-1 flex-row bg-white rounded-lg px-3 py-1 items-center border border-gray-300'>
+            <Icon name='search' size={20} color={"#94a3b8"} />
             <TextInput
-              placeholder="Search for products..."
+              placeholder='Search for products...'
               placeholderTextColor={"#94a3b8"}
-              className="flex-1 pl-2 text-slate-900"
+              className='flex-1 pl-2 text-slate-900'
             />
             <TouchableOpacity>
-              <Ionicons name="camera" size={24} color={"#FFC515"} />
+              <Ionicons name='camera' size={24} color={"#FFC515"} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
             onPress={navigateCart}
-            className="bg-customYellow p-1 rounded-lg"
-            style={{ zIndex: 30 }}
-          >
-            <Icon name="cart-outline" size={24} color={"black"} />
+            className='bg-customYellow p-1 rounded-lg'
+            style={{ zIndex: 30 }}>
+            <Icon name='cart-outline' size={24} color={"black"} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="p-1"
+            className='p-1'
             style={{
               backgroundColor: "black",
               borderRadius: 8,
@@ -98,96 +120,120 @@ export default function Home() {
             onPress={() => {
               console.log("Chat button pressed");
               router.push("/customer/chat");
-            }}
-          >
+            }}>
             <Ionicons
-              name="chatbubble-ellipses-outline"
+              name='chatbubble-ellipses-outline'
               size={24}
               color={"#FFC515"}
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
 
-      <View className="absolute top-20 left-1/2 -translate-x-1/2 w-11/12 h-44 rounded-lg shadow-lg bg-white z-10 overflow-hidden">
+      <Animated.View
+        style={{
+          position: "absolute",
+          top: 80,
+          left: "4.5%",
+          width: "91%",
+          height: 176,
+          borderRadius: 16,
+
+          overflow: "hidden",
+          zIndex: 40,
+          transform: [{ translateY: bannerTranslateY }],
+          opacity: bannerOpacity,
+        }}>
         <Image
           source={{
             uri: "https://img.freepik.com/premium-vector/social-media-food-design-restaurant-banner-post-template-business-promotion_784890-596.jpg",
           }}
-          className="w-full h-full"
-          resizeMode="cover"
+          style={{ width: "100%", height: "100%" }}
+          resizeMode='cover'
         />
-      </View>
+      </Animated.View>
 
-      <ScrollView className="flex-1 mt-28 px-4 py-6 pr-0">
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        style={{
+          flex: 1,
+          paddingLeft: 16,
+          paddingRight: 0,
+          paddingTop: 110,
+          paddingBottom: 32,
+        }}>
         <Category />
 
-        <View className="flex-1 gap-4 pr-6 ">
-          <View className="flex-row justify-between items-center gap-4">
-            <TouchableOpacity className="flex-1 bg-customYellow rounded-lg p-4 relative pb-10">
-              <Text className="text-black text-lg font-medium">Near me</Text>
-              <Text className="text-black text-sm font-normal">
+        <View className='flex-1 gap-4 pr-6 '>
+          <View className='flex-row justify-between items-center gap-4'>
+            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
+              <Text className='text-black text-lg font-medium'>Near me</Text>
+              <Text className='text-black text-sm font-normal'>
                 Just in few minutes
               </Text>
               <Icon
-                name="location-outline"
+                name='location-outline'
                 size={40}
                 color={"black"}
-                className="absolute bottom-2 right-2"
+                className='absolute bottom-2 right-2'
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-1 bg-black rounded-lg p-4 relative pb-10">
-              <Text className="text-customYellow text-lg font-medium">
+            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
+              <Text className='text-customYellow text-lg font-medium'>
                 Recommended
               </Text>
-              <Text className="text-customYellow text-sm font-normal">
+              <Text className='text-customYellow text-sm font-normal'>
                 You may also like
               </Text>
               <Icon
-                name="thumbs-up-outline"
+                name='thumbs-up-outline'
                 size={40}
                 color={"#FFC515"}
-                className="absolute bottom-2 right-2"
+                className='absolute bottom-2 right-2'
               />
             </TouchableOpacity>
           </View>
 
-          <View className="flex-row justify-between items-center gap-4">
-            <TouchableOpacity className="flex-1 bg-black rounded-lg p-4 relative pb-10">
-              <Text className="text-customYellow text-lg font-medium">
+          <View className='flex-row justify-between items-center gap-4'>
+            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
+              <Text className='text-customYellow text-lg font-medium'>
                 Multiple deals
               </Text>
-              <Text className="text-customYellow text-sm font-normal">
+              <Text className='text-customYellow text-sm font-normal'>
                 Save your money
               </Text>
               <Icon
-                name="pricetag-outline"
+                name='pricetag-outline'
                 size={40}
                 color={"#FFC515"}
-                className="absolute bottom-2 right-2"
+                className='absolute bottom-2 right-2'
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex-1 bg-customYellow rounded-lg p-4 relative pb-10">
-              <Text className="text-black text-lg font-medium">
+            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
+              <Text className='text-black text-lg font-medium'>
                 Multiple buyers
               </Text>
-              <Text className="text-black text-sm font-normal">
+              <Text className='text-black text-sm font-normal'>
                 Can be consulted
               </Text>
               <Icon
-                name="people-outline"
+                name='people-outline'
                 size={40}
                 color={"black"}
-                className="absolute bottom-2 right-2"
+                className='absolute bottom-2 right-2'
               />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View className="mt-32 gap-2">
-          <Text className="text-slate-900 text-lg font-medium">
+        <View className='mt-32 gap-2'>
+          <Text className='text-slate-900 text-lg font-medium'>
             Order again
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -197,15 +243,15 @@ export default function Home() {
           </ScrollView>
         </View>
 
-        <View className="mt-6 gap-2">
-          <Text className="text-slate-900 text-lg font-medium">For you</Text>
+        <View className='mt-6 gap-2'>
+          <Text className='text-slate-900 text-lg font-medium'>For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {rcmRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />
             ))}
           </ScrollView>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

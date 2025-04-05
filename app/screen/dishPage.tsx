@@ -87,7 +87,6 @@ const DishPage = () => {
     },
   });
   const editCart = () => {
-    console.log("co ne");
     const data = {
       quantity,
       topping: selectedToppings,

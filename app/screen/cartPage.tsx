@@ -7,9 +7,10 @@ import * as CartApi from "@/services/api/cartApi";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
 import { CustomToast } from "../components/toast";
+import EditOIModal from "../components/editOIModal";
 const CartPage = () => {
   const [selectedDish, setSelectedDish] = useState([]);
-
+  const [editedItem, setEditedItem] = useState(null);
   const toggleCheckbox = (restaurantIndex: number, itemIndex: number) => {
     const selectedRestaurant = cart[restaurantIndex];
     const selectedItem = selectedRestaurant.order_items[itemIndex];
@@ -91,6 +92,7 @@ const CartPage = () => {
       CustomToast("error", "Error", "Please select at least one item");
     }
   };
+  const [showModal, setShowModal] = useState(false);
   const router = useRouter();
   return (
     <View className='flex-1 bg-gray-100'>
@@ -105,6 +107,8 @@ const CartPage = () => {
         <ScrollView className='p-4'>
           {cart.map((item, restaurantIndex) => (
             <CardItem
+              setShowModal={setShowModal}
+              setEditedItem={setEditedItem}
               key={restaurantIndex}
               selectedDish={selectedDish}
               item={item}
@@ -130,6 +134,14 @@ const CartPage = () => {
             You have no items in your cart
           </Text>
         </View>
+      )}
+      {showModal && editedItem && (
+        <EditOIModal
+          orderItem={editedItem}
+          setShowModal={setShowModal}
+          showModal={showModal}
+          setEditedItem={setEditedItem}
+        />
       )}
     </View>
   );

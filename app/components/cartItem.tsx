@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { Stepper } from "react-native-ui-lib";
 import { transPrice } from "./../../utils/transPrice";
@@ -11,6 +11,8 @@ const CardItem = ({
   toggleRestaurantCheckbox,
   toggleCheckbox,
   updateQuantity,
+  setEditedItem,
+  setShowModal,
 }) => {
   return (
     <View className='mb-6 bg-white p-4 rounded-lg shadow-sm'>
@@ -37,49 +39,58 @@ const CardItem = ({
       </View>
 
       {item.order_items.map((orderItem: any, itemIndex: any) => (
-        <View key={itemIndex} className='flex-row items-center mb-4 '>
-          <Checkbox
-            status={selectedDish.includes(orderItem) ? "checked" : "unchecked"}
-            onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
-          />
-          <Image
-            source={{ uri: orderItem.dish_id.image }}
-            className='w-16 h-16 rounded-lg ml-2'
-          />
-          <View className='ml-4 flex-1'>
-            <Text className='text-lg font-medium'>
-              {orderItem.dish_id.name}
-            </Text>
-            <View className='flex-row gap-2'>
-              <Text className='text-gray-600'>
-                {transPrice(
-                  orderItem.dish_id.price * orderItem.quantity +
-                    orderItem.topping.reduce(
-                      (sum: number, topping: any) => sum + topping.price,
-                      0
-                    )
-                )}
+        <TouchableOpacity
+          onPress={() => {
+            setShowModal(true);
+            setEditedItem(orderItem);
+          }}
+          key={itemIndex}>
+          <View className='flex-row items-center mb-4 '>
+            <Checkbox
+              status={
+                selectedDish.includes(orderItem) ? "checked" : "unchecked"
+              }
+              onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
+            />
+            <Image
+              source={{ uri: orderItem.dish_id.image }}
+              className='w-16 h-16 rounded-lg ml-2'
+            />
+            <View className='ml-4 flex-1'>
+              <Text className='text-lg font-medium'>
+                {orderItem.dish_id.name}
               </Text>
-              {orderItem.topping && (
-                <Text className='text-gray-500 max-w-[50%] truncate'>
-                  (
-                  {orderItem.topping
-                    .map((topping: any) => topping.name)
-                    .join(", ")}
-                  )
+              <View className='flex-row gap-2'>
+                <Text className='text-gray-600'>
+                  {transPrice(
+                    orderItem.dish_id.price * orderItem.quantity +
+                      orderItem.topping.reduce(
+                        (sum: number, topping: any) => sum + topping.price,
+                        0
+                      )
+                  )}
                 </Text>
-              )}
+                {orderItem.topping && (
+                  <Text className='text-gray-500 max-w-[50%] truncate'>
+                    (
+                    {orderItem.topping
+                      .map((topping: any) => topping.name)
+                      .join(", ")}
+                    )
+                  </Text>
+                )}
+              </View>
             </View>
+            <Stepper
+              value={orderItem.quantity}
+              minValue={1}
+              maxValue={99}
+              onValueChange={(value) =>
+                updateQuantity(restaurantIndex, itemIndex, value)
+              }
+            />
           </View>
-          <Stepper
-            value={orderItem.quantity}
-            minValue={1}
-            maxValue={99}
-            onValueChange={(value) =>
-              updateQuantity(restaurantIndex, itemIndex, value)
-            }
-          />
-        </View>
+        </TouchableOpacity>
       ))}
       <View className='flex-row justify-between items-center mt-4'>
         <Text className='text-lg font-semibold'>Total Price:</Text>
