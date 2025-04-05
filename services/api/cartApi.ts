@@ -36,3 +36,8 @@ export const completePayment = async (data: any) => {
   const response = await axiosInstance.post("order/create", data);
   return response.data;
 };
+export const deleteCart = async (data) => {
+  const { userId, orderItemId } = data;
+  const response = await axiosInstance.delete(`cart/${userId}/${orderItemId}`);
+  return response.data;
+};
