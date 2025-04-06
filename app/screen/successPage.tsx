@@ -1,8 +1,13 @@
 import React from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const SuccessPage = () => {
+  const router = useRouter();
+  const handleGoHome = () => {
+    router.push("/customer/(tabs)/home");
+  };
   return (
     <View className='flex-1'>
       <ImageBackground
@@ -12,7 +17,7 @@ const SuccessPage = () => {
         <View className='flex flex-row justify-center items-center gap-4 '>
           <TouchableOpacity
             className='bg-customYellow py-3 px-6 rounded-full shadow-md flex-row items-center gap-2'
-            onPress={() => console.log("Go home pressed")}>
+            onPress={() => handleGoHome()}>
             <Ionicons name='home-outline' size={20} color='white' />
             <Text className='text-white text-lg font-semibold'>Go Home</Text>
           </TouchableOpacity>
