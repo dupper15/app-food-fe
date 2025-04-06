@@ -23,7 +23,8 @@ export const getRestaurantHistory = async (
 export const getRcmRestaurant = async (
   userId: any
 ): Promise<RestaurantData> => {
-  const response = await axiosInstance.get(`restaurants/rcm/${userId}`);
+  // cai nay la cho for you
+  const response = await axiosInstance.get(`restaurants/for-you/${userId}`);
   return response.data;
 };
 export const getDishesOfRestaurant = async (data: any) => {
@@ -42,13 +43,31 @@ export const getDishesOfRestaurant = async (data: any) => {
 };
 export const getCategory = async () => {
   const response = await axiosInstance.get("categories/fetchall-category");
-   return response.data;
+  return response.data;
 };
 export const getRestaurantDetail = async (restaurantId: string) => {
   const response = await axiosInstance.get(`restaurants/${restaurantId}`);
   return response.data;
 };
 export const fetchRestaurantByOwner = async (id: any): Promise<any> => {
-  console.log("id restaurant", id);
   return await axiosInstance.get(`restaurants/owner/${id}`);
+};
+export const getRestaurantByCriteria = async (data) => {
+  const { restaurantCriteria, userId } = data;
+  const restaurantCriteriaString = restaurantCriteria.toString().slice(1, -1);
+  if (restaurantCriteriaString === "Near me") {
+    const response = await axiosInstance.get(`restaurants/nearby/${userId}`);
+    return response.data;
+  } else if (restaurantCriteriaString === "Recommended") {
+    const response = await axiosInstance.get(
+      `restaurants/recommended/${userId}`
+    );
+    return response.data;
+  } else if (restaurantCriteriaString === "Multiple deals") {
+    const response = await axiosInstance.get(`restaurants/multiple-deals`);
+    return response.data;
+  } else {
+    const response = await axiosInstance.get(`restaurants/multiple-buyers`);
+    return response.data;
+  }
 };

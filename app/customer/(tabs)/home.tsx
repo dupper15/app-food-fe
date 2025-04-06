@@ -78,7 +78,10 @@ export default function Home() {
     outputRange: [160, 70], // Chiều cao giảm từ 160px xuống 30px khi cuộn
     extrapolate: "clamp", // Giới hạn không cho giá trị vượt qua 160px và 30px
   });
-
+  const handlePickCriteria = (restaurantCriteria: string) => {
+    const params = { restaurantCriteria: JSON.stringify(restaurantCriteria) };
+    router.push({ pathname: "/screen/restaurantSelection", params });
+  };
   return (
     <View className='flex-1 bg-gray-100'>
       <Animated.View
@@ -170,7 +173,9 @@ export default function Home() {
 
         <View className='flex-1 gap-4 pr-6 '>
           <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
+            <TouchableOpacity
+              onPress={() => handlePickCriteria("Near me")}
+              className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
               <Text className='text-black text-lg font-medium'>Near me</Text>
               <Text className='text-black text-sm font-normal'>
                 Just in few minutes
@@ -183,7 +188,9 @@ export default function Home() {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
+            <TouchableOpacity
+              onPress={() => handlePickCriteria("Recommended")}
+              className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
               <Text className='text-customYellow text-lg font-medium'>
                 Recommended
               </Text>
@@ -200,7 +207,9 @@ export default function Home() {
           </View>
 
           <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
+            <TouchableOpacity
+              onPress={() => handlePickCriteria("Multiple deals")}
+              className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
               <Text className='text-customYellow text-lg font-medium'>
                 Multiple deals
               </Text>
@@ -215,7 +224,9 @@ export default function Home() {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
+            <TouchableOpacity
+              onPress={() => handlePickCriteria("Multiple buyers")}
+              className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
               <Text className='text-black text-lg font-medium'>
                 Multiple buyers
               </Text>
