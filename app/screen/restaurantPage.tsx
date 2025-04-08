@@ -77,18 +77,27 @@ const RestaurantPage = () => {
       getCategoryMutation.mutate();
     }
   }, []);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const toggleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+  };
   useEffect(() => {
     if (restaurant && currentCategory) {
       changeCategory();
     }
   }, [currentCategory]);
   return (
-    <ScrollView className='bg-gray-100'>
-      <View className='absolute top-5 left-5 z-10'>
+    <ScrollView className='bg-gray-100 flex-1'>
+      <View className='absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10'>
         <TouchableOpacity
           onPress={() => router.back()}
           className='bg-white rounded-full p-2 shadow-md'>
           <Icon name='arrow-back' size={24} color='black' />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className='bg-customYellow p-1 rounded-lg'
+          style={{ zIndex: 30 }}>
+          <Icon name='cart-outline' size={24} color={"black"} />
         </TouchableOpacity>
       </View>
       <View className='relative'>
@@ -129,9 +138,22 @@ const RestaurantPage = () => {
       </View>
 
       <View className='p-4'>
-        <Text className='text-3xl font-bold text-gray-900 mb-2'>
-          {restaurant?.name}
-        </Text>
+        <View className='flex-row items-center justify-between space-x-2 mb-2'>
+          <Text className='text-3xl font-bold text-gray-900 mb-2'>
+            {restaurant?.name}
+          </Text>
+
+          <View className='flex-row items-center gap-4'>
+            <TouchableHighlight onPress={toggleFavorite}>
+              <Icon
+                name={isFavorite ? "favorite" : "favorite-border"}
+                size={24}
+                color={isFavorite ? "#FF6347" : "gray"}
+              />
+            </TouchableHighlight>
+            <Icon name='chat-bubble-outline' size={24} color='blue' />
+          </View>
+        </View>
 
         <View className='flex-row items-center space-x-2 mb-2'>
           <Icon name='location-on' size={22} color='#FF6347' />

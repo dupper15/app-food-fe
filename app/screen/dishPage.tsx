@@ -67,6 +67,7 @@ const DishPage = () => {
   });
 
   const addToCart = () => {
+    console.log("add cart");
     if (!dish) return;
     addToCartMutation.mutate({
       userId,
@@ -74,6 +75,24 @@ const DishPage = () => {
       quantity,
       topping: selectedToppings,
     });
+  };
+  const editCartMutation = useMutation({
+    mutationFn: CartApi.editCart,
+    onSuccess: () => {
+      router.back();
+      CustomToast("success", "Success", "Edit successfully");
+    },
+    onError: () => {
+      CustomToast("error", "Error", "Edit failed, please try again");
+    },
+  });
+  const editCart = () => {
+    const data = {
+      quantity,
+      topping: selectedToppings,
+      orderItemId: orderItem?._id,
+    };
+    editCartMutation.mutate(data);
   };
 
   if (!dish) {
@@ -146,7 +165,7 @@ const DishPage = () => {
         </View>
 
         <TouchableOpacity
-          onPress={addToCart}
+          onPress={orderItem ? editCart : addToCart}
           className='mt-6 bg-customYellow py-3 rounded-lg shadow-lg'>
           <Text className='text-white text-lg font-semibold text-center'>
             {orderItem

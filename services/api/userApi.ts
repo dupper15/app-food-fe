@@ -33,3 +33,10 @@ export const registerRestaurantOwner = async (
   const response = await axiosInstance.post("restaurant_owners", data);
   return response.data;
 };
+export const getPoint = async (userId: string): Promise<any> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const response = await axiosInstance.get(`customers/${userId}/points`);
+  return response.data;
+};

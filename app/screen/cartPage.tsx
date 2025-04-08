@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import CardItem from "../components/cartItem";
-
+import { useMutation } from "@tanstack/react-query";
+import * as CartApi from "@/services/api/cartApi";
+import { useSelector } from "react-redux";
+import { useRouter } from "expo-router";
+import { CustomToast } from "../components/toast";
+import EditOIModal from "../components/editOIModal";
 const CartPage = () => {
   const [selectedDish, setSelectedDish] = useState([]);
-
+  const [editedItem, setEditedItem] = useState(null);
   const toggleCheckbox = (restaurantIndex: number, itemIndex: number) => {
     const selectedRestaurant = cart[restaurantIndex];
     const selectedItem = selectedRestaurant.order_items[itemIndex];
@@ -47,68 +52,25 @@ const CartPage = () => {
 
     setSelectedDish(allSelected ? [] : [...restaurantItems]);
   };
-  const [cart, setCart] = useState([
-    {
-      restaurant_id: { name: "Burger King" },
-      order_items: [
-        {
-          dish_id: {
-            name: "Cheeseburger",
-            price: 5.99,
-            image:
-              "https://th.bing.com/th/id/R.a2f90a353f8477ff36567a0f458a26df?rik=WafrhYO%2fvOvCWA&pid=ImgRaw&r=0",
-          },
-          topping: [
-            {
-              name: "Cheese",
-              price: 0.99,
-            },
-            {
-              name: "Bacon",
-              price: 1.99,
-            },
-          ],
-          quantity: 1,
-        },
-        {
-          dish_id: {
-            name: "Fries",
-            price: 2.99,
-            image:
-              "https://th.bing.com/th/id/R.a2f90a353f8477ff36567a0f458a26df?rik=WafrhYO%2fvOvCWA&pid=ImgRaw&r=0",
-          },
-          topping: [],
-          quantity: 1,
-        },
-      ],
+  const [cart, setCart] = useState(null);
+  const getCartMutation = useMutation({
+    mutationFn: CartApi.getCart,
+    onSuccess: (data) => {
+      setCart(data);
     },
-    {
-      restaurant_id: { name: "KFC" },
-      order_items: [
-        {
-          dish_id: {
-            name: "Fried Chicken",
-            price: 7.99,
-            image:
-              "https://th.bing.com/th/id/R.a2f90a353f8477ff36567a0f458a26df?rik=WafrhYO%2fvOvCWA&pid=ImgRaw&r=0",
-          },
-          topping: [],
-          quantity: 1,
-        },
-        {
-          dish_id: {
-            name: "Coleslaw",
-            price: 1.99,
-            image:
-              "https://th.bing.com/th/id/R.a2f90a353f8477ff36567a0f458a26df?rik=WafrhYO%2fvOvCWA&pid=ImgRaw&r=0",
-          },
-          topping: [],
-          quantity: 1,
-        },
-      ],
+    onError: (error) => {
+      console.error("Error fetching cart:", error);
     },
-  ]);
-
+  });
+  const userId = useSelector((state: any) => state.user.userId);
+  const getCart = async () => {
+    getCartMutation.mutate(userId);
+  };
+  useEffect(() => {
+    if (userId) {
+      getCart();
+    }
+  }, [userId]);
   const updateQuantity = (
     restaurantIndex: number,
     itemIndex: number,
@@ -119,19 +81,35 @@ const CartPage = () => {
     setCart(newCart);
   };
   const handleCheckout = () => {
-    console.log("Order confirmed", selectedDish);
+    if (selectedDish.length > 0) {
+      router.push({
+        pathname: "./paymentPage",
+        params: {
+          selectedDish: JSON.stringify(selectedDish),
+        },
+      });
+    } else {
+      CustomToast("error", "Error", "Please select at least one item");
+    }
   };
+  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
   return (
     <View className='flex-1 bg-gray-100'>
       <View className='flex-row justify-start gap-4 items-center p-4 bg-white shadow-sm'>
-        <Ionicons name='arrow-back' size={24} color='black' />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name='arrow-back' size={24} color='black' />
+        </TouchableOpacity>
         <Text className='text-2xl font-medium text-gray-900'>My Cart</Text>
       </View>
 
-      {cart.length > 0 ? (
+      {cart && cart.length > 0 ? (
         <ScrollView className='p-4'>
           {cart.map((item, restaurantIndex) => (
             <CardItem
+              setShowModal={setShowModal}
+              setEditedItem={setEditedItem}
+              key={restaurantIndex}
               selectedDish={selectedDish}
               item={item}
               restaurantIndex={restaurantIndex}
@@ -144,7 +122,6 @@ const CartPage = () => {
             className='m-4 bg-customYellow p-4 rounded-lg shadow-sm'
             onPress={() => {
               handleCheckout();
-              console.log("heloo");
             }}>
             <Text className='text-lg font-semibold text-white text-center'>
               Order Now
@@ -157,6 +134,14 @@ const CartPage = () => {
             You have no items in your cart
           </Text>
         </View>
+      )}
+      {showModal && editedItem && (
+        <EditOIModal
+          orderItem={editedItem}
+          setShowModal={setShowModal}
+          showModal={showModal}
+          setEditedItem={setEditedItem}
+        />
       )}
     </View>
   );

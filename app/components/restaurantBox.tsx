@@ -10,7 +10,7 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   const route = useRouter();
   const handleNavigate = () => {
     route.push({
-      pathname: "../screen/restaurantPage",
+      pathname: "/screen/restaurantPage",
       params: {
         data: JSON.stringify(restaurant),
       },

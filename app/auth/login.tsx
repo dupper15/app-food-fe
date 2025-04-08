@@ -54,7 +54,7 @@ const LoginScreen: React.FC = () => {
       }
       if (data.userType === "customer") {
         AsyncStorage.setItem("customer_id", String(userId));
-        router.push("/customer/home");
+        router.push("/customer/(tabs)/home");
       }
     },
     onError: (data: any) => {
