@@ -22,13 +22,15 @@ import { fetchAllToppingByRestaurant } from "@/services/api/toppingApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Topping } from "@/interfaces/ToppingInterface";
 import { Category } from "@/interfaces/CategoryInterface";
-import { createDish } from "@/services/api/dishApi";
+import { createDish, editDish } from "@/services/api/dishApi";
 import { useSelector } from "react-redux";
+import { CustomToast } from "./toast";
 
 const DishModal: React.FC<{
   setShowModal: (value: boolean) => void;
+  setRefresh: (value: boolean) => void;
   dish: DishData | null;
-}> = ({ setShowModal, dish }) => {
+}> = ({ setShowModal, setRefresh, dish }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     dish?.category_id || null
   );
@@ -46,9 +48,8 @@ const DishModal: React.FC<{
   const [time, setTime] = useState(dish?.time || "");
   const [toppings, setToppings] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(
-    dish?.image || null
-  );
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>(dish?.image || "");
 
   const fetchAllCategoryMutation = useMutation({
     mutationFn: fetchAllCategory,
@@ -70,14 +71,32 @@ const DishModal: React.FC<{
   const createDishMutation = useMutation({
     mutationFn: createDish,
     onSuccess: (data: any) => {
-      console.log("Dish created successfully:", data);
-      Alert.alert("Success", "Dish created successfully!");
+      CustomToast("success", "Success", "Created dish successfully!");
+      setShowModal(false);
+      setRefresh(true);
     },
     onError: (error: any) => {
       console.error("Error creating dish:", error);
       Alert.alert(
         "Error",
         error?.response?.data?.message || "Failed to create dish"
+      );
+    },
+  });
+
+  const editDishMutation = useMutation({
+    mutationFn: ({ data, id }: { data: FormData; id: string }) =>
+      editDish(data, id),
+    onSuccess: (data: any) => {
+      CustomToast("success", "Success", "Edited dish successfully!");
+      setShowModal(false);
+      setRefresh(true);
+    },
+    onError: (error: any) => {
+      console.error("Error editing dish:", error);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "Failed to edit dish"
       );
     },
   });
@@ -90,7 +109,7 @@ const DishModal: React.FC<{
 
     const formData = new FormData();
 
-    formData.append("restaurant_id", restaurantId.toString() || "");
+    formData.append("restaurant_id", restaurantId?.toString() || "");
     formData.append("category_id", selectedCategory.toString());
     formData.append("name", name.toString() || "");
     formData.append("introduce", introduce.toString() || "");
@@ -102,17 +121,18 @@ const DishModal: React.FC<{
     });
 
     if (selectedImage) {
-      formData.append("image", {
-        uri: selectedImage.uri,
-        name: selectedImage.name,
-        type: selectedImage.type,
-      } as any);
+      formData.append("image", selectedImage, "image.jpg");
+    } else if (imageUrl && imageUrl !== dish?.image) {
+      formData.append("image", imageUrl);
     }
     try {
-      createDishMutation.mutate(formData);
-      setShowModal(false);
+      if (dish) {
+        editDishMutation.mutate({ data: formData, id: dish._id });
+      } else {
+        createDishMutation.mutate(formData);
+      }
     } catch (error) {
-      console.error("Error creating dish:", error);
+      console.error("Error submitting dish:", error);
     }
   };
 
@@ -180,14 +200,9 @@ const DishModal: React.FC<{
     const blob = await response.blob();
 
     const fileExtension = uri.split(".").pop() || "jpg";
-    const fileName = `${Date.now()}.${fileExtension}`;
-    const fileType = blob.type || `image/${fileExtension}`;
+    const finalFileName = `${Date.now()}.${fileExtension}`;
 
-    return {
-      uri,
-      name: fileName,
-      type: fileType,
-    };
+    return new File([blob], finalFileName, { type: blob.type });
   };
 
   const pickImage = async (fromCamera: boolean) => {
@@ -215,7 +230,12 @@ const DishModal: React.FC<{
         }));
 
     if (!result.canceled && result.assets?.length > 0) {
+      setImageUrl(result.assets[0].uri);
       const file = await createFileFromUri(result.assets[0].uri);
+      if (!(file instanceof File)) {
+        console.error("Invalid file type", file);
+        return;
+      }
       setSelectedImage(file);
     }
   };
@@ -233,13 +253,19 @@ const DishModal: React.FC<{
             </Text>
             <View className="w-full flex flex-col gap-3">
               {/* image */}
-              {selectedImage && (
+              {imageUrl ? (
                 <Image
-                  source={{ uri: selectedImage }}
+                  source={{ uri: imageUrl }}
                   className="w-full h-40 mt-2 rounded-lg"
                   resizeMode="cover"
                 />
-              )}
+              ) : dish?.image ? (
+                <Image
+                  source={{ uri: dish.image }}
+                  className="w-full h-40 mt-2 rounded-lg"
+                  resizeMode="cover"
+                />
+              ) : null}
 
               <View className="flex-row justify-between items-start gap-2">
                 <TouchableOpacity
@@ -262,6 +288,7 @@ const DishModal: React.FC<{
               <View className="flex-col justify-between items-start gap-2">
                 <Text className="font-semibold text-base">Name</Text>
                 <TextInput
+                  value={name}
                   onChangeText={setName}
                   multiline
                   numberOfLines={4}
@@ -277,9 +304,10 @@ const DishModal: React.FC<{
                 <TextInput
                   multiline
                   numberOfLines={4}
+                  value={introduce}
                   onChangeText={setIntroduce}
                   className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder={dish?.introduce || "Enter introduce"}
+                  placeholder={"Enter introduce"}
                   placeholderTextColor="#94a3b8"
                 />
               </View>
@@ -309,6 +337,7 @@ const DishModal: React.FC<{
               <View className="flex-col justify-between items-start gap-2">
                 <Text className="font-semibold text-base">Price</Text>
                 <TextInput
+                  value={price}
                   onChangeText={setPrice}
                   className="w-full p-2 border border-slate-400 rounded-lg"
                   placeholder={dish?.price.toString() || "Enter price"}
@@ -321,6 +350,7 @@ const DishModal: React.FC<{
               <View className="flex-col justify-between items-start gap-2">
                 <Text className="font-semibold text-base">Time</Text>
                 <TextInput
+                  value={time}
                   onChangeText={setTime}
                   className="w-full p-2 border border-slate-400 rounded-lg"
                   placeholder={dish?.time.toString() || "Enter time"}

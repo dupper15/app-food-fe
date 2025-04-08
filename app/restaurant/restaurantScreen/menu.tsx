@@ -10,6 +10,7 @@ import { DishData } from "@/interfaces/DishInterface";
 export default function Menu() {
   const route = useRouter();
   const [openModal, setOpenModal] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   const handleCreateDish = () => {
     setOpenModal(true);
@@ -31,9 +32,15 @@ export default function Menu() {
       </View>
 
       {/* list dishes in menu */}
-      <ListMenuItem />
+      <ListMenuItem setRefresh={setRefresh} refresh={refresh} />
 
-      {openModal && <DishModal setShowModal={setOpenModal} dish={null} />}
+      {openModal && (
+        <DishModal
+          setShowModal={setOpenModal}
+          setRefresh={setRefresh}
+          dish={null}
+        />
+      )}
     </View>
   );
 }
