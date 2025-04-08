@@ -40,3 +40,43 @@ export const getPoint = async (userId: string): Promise<any> => {
   const response = await axiosInstance.get(`customers/${userId}/points`);
   return response.data;
 };
+export const getFavoriteRestaurants = async (userId: string): Promise<any> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const response = await axiosInstance.get(
+    `customers/${userId}/favorite-restaurant`
+  );
+  return response.data;
+};
+export const removeFavoriteRestaurant = async (data): Promise<any> => {
+  const { userId, restaurantId } = data;
+  if (!userId || !restaurantId) {
+    throw new Error("User ID and Restaurant ID are required");
+  }
+  const response = await axiosInstance.delete(
+    `customers/${userId}/favorite-restaurant/${restaurantId}`
+  );
+  return response.data;
+};
+export const addFavoriteRestaurant = async (data): Promise<any> => {
+  const { userId, restaurantId } = data;
+  if (!userId || !restaurantId) {
+    throw new Error("User ID and Restaurant ID are required");
+  }
+  const response = await axiosInstance.post(
+    `customers/${userId}/favorite-restaurant/${restaurantId}`
+  );
+  return response.data;
+};
+export const getFavoriteRestaurantIds = async (
+  userId: string
+): Promise<any> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const response = await axiosInstance.get(
+    `customers/${userId}/favorite-restaurant-ids`
+  );
+  return response.data;
+};
