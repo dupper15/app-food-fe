@@ -11,6 +11,11 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
 import { getRestaurantByCriteria } from "@/services/api/restaurantApi";
+import {
+  addFavoriteRestaurant,
+  getFavoriteRestaurantIds,
+  removeFavoriteRestaurant,
+} from "@/services/api/userApi";
 const RestaurantSelection = () => {
   const { restaurantCriteria } = useLocalSearchParams();
   const [restaurants, setRestaurants] = useState([0]);
@@ -23,6 +28,7 @@ const RestaurantSelection = () => {
         : [...prevFavorites, id]
     );
   };
+
   const getRestaurantMutation = useMutation({
     mutationFn: getRestaurantByCriteria,
     onSuccess: (data) => {
@@ -51,7 +57,10 @@ const RestaurantSelection = () => {
       getRestaurantMutation.mutate(data);
       //  getFavoriteRestaurants.mutate(userId);
     }
-  }, [restaurantCriteria]);
+    if (userId) {
+      getFavoriteResMutation.mutate(userId);
+    }
+  }, [restaurantCriteria, userId]);
   const router = useRouter();
   const handleDishNavigate = (item) => {
     router.push({
@@ -60,6 +69,46 @@ const RestaurantSelection = () => {
         data: JSON.stringify(item),
       },
     });
+  };
+  const getFavoriteResMutation = useMutation({
+    mutationFn: getFavoriteRestaurantIds,
+    onSuccess: (data) => {
+      setFavoriteRestaurants(data);
+    },
+    onError: (error) => {
+      console.error("Error fetching favorite restaurant IDs:", error);
+    },
+  });
+  const addToFavoriteRestaurant = useMutation({
+    mutationFn: addFavoriteRestaurant,
+    onSuccess: () => {
+      console.log("Added to favorites");
+      getFavoriteResMutation.mutate(userId);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+  const removeFavoriteRestaurantMutation = useMutation({
+    mutationFn: removeFavoriteRestaurant,
+    onSuccess: () => {
+      console.log("Removed from favorites");
+      getFavoriteResMutation.mutate(userId);
+    },
+    onError: (error) => {
+      console.error("Error removing favorite restaurant:", error);
+    },
+  });
+  const handleAddToFavorite = (restaurantId, isFavorite) => {
+    const data = {
+      userId: userId,
+      restaurantId,
+    };
+    if (isFavorite) {
+      removeFavoriteRestaurantMutation.mutate(data);
+    } else {
+      addToFavoriteRestaurant.mutate(data);
+    }
   };
   return (
     <View className='flex-1 bg-gray-100 '>
@@ -101,7 +150,12 @@ const RestaurantSelection = () => {
               </View>
 
               <TouchableHighlight
-                onPress={() => toggleFavorite(restaurant._id)}
+                onPress={() =>
+                  handleAddToFavorite(
+                    restaurant._id,
+                    favoriteRestaurants.includes(restaurant._id)
+                  )
+                }
                 className='absolute top-3 right-3'>
                 <Icon
                   name={

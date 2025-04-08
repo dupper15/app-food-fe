@@ -18,6 +18,12 @@ import {
   getCategory,
 } from "@/services/api/restaurantApi";
 import { useRouter } from "expo-router";
+import {
+  addFavoriteRestaurant,
+  getFavoriteRestaurantIds,
+  removeFavoriteRestaurant,
+} from "@/services/api/userApi";
+import { useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
@@ -34,6 +40,7 @@ const RestaurantPage = () => {
       },
     ]
   );
+  const userId = useSelector((state) => state.user.userId);
   const router = useRouter();
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   useEffect(() => {
@@ -76,16 +83,60 @@ const RestaurantPage = () => {
     if (categories.length == 1) {
       getCategoryMutation.mutate();
     }
-  }, []);
+    if (userId && restaurant) {
+      getFavoriteResMutation.mutate(userId);
+    }
+  }, [userId, restaurant]);
   const [isFavorite, setIsFavorite] = useState(false);
-  const toggleFavorite = () => {
-    setIsFavorite((prev) => !prev);
-  };
   useEffect(() => {
     if (restaurant && currentCategory) {
       changeCategory();
     }
   }, [currentCategory]);
+  const addToFavoriteRestaurant = useMutation({
+    mutationFn: addFavoriteRestaurant,
+    onSuccess: () => {
+      console.log("Added to favorites");
+      setIsFavorite(true);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+  const removeFavoriteRestaurantMutation = useMutation({
+    mutationFn: removeFavoriteRestaurant,
+    onSuccess: () => {
+      console.log("Removed from favorites");
+      setIsFavorite(false);
+    },
+    onError: (error) => {
+      console.error("Error removing favorite restaurant:", error);
+    },
+  });
+  const handleAddToFavorite = () => {
+    const data = {
+      userId: userId,
+      restaurantId: restaurant?._id,
+    };
+    if (isFavorite) {
+      removeFavoriteRestaurantMutation.mutate(data);
+    } else {
+      addToFavoriteRestaurant.mutate(data);
+    }
+  };
+  const getFavoriteResMutation = useMutation({
+    mutationFn: getFavoriteRestaurantIds,
+    onSuccess: (data) => {
+      console.log("Favorite restaurant IDs:", data);
+      const isFavoriteRestaurant = data.some(
+        (restaurantId) => restaurantId === restaurant?._id
+      );
+      setIsFavorite(isFavoriteRestaurant);
+    },
+    onError: (error) => {
+      console.error("Error fetching favorite restaurant IDs:", error);
+    },
+  });
   return (
     <ScrollView className='bg-gray-100 flex-1'>
       <View className='absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10'>
@@ -144,7 +195,7 @@ const RestaurantPage = () => {
           </Text>
 
           <View className='flex-row items-center gap-4'>
-            <TouchableHighlight onPress={toggleFavorite}>
+            <TouchableHighlight onPress={handleAddToFavorite}>
               <Icon
                 name={isFavorite ? "favorite" : "favorite-border"}
                 size={24}
