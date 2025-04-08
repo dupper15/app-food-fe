@@ -21,7 +21,31 @@ export const createDish = async (data: FormData): Promise<DishData> => {
   return response.data;
 };
 
+export const editDish = async (
+  data: FormData,
+  id: string
+): Promise<DishData> => {
+  const response = await axiosInstance.put(`dish/edit/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
+export const deleteDish = async (id: string): Promise<any> => {
+  try {
+    const response = await axiosInstance.delete(`dish/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting dish:", error);
+    throw error;
+  }
+};
+
 export const fetchDishById = async (id: string): Promise<DishData> => {
   const response = await axiosInstance.get(`dish/fetch-detail-dish/${id}`);
   return response.data;
 };
+

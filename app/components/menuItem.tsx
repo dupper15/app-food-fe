@@ -6,11 +6,21 @@ import DishModal from "./dishModal";
 import { DishData } from "@/interfaces/DishInterface";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { fetchAllDishByRestaurant } from "@/services/api/dishApi";
+import { deleteDish, fetchAllDishByRestaurant } from "@/services/api/dishApi";
 import { CustomToast } from "./toast";
 import Entypo from "@expo/vector-icons/Entypo";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import ConfirmDeleteModal from "./deleteModal";
 
-export default function ListMenuItem() {
+interface ListMenuItemProps {
+  setRefresh: (value: boolean) => void;
+  refresh: boolean;
+}
+
+export default function ListMenuItem({
+  setRefresh,
+  refresh,
+}: ListMenuItemProps) {
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string | null } }) =>
       state.restaurant.restaurantId
@@ -20,6 +30,7 @@ export default function ListMenuItem() {
   const [selectDish, setSelectDish] = useState<DishData | null>(null);
 
   const [dishes, setDishes] = useState<DishData[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const fetchAllDishByRestaurantMution = useMutation({
     mutationFn: async (id: string) => {
@@ -27,6 +38,23 @@ export default function ListMenuItem() {
     },
     onSuccess: (data: any) => {
       setDishes(data);
+      setRefresh(false);
+    },
+    onError: (error: any) => {
+      console.error("Error fetching dishes:", error);
+      CustomToast("error", "Error", "Failed to fetch dishes");
+    },
+  });
+
+  const deleteDishMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await deleteDish(id);
+    },
+    onSuccess: (data: any) => {
+      CustomToast("success", "Succes", "Deleted dish successfully!");
+      setRefresh(true);
+      setDeleteModalVisible(false);
+      setSelectDish(null);
     },
     onError: (error: any) => {
       console.error("Error fetching dishes:", error);
@@ -35,14 +63,40 @@ export default function ListMenuItem() {
   });
 
   useEffect(() => {
-    if (restaurantId) {
+    if (!restaurantId) return;
+
+    if (dishes.length === 0 || refresh) {
       fetchAllDishByRestaurantMution.mutate(restaurantId);
     }
-  }, [restaurantId]);
+
+    if (refresh) {
+      setRefresh(false);
+    }
+  }, [refresh, restaurantId]);
 
   const handleEditDish = (item: DishData) => {
     setOpenModal(true);
     setSelectDish(item);
+  };
+
+  const handleDeleteDish = (id: string) => {
+    deleteDishMutation.mutate(id);
+  };
+
+  const openDeleteConfirmation = (item: DishData) => {
+    setSelectDish(item);
+    setDeleteModalVisible(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    setDeleteModalVisible(false);
+    setSelectDish(null);
+  };
+
+  const confirmDelete = () => {
+    if (selectDish) {
+      handleDeleteDish(selectDish._id);
+    }
   };
 
   const renderItem = ({ item }: { item: DishData }) => (
@@ -72,14 +126,30 @@ export default function ListMenuItem() {
           <Text className="text-start mt-2 text-xl text-[#E23637] font-extrabold">
             {formatPrice(item.price)}
           </Text>
-          <TouchableOpacity
-            onPress={(e) => {
-              e.preventDefault(), handleEditDish(item);
-            }}
-            className="w-10 h-10 items-center justify-center bg-[#FFC515] rounded-full"
-          >
-            <Ionicons name="pencil-outline" size={20} color="white" />
-          </TouchableOpacity>
+          <View className="flex-row space-x-2">
+            <TouchableOpacity
+              onPress={(e) => {
+                e.preventDefault();
+                openDeleteConfirmation(item);
+              }}
+              className="w-10 h-10 items-center justify-center bg-[#FFC515] rounded-full"
+            >
+              <MaterialCommunityIcons
+                name="delete-outline"
+                size={24}
+                color="white"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.preventDefault();
+                handleEditDish(item);
+              }}
+              className="w-10 h-10 items-center justify-center bg-[#FFC515] rounded-full"
+            >
+              <Ionicons name="pencil-outline" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -96,7 +166,20 @@ export default function ListMenuItem() {
         className="pb-20"
       />
 
-      {openModal && <DishModal setShowModal={setOpenModal} dish={selectDish} />}
+      {openModal && (
+        <DishModal
+          setShowModal={setOpenModal}
+          dish={selectDish}
+          setRefresh={setRefresh}
+        />
+      )}
+
+      <ConfirmDeleteModal
+        visible={deleteModalVisible}
+        onClose={closeDeleteConfirmation}
+        onConfirm={confirmDelete}
+        itemName={selectDish?.name || ""}
+      />
     </View>
   );
 }

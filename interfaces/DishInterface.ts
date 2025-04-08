@@ -15,8 +15,8 @@ export interface DishData {
   image: string;
   introduce: string;
   restaurant_id: string;
-  price: string;
-  time: string;
+  price: number;
+  time: number;
   topping: string[];
   category_id: string;
   bestSeller: boolean;
