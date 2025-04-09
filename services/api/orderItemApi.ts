@@ -15,7 +15,7 @@ export const fetchOrderItems = async (
 ): Promise<OrderItem[]> => {
   // Handle both string and array cases
   const idsToSend = Array.isArray(itemIds) ? itemIds : [itemIds];
-
+  console.log("IDs to send:", idsToSend);
   try {
     // Ensure we're sending a proper JSON array
     const response = await axiosInstance.post(
@@ -27,6 +27,7 @@ export const fetchOrderItems = async (
         },
       }
     );
+    console.log("Response from fetchOrderItems:", response.data);
     return Array.isArray(response.data) ? response.data : [response.data];
   } catch (error) {
     console.error("Error fetching order items:", error);

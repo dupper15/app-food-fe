@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { router } from "expo-router";
 import { CompleteHistoryItem } from "@/services/historyService";
+import { transPrice } from "@/utils/transPrice";
 
 interface OrderComponentProps {
   item: CompleteHistoryItem;
@@ -48,8 +49,7 @@ const OrderComponent = ({
             style={[
               styles.statusText,
               { color: getStatusColor(item.order.status) },
-            ]}
-          >
+            ]}>
             {item.order.status}
           </Text>
         </View>
@@ -63,7 +63,7 @@ const OrderComponent = ({
               <Image
                 source={{ uri: orderItem.dish.image }}
                 style={styles.dishImage}
-                resizeMode="cover"
+                resizeMode='cover'
               />
             ) : (
               <View style={styles.placeholderImage} />
@@ -74,7 +74,7 @@ const OrderComponent = ({
             <Text style={styles.dishName}>{orderItem.dish.name}</Text>
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>
-                {orderItem.dish.price.toLocaleString()}đ
+                {transPrice(orderItem.dish.price)}
               </Text>
               <Text style={styles.quantityText}> x{orderItem.quantity}</Text>
             </View>
@@ -86,7 +86,7 @@ const OrderComponent = ({
       <View style={styles.totalPriceContainer}>
         <Text style={styles.totalPriceLabel}>Total Price:</Text>
         <Text style={styles.totalPriceValue}>
-          {item.order.total_price.toLocaleString()},000đ
+          {transPrice(item.order.total_price)}
         </Text>
       </View>
 
@@ -97,15 +97,13 @@ const OrderComponent = ({
           <>
             <TouchableOpacity
               style={styles.rateButton}
-              onPress={() => onTrackRoute && onTrackRoute(item.order._id)}
-            >
+              onPress={() => onTrackRoute && onTrackRoute(item.order._id)}>
               <Text style={styles.rateButtonText}>Track Route</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.reorderButton}
-              onPress={() => onCancel && onCancel(item.order._id)}
-            >
+              onPress={() => onCancel && onCancel(item.order._id)}>
               <Text style={styles.reorderButtonText}>Cancel</Text>
             </TouchableOpacity>
           </>
@@ -115,15 +113,13 @@ const OrderComponent = ({
             {item.order.status.toLowerCase() === "completed" && (
               <TouchableOpacity
                 style={styles.rateButton}
-                onPress={() => onRate && onRate(item.order._id)}
-              >
+                onPress={() => onRate && onRate(item.order._id)}>
                 <Text style={styles.rateButtonText}>Rate</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={styles.reorderButton}
-              onPress={() => onReorder && onReorder(item.order._id)}
-            >
+              onPress={() => onReorder && onReorder(item.order._id)}>
               <Text style={styles.reorderButtonText}>Re-Order</Text>
             </TouchableOpacity>
           </>

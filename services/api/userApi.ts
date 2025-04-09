@@ -80,3 +80,17 @@ export const getFavoriteRestaurantIds = async (
   );
   return response.data;
 };
+export const getCustomerInfo = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const response = await axiosInstance.get(`customers/${userId}`);
+  return response.data;
+};
+export const editCustomerInfo = async (data) => {
+  const { userId, editUser } = data;
+  const response = await axiosInstance.put(`customers/${userId}`, {
+    editUser,
+  });
+  return response.data;
+};
