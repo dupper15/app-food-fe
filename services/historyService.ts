@@ -190,7 +190,7 @@ export const fetchCompleteHistory = async (
         };
       }
     });
-
+    console.log("Complete history promises:", completeHistoryPromises);
     return Promise.all(completeHistoryPromises);
   } catch (error) {
     console.error("Error fetching complete history:", error);

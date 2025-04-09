@@ -53,7 +53,6 @@ const OrderDetailScreen = () => {
         if (!order) {
           throw new Error("Order not found");
         }
-
         setOrderDetail(order);
         setIsLoading(false);
       } catch (err) {
@@ -75,7 +74,7 @@ const OrderDetailScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FFCC00" />
+        <ActivityIndicator size='large' color='#FFCC00' />
         <Text style={styles.loadingText}>Loading order details...</Text>
       </SafeAreaView>
     );
@@ -88,8 +87,7 @@ const OrderDetailScreen = () => {
         <Text style={styles.errorText}>{error || "Order not found"}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
+          onPress={() => router.back()}>
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -120,19 +118,18 @@ const OrderDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={24} color="#000" />
+          onPress={() => router.back()}>
+          <ChevronLeft size={24} color='#000' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Orders</Text>
         <TouchableOpacity style={styles.menuButton}>
-          <MoreVertical size={24} color="#000" />
+          <MoreVertical size={24} color='#000' />
         </TouchableOpacity>
       </View>
 
@@ -167,7 +164,7 @@ const OrderDetailScreen = () => {
         {/* Location */}
         <View style={styles.locationContainer}>
           <View style={styles.locationRow}>
-            <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
+            <MapPin size={18} color='#e74c3c' style={styles.locationIcon} />
             <Text style={styles.locationText}>
               {orderDetail.restaurant.address}
             </Text>

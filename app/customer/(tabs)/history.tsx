@@ -93,7 +93,7 @@ const OrderHistoryScreen = () => {
   const renderOngoingItem = ({ item }: { item: CompleteHistoryItem }) => (
     <OrderComponent
       item={item}
-      mode="ongoing"
+      mode='ongoing'
       onTrackRoute={handleTrackRoute}
       onCancel={handleCancelOrder}
     />
@@ -103,7 +103,7 @@ const OrderHistoryScreen = () => {
   const renderHistoryItem = ({ item }: { item: CompleteHistoryItem }) => (
     <OrderComponent
       item={item}
-      mode="history"
+      mode='history'
       onRate={handleRateOrder}
       onReorder={handleReorderOrder}
     />
@@ -113,7 +113,7 @@ const OrderHistoryScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FFCC00" />
+        <ActivityIndicator size='large' color='#FFCC00' />
         <Text style={styles.loadingText}>Loading your orders...</Text>
       </SafeAreaView>
     );
@@ -133,7 +133,7 @@ const OrderHistoryScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
@@ -141,14 +141,12 @@ const OrderHistoryScreen = () => {
           <TouchableOpacity
             key={index}
             style={[styles.tab, activeTab === index && styles.activeTab]}
-            onPress={() => setActiveTab(index)}
-          >
+            onPress={() => setActiveTab(index)}>
             <Text
               style={[
                 styles.tabText,
                 activeTab === index && styles.activeTabText,
-              ]}
-            >
+              ]}>
               {tab}
             </Text>
             {activeTab === index && <View style={styles.activeIndicator} />}
