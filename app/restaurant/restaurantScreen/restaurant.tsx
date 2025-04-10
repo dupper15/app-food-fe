@@ -14,7 +14,7 @@ const user: User = {
 
 export default function Restaurant() {
   return (
-    <View className="bg-white px-6 py-8 flex-col">
+    <View className="bg-white px-6 py-8 flex-col h-full gap-4">
       {/* avatar and fullname */}
       <View className="flex-row py-10 items-center gap-10">
         <Image
@@ -31,7 +31,7 @@ export default function Restaurant() {
       <ListSetting />
 
       {/* logout */}
-      <TouchableOpacity className="flex-row gap-2 items-center px-4 py-5 my-10 bg-gray-100 rounded-2xl">
+      <TouchableOpacity className="flex-row gap-2 items-center px-4 py-5 mb-20 bg-gray-100 rounded-2xl">
         <View className="bg-white rounded-full p-2">
           <Ionicons name="log-out-outline" size={20} color="#FF5733" />
         </View>

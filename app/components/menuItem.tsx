@@ -102,7 +102,7 @@ export default function ListMenuItem({
   const renderItem = ({ item }: { item: DishData }) => (
     <TouchableOpacity
       onPress={(e) => e.preventDefault()}
-      className="flex-row items-center px-4 py-2"
+      className="flex-row items-center mt-4 mx-2"
     >
       <View className="rounded-lg items-center justify-center shadow-sm bg-[#f8f8f8] w-48 gap-1">
         <Image
@@ -126,17 +126,17 @@ export default function ListMenuItem({
           <Text className="text-start mt-2 text-xl text-[#E23637] font-extrabold">
             {formatPrice(item.price)}
           </Text>
-          <View className="flex-row space-x-2">
+          <View className="flex-row space-x-2 mt-2">
             <TouchableOpacity
               onPress={(e) => {
                 e.preventDefault();
                 openDeleteConfirmation(item);
               }}
-              className="w-10 h-10 items-center justify-center bg-[#FFC515] rounded-full"
+              className="w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full"
             >
               <MaterialCommunityIcons
                 name="delete-outline"
-                size={24}
+                size={20}
                 color="white"
               />
             </TouchableOpacity>
@@ -145,7 +145,7 @@ export default function ListMenuItem({
                 e.preventDefault();
                 handleEditDish(item);
               }}
-              className="w-10 h-10 items-center justify-center bg-[#FFC515] rounded-full"
+              className="w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full"
             >
               <Ionicons name="pencil-outline" size={20} color="white" />
             </TouchableOpacity>
