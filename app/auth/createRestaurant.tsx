@@ -12,10 +12,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { getAddressFromCoordinates } from "@/utils/getAddressFromCoordinates";
 import { useMutation } from "@tanstack/react-query";
-import { createRestaurant, setAvatarRes } from "@/services/api/restaurantApi";
+import { createRestaurant } from "@/services/api/restaurantApi";
 import UploadImageModal from "../components/uploadImageModal";
 import { useSelector } from "react-redux";
 import { CustomToast } from "../components/toast";
+import { setAvatarRes } from "@/services/api/owner";
 // import MapView, { Marker } from "react-native-maps";
 const CreateRestaurantScreen: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -91,23 +92,23 @@ const CreateRestaurantScreen: React.FC = () => {
     }
   };
   return (
-    <ScrollView className='bg-slate-100 relative flex-1 flex-col w-full'>
-      <View className='bg-white w-full h-max p-4'>
-        <Text className='text-slate-900 font-medium text-xl text-center'>
+    <ScrollView className="bg-slate-100 relative flex-1 flex-col w-full">
+      <View className="bg-white w-full h-max p-4">
+        <Text className="text-slate-900 font-medium text-xl text-center">
           Restaurant information
         </Text>
       </View>
-      <View className='flex-1 flex-col items-center w-full p-8'>
-        <View className='w-2/5 aspect-square relative'>
-          <View className='w-full h-full bg-slate-200 rounded-lg overflow-hidden'>
+      <View className="flex-1 flex-col items-center w-full p-8">
+        <View className="w-2/5 aspect-square relative">
+          <View className="w-full h-full bg-slate-200 rounded-lg overflow-hidden">
             {avatar ? (
               <Image
                 source={{ uri: URL.createObjectURL(avatar) }}
-                className='w-full h-full'
-                resizeMode='cover'
+                className="w-full h-full"
+                resizeMode="cover"
               />
             ) : (
-              <Image className='w-full h-full' resizeMode='cover' />
+              <Image className="w-full h-full" resizeMode="cover" />
             )}{" "}
           </View>
           <TouchableHighlight
@@ -115,53 +116,55 @@ const CreateRestaurantScreen: React.FC = () => {
               setShowModal(true);
               setType("avatar");
             }}
-            className='absolute -bottom-4 left-1/2 -translate-x-1/2 bg-customYellow p-2 rounded-full'
-            underlayColor='#FFD700'>
-            <Ionicons name='camera' size={24} color='white' />
+            className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-customYellow p-2 rounded-full"
+            underlayColor="#FFD700"
+          >
+            <Ionicons name="camera" size={24} color="white" />
           </TouchableHighlight>
         </View>
 
-        <View className='w-full flex gap-2'>
-          <Text className='text-slate-900 font-medium text-lg mt-4'>
+        <View className="w-full flex gap-2">
+          <Text className="text-slate-900 font-medium text-lg mt-4">
             Restaurant Name
           </Text>
           <TextInput
             onChangeText={setName}
-            className='w-full p-2 border border-slate-400 rounded-lg'
-            placeholder='Enter restaurant name'
-            placeholderTextColor='#94a3b8'
+            className="w-full p-2 border border-slate-400 rounded-lg"
+            placeholder="Enter restaurant name"
+            placeholderTextColor="#94a3b8"
           />
         </View>
 
-        <View className='w-full flex gap-2'>
-          <Text className='text-slate-900 font-medium text-lg mt-4'>
+        <View className="w-full flex gap-2">
+          <Text className="text-slate-900 font-medium text-lg mt-4">
             Describe
           </Text>
           <TextInput
             multiline
             onChangeText={setDescription}
             numberOfLines={4}
-            className='w-full p-2 border border-slate-400 h-40 rounded-lg'
-            placeholder='Enter description'
-            placeholderTextColor='#94a3b8'
+            className="w-full p-2 border border-slate-400 h-40 rounded-lg"
+            placeholder="Enter description"
+            placeholderTextColor="#94a3b8"
           />
         </View>
-        <View className='w-full flex gap-2'>
-          <Text className='text-slate-900 font-medium text-lg mt-4'>
+        <View className="w-full flex gap-2">
+          <Text className="text-slate-900 font-medium text-lg mt-4">
             Banner
           </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className='flex flex-row gap-4 h-max w-full'>
+            className="flex flex-row gap-4 h-max w-full"
+          >
             {image.map((item, index) => (
-              <View key={index} className='w-32 h-24 bg-slate-300'>
+              <View key={index} className="w-32 h-24 bg-slate-300">
                 <Image
                   source={{
                     uri: URL.createObjectURL(item),
                   }}
-                  resizeMode='cover'
-                  className='h-full w-full'
+                  resizeMode="cover"
+                  className="h-full w-full"
                 />
               </View>
             ))}
@@ -170,23 +173,24 @@ const CreateRestaurantScreen: React.FC = () => {
                 setShowModal(true);
                 setType("banner");
               }}
-              className='w-48 h-40 bg-slate-200 rounded-md'>
-              <View className='w-full h-full flex justify-center items-center'>
-                <Ionicons name='add' size={36} color='white' />{" "}
+              className="w-48 h-40 bg-slate-200 rounded-md"
+            >
+              <View className="w-full h-full flex justify-center items-center">
+                <Ionicons name="add" size={36} color="white" />{" "}
               </View>
             </TouchableHighlight>
           </ScrollView>
         </View>
 
         {/* Address & Map */}
-        <View className='w-full flex gap-2'>
-          <Text className='text-slate-900 font-medium text-lg mt-4'>
+        <View className="w-full flex gap-2">
+          <Text className="text-slate-900 font-medium text-lg mt-4">
             Address
           </Text>
           <TextInput
-            className='w-full p-2 border border-slate-400 rounded-lg'
-            placeholder='Enter address'
-            placeholderTextColor='#94a3b8'
+            className="w-full p-2 border border-slate-400 rounded-lg"
+            placeholder="Enter address"
+            placeholderTextColor="#94a3b8"
             value={address}
             onChangeText={setAddress}
           />
@@ -208,10 +212,11 @@ const CreateRestaurantScreen: React.FC = () => {
               </MapView> */}
         </View>
       </View>
-      <TouchableOpacity className='bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4'>
+      <TouchableOpacity className="bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4">
         <Text
           onPress={handleSubmit}
-          className='text-white font-medium text-lg text-center'>
+          className="text-white font-medium text-lg text-center"
+        >
           Submit
         </Text>
       </TouchableOpacity>

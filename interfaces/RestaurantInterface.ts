@@ -7,7 +7,7 @@ export type CreateRestaurantData = {
   ownerId: string;
 };
 export type RestaurantData = {
-  id: string;
+  _id: string;
   name: string;
   total_reviews: number;
   total_orders: number;

@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableHighlight,
@@ -242,163 +243,174 @@ const DishModal: React.FC<{
 
   return (
     <Modal animationType="slide" transparent={true} visible={true}>
-      <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
+      <View className=" flex-1 bg-black bg-opacity-50">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="w-full items-center"
+          className="flex-1 justify-center items-center"
         >
-          <View className="bg-white w-3/4 p-6 rounded-lg shadow-lg">
-            <Text className="text-slate-900 font-extrabold text-2xl text-center mb-4">
-              {dish ? "Edit Dish" : "Create Dish"}
-            </Text>
-            <View className="w-full flex flex-col gap-3">
-              {/* image */}
-              {imageUrl ? (
-                <Image
-                  source={{ uri: imageUrl }}
-                  className="w-full h-40 mt-2 rounded-lg"
-                  resizeMode="cover"
-                />
-              ) : dish?.image ? (
-                <Image
-                  source={{ uri: dish.image }}
-                  className="w-full h-40 mt-2 rounded-lg"
-                  resizeMode="cover"
-                />
-              ) : null}
+          <View className="bg-white w-10/12 h-[90%] p-4 mt-4 rounded-lg shadow-lg">
+            <ScrollView
+              contentContainerStyle={{
+                paddingBottom: 24,
+              }}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text className="text-slate-900 font-extrabold text-2xl text-center mb-4">
+                {dish ? "Edit Dish" : "Create Dish"}
+              </Text>
+              <View className="w-full flex flex-col gap-3">
+                <View className="w-full flex flex-col gap-3">
+                  {/* image */}
+                  {imageUrl ? (
+                    <Image
+                      source={{ uri: imageUrl }}
+                      className="w-full h-40 pt-2 rounded-lg"
+                      resizeMode="cover"
+                    />
+                  ) : dish?.image ? (
+                    <Image
+                      source={{ uri: dish.image }}
+                      className="w-full h-40 pt-2 rounded-lg"
+                      resizeMode="cover"
+                    />
+                  ) : null}
 
-              <View className="flex-row justify-between items-start gap-2">
-                <TouchableOpacity
-                  className="bg-[#389C9A] rounded-md py-1 px-2"
-                  onPress={() => pickImage(true)}
-                >
-                  <Text className="text-white text-base">Take Photo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="bg-[#FFC515] rounded-md py-1 px-2"
-                  onPress={() => pickImage(false)}
-                >
-                  <Text className="text-white text-base">
-                    Choose from Gallery
-                  </Text>
-                </TouchableOpacity>
+                  <View className="flex-row justify-between items-start gap-2">
+                    <TouchableOpacity
+                      className="bg-[#389C9A] rounded-md py-1 px-2"
+                      onPress={() => pickImage(true)}
+                    >
+                      <Text className="text-white text-base">Take Photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="bg-[#FFC515] rounded-md py-1 px-2"
+                      onPress={() => pickImage(false)}
+                    >
+                      <Text className="text-white text-base">
+                        Choose from Gallery
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* name */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Name</Text>
+                    <TextInput
+                      value={name}
+                      onChangeText={setName}
+                      multiline
+                      numberOfLines={4}
+                      className="w-full p-2 border border-slate-400 rounded-lg"
+                      placeholder="Enter name"
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
+
+                  {/* introduce */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Introduce</Text>
+                    <TextInput
+                      multiline
+                      numberOfLines={4}
+                      value={introduce}
+                      onChangeText={setIntroduce}
+                      className="w-full p-2 border border-slate-400 rounded-lg"
+                      placeholder={"Enter introduce"}
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
+
+                  {/* category */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Category</Text>
+                    {fetchAllCategoryMutation.isError && (
+                      <Text className="text-center text-red-500">
+                        Failed to load categories
+                      </Text>
+                    )}
+
+                    {fetchAllCategoryMutation.isSuccess && (
+                      <FlatList
+                        data={categories}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderItemCategory}
+                        keyExtractor={(item) => item._id}
+                        contentContainerStyle={{ gap: 10 }}
+                        className="w-full"
+                      />
+                    )}
+                  </View>
+
+                  {/* price */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Price</Text>
+                    <TextInput
+                      value={price.toString()}
+                      onChangeText={setPrice}
+                      className="w-full p-2 border border-slate-400 rounded-lg"
+                      placeholder={dish?.price.toString() || "Enter price"}
+                      keyboardType="numeric"
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
+
+                  {/* time */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Time</Text>
+                    <TextInput
+                      value={time.toString()}
+                      onChangeText={setTime}
+                      className="w-full p-2 border border-slate-400 rounded-lg"
+                      placeholder={dish?.time.toString() || "Enter time"}
+                      keyboardType="numeric"
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
+
+                  {/* topping */}
+                  <View className="flex-col justify-between items-start gap-2">
+                    <Text className="font-semibold text-base">Topping</Text>
+                    {fetchAllCategoryMutation.isError && (
+                      <Text className="text-center text-red-500">
+                        Failed to load topping
+                      </Text>
+                    )}
+
+                    {fetchAllToppingMutaion.isSuccess && (
+                      <FlatList
+                        data={toppings}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderItemTopping}
+                        keyExtractor={(item) => item._id}
+                        contentContainerStyle={{ gap: 10 }}
+                        className="w-full"
+                      />
+                    )}
+                  </View>
+
+                  <View className="flex-row items-center gap-4 justify-between">
+                    <TouchableHighlight
+                      onPress={() => setShowModal(false)}
+                      className="bg-red-500 p-3 rounded-lg flex-1"
+                    >
+                      <Text className="text-white text-center font-medium">
+                        Cancel
+                      </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight
+                      onPress={handleCreateDish}
+                      className="bg-[#389C9A] p-3 rounded-lg flex-1"
+                    >
+                      <Text className="text-white text-center font-medium">
+                        {dish !== null ? "Save" : "Create"}
+                      </Text>
+                    </TouchableHighlight>
+                  </View>
+                </View>
               </View>
-
-              {/* name */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Name</Text>
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  multiline
-                  numberOfLines={4}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder="Enter name"
-                  placeholderTextColor="#94a3b8"
-                />
-              </View>
-
-              {/* introduce */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Introduce</Text>
-                <TextInput
-                  multiline
-                  numberOfLines={4}
-                  value={introduce}
-                  onChangeText={setIntroduce}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder={"Enter introduce"}
-                  placeholderTextColor="#94a3b8"
-                />
-              </View>
-
-              {/* category */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Category</Text>
-                {fetchAllCategoryMutation.isError && (
-                  <Text className="text-center text-red-500">
-                    Failed to load categories
-                  </Text>
-                )}
-
-                {fetchAllCategoryMutation.isSuccess && (
-                  <FlatList
-                    data={categories}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={renderItemCategory}
-                    keyExtractor={(item) => item._id}
-                    contentContainerStyle={{ gap: 10 }}
-                  />
-                )}
-              </View>
-
-              {/* price */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Price</Text>
-                <TextInput
-                  value={price}
-                  onChangeText={setPrice}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder={dish?.price.toString() || "Enter price"}
-                  keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
-                />
-              </View>
-
-              {/* time */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Time</Text>
-                <TextInput
-                  value={time}
-                  onChangeText={setTime}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder={dish?.time.toString() || "Enter time"}
-                  keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
-                />
-              </View>
-
-              {/* topping */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Topping</Text>
-                {fetchAllCategoryMutation.isError && (
-                  <Text className="text-center text-red-500">
-                    Failed to load topping
-                  </Text>
-                )}
-
-                {fetchAllToppingMutaion.isSuccess && (
-                  <FlatList
-                    data={toppings}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={renderItemTopping}
-                    keyExtractor={(item) => item._id}
-                    contentContainerStyle={{ gap: 10 }}
-                  />
-                )}
-              </View>
-
-              <View className="flex-row items-center gap-4 justify-between">
-                <TouchableHighlight
-                  onPress={() => setShowModal(false)}
-                  className="bg-red-500 p-3 rounded-lg flex-1"
-                >
-                  <Text className="text-white text-center font-medium">
-                    Cancel
-                  </Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                  onPress={handleCreateDish}
-                  className="bg-[#389C9A] p-3 rounded-lg flex-1"
-                >
-                  <Text className="text-white text-center font-medium">
-                    {dish !== null ? "Save" : "Create"}
-                  </Text>
-                </TouchableHighlight>
-              </View>
-            </View>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </View>

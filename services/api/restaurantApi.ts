@@ -9,9 +9,15 @@ export const createRestaurant = async (data: FormData): Promise<any> => {
   });
   return response.data;
 };
-export const setAvatarRes = async (data: FormData): Promise<any> => {
-  const id = data.get("owner_id");
-  const response = await axiosInstance.put(`restaurant_owners/${id}`, data);
+export const editRestaurant = async (
+  id: string,
+  data: FormData
+): Promise<RestaurantData> => {
+  const response = await axiosInstance.put(`restaurants/edit/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 export const getRestaurantHistory = async (
@@ -52,7 +58,7 @@ export const getRestaurantDetail = async (restaurantId: string) => {
 export const fetchRestaurantByOwner = async (id: any): Promise<any> => {
   return await axiosInstance.get(`restaurants/owner/${id}`);
 };
-export const getRestaurantByCriteria = async (data) => {
+export const getRestaurantByCriteria = async (data: any) => {
   const { restaurantCriteria, userId } = data;
   const restaurantCriteriaString = restaurantCriteria.toString().slice(1, -1);
   if (restaurantCriteriaString === "Near me") {
