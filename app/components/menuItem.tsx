@@ -57,8 +57,8 @@ export default function ListMenuItem({
       setSelectDish(null);
     },
     onError: (error: any) => {
-      console.error("Error fetching dishes:", error);
-      CustomToast("error", "Error", "Failed to fetch dishes");
+      console.error("Error deleting dish:", error);
+      CustomToast("error", "Error", "Failed to delete dish");
     },
   });
 

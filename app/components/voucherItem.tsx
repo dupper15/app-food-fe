@@ -1,106 +1,174 @@
-import { formatPrice, formatRatio } from "@/utils/format";
-import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
+import {
+  formatCode,
+  formatDate,
+  formatPrice,
+  formatRatio,
+} from "@/utils/format";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TouchableHighlight,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
-import DishModal from "./dishModal";
-import { Voucher } from "@/interfaces/VoucherInterface";
+import { useEffect, useState } from "react";
+import { VoucherData } from "@/interfaces/VoucherInterface";
 import VoucherModal from "./voucherModal";
+import { useMutation } from "@tanstack/react-query";
+import { deleteVoucher, getAllVouchers } from "@/services/api/voucherApi";
+import { CustomToast } from "./toast";
+import { useSelector } from "react-redux";
+import ConfirmDeleteModal from "./deleteModal";
 
-const vouchers: Voucher[] = [
-  {
-    id: "1",
-    name: "Khuyen mai thang 12",
-    code: "CTHCGSCN001",
-    quantity: 10,
-    restaurant_id: "2",
-    value: 0.1, // Giá trị hợp lý hơn cho một món ăn
-    max: 100000,
-    start_date: new Date("2025-03-24"), // Ngày bắt đầu bán
-    expire_date: new Date("2025-04-24"),
-  },
-  {
-    id: "2",
-    name: "Khuyen mai thang 12",
-    code: "CTHCGSCN001",
-    quantity: 10,
-    value: 100000, // Giá trị hợp lý hơn cho một món ăn
-    max: 100,
-    restaurant_id: "2",
-    start_date: new Date("2025-03-24"), // Ngày bắt đầu bán
-    expire_date: new Date("2025-04-24"),
-  },
-  {
-    id: "3",
-    name: "Khuyen mai thang 12",
-    code: "CTHCGSCN001",
-    quantity: 10,
-    value: 100000, // Giá trị hợp lý hơn cho một món ăn
-    max: 100,
-    restaurant_id: "2",
-    start_date: new Date("2025-03-24"), // Ngày bắt đầu bán
-    expire_date: new Date("2025-04-24"),
-  },
-];
+interface ListVoucherItemProps {
+  setRefresh: (value: boolean) => void;
+  refresh: boolean;
+}
 
-export default function ListVoucherItem() {
+export default function ListVoucherItem({
+  setRefresh,
+  refresh,
+}: ListVoucherItemProps) {
   const [openModal, setOpenModal] = useState(false);
-  const [selectVoucher, setSelectVoucher] = useState<Voucher | null>(null);
+  const [selectVoucher, setSelectVoucher] = useState<VoucherData | null>(null);
+  const restaurantId = useSelector(
+    (state: { restaurant: { restaurantId: string | null } }) =>
+      state.restaurant.restaurantId
+  );
+  const [vouchers, setVouchers] = useState([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
 
-  const handleEditVoucher = (item: Voucher) => {
+  const handleEditVoucher = (item: VoucherData) => {
     setOpenModal(true);
     setSelectVoucher(item);
   };
 
-  const renderItem = ({ item }: { item: Voucher }) => (
-    <TouchableOpacity
-      onPress={(e) => e.preventDefault()}
-      className="flex-row items-center px-4 py-3"
-    >
+  const fetchAllVoucherMutation = useMutation({
+    mutationFn: getAllVouchers,
+    onSuccess: (data) => {
+      setVouchers(data.reverse());
+      setRefresh(false);
+    },
+    onError: (error: any) => {
+      console.error("Error loading voucher:", error);
+      CustomToast(
+        "error",
+        "Error",
+        "Loading vouchers failed! Please try again"
+      );
+    },
+  });
+
+  const deleteVoucherMutation = useMutation({
+    mutationFn: deleteVoucher,
+    onSuccess: (data: any) => {
+      CustomToast("success", "Succes", "Deleted voucher successfully!");
+      setRefresh(true);
+      setDeleteModalVisible(false);
+      setSelectVoucher(null);
+    },
+    onError: (error: any) => {
+      console.error("Error deleting voucher:", error);
+      CustomToast("error", "Error", "Failed to delete voucher");
+    },
+  });
+
+  useEffect(() => {
+    if (restaurantId) {
+      fetchAllVoucherMutation.mutate(restaurantId);
+    }
+    if (refresh) {
+      setRefresh(false);
+    }
+  }, [restaurantId, refresh]);
+
+  const handleEditDish = (item: VoucherData) => {
+    setOpenModal(true);
+    setSelectVoucher(item);
+  };
+
+  const handleDeleteVoucher = (id: string) => {
+    deleteVoucherMutation.mutate(id);
+  };
+
+  const openDeleteConfirmation = (item: VoucherData) => {
+    setSelectVoucher(item);
+    setDeleteModalVisible(true);
+  };
+
+  const closeDeleteConfirmation = () => {
+    setDeleteModalVisible(false);
+    setSelectVoucher(null);
+  };
+
+  const confirmDelete = () => {
+    if (selectVoucher) {
+      handleDeleteVoucher(selectVoucher._id);
+    }
+  };
+
+  const renderItem = ({ item }: { item: VoucherData }) => (
+    <View className="flex-row items-center px-4 py-3">
       <View className="rounded-2xl bg-white shadow-sm w-full p-4 border border-gray-200 gap-3">
-        {/* Tên và mã Voucher */}
+        {/* name, code and content */}
         <View className="flex-col items-start gap-2">
           <Text className="text-lg font-bold text-black truncate">
             {item.name}
           </Text>
           <Text className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
-            {item.code}
+            {formatCode(item._id)}
+          </Text>
+          <Text className="text-md font-semibold text-black truncate">
+            {item.content}
           </Text>
         </View>
-
-        {/* Giá trị và số lượng */}
-        <View className="flex-row items-center justify-between">
+        {/* value, max and quantity*/}
+        <View className="flex-row items-center justify-start gap-4">
           <Text className="text-base text-[#389C9A] font-semibold">
             Value: {formatRatio(item.value)}
-          </Text>
-          <Text className="text-base text-[#389C9A] font-semibold">
-            Max: {formatRatio(item.max)}
           </Text>
           <Text className="text-base text-[#389C9A] font-semibold">
             Quantity: {item.quantity}
           </Text>
         </View>
-
-        {/* Ngày bắt đầu và ngày hết hạn */}
+        {/* value, max and quantity*/}
+        <View className="flex-row items-center justify-start gap-4">
+          <Text className="text-base text-[#389C9A] font-semibold">
+            Max: {formatPrice(item.max)}
+          </Text>
+          <Text className="text-base text-[#389C9A] font-semibold">
+            Min: {formatPrice(item.min)}
+          </Text>
+        </View>
+        {/* start date and end date */}
         <View className="flex-row items-center justify-between text-sm text-gray-500">
           <View className="flex-row items-center gap-1">
             <Ionicons name="calendar-outline" size={16} color="#888" />
-            <Text>Start: {item.start_date.toLocaleDateString()}</Text>
+            <Text>Start: {formatDate(item.start_date)}</Text>
           </View>
           <View className="flex-row items-center gap-1">
             <Ionicons name="calendar-outline" size={16} color="#888" />
-            <Text>Expire: {item.expire_date.toLocaleDateString()}</Text>
+            <Text>Expire: {formatDate(item.expire_date)}</Text>
           </View>
         </View>
-
-        {/* Nút chỉnh sửa */}
-        <TouchableOpacity
-          onPress={() => handleEditVoucher(item)}
-          className="mt-2 w-full bg-[#FFC515] py-2 rounded-lg items-center"
-        >
-          <Text className="text-white font-semibold">Edit</Text>
-        </TouchableOpacity>
+        {/* delete and edit */}
+        <View className="flex-row items-center gap-4 justify-between">
+          <TouchableHighlight
+            onPress={() => openDeleteConfirmation(item)}
+            className="bg-red-500 p-3 rounded-lg flex-1"
+          >
+            <Text className="text-white text-center font-medium">Delete</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => handleEditVoucher(item)}
+            className="bg-[#FFC515] p-3 rounded-lg flex-1"
+          >
+            <Text className="text-white text-center font-medium">Edit</Text>
+          </TouchableHighlight>
+        </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -109,13 +177,23 @@ export default function ListVoucherItem() {
         data={vouchers}
         renderItem={renderItem}
         horizontal={false}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         className="pb-20"
       />
 
       {openModal && (
-        <VoucherModal setShowModal={setOpenModal} voucher={selectVoucher} />
+        <VoucherModal
+          setShowModal={setOpenModal}
+          setRefresh={setRefresh}
+          voucher={selectVoucher}
+        />
       )}
+      <ConfirmDeleteModal
+        visible={deleteModalVisible}
+        onClose={closeDeleteConfirmation}
+        onConfirm={confirmDelete}
+        itemName={selectVoucher?.name || ""}
+      />
     </View>
   );
 }

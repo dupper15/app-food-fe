@@ -63,7 +63,6 @@ const DishModal: React.FC<{
   const fetchAllToppingMutaion = useMutation({
     mutationFn: (id: string) => fetchAllToppingByRestaurant(id),
     onSuccess: (data: any) => {
-      console.log(data);
       setToppings(data);
     },
     onError: (data: any) => {},
@@ -102,7 +101,7 @@ const DishModal: React.FC<{
     },
   });
 
-  const handleCreateDish = () => {
+  const handleSubmitDish = () => {
     if (!selectedCategory) {
       Alert.alert("Error", "Please select a category");
       return;
@@ -243,7 +242,7 @@ const DishModal: React.FC<{
 
   return (
     <Modal animationType="slide" transparent={true} visible={true}>
-      <View className=" flex-1 bg-black bg-opacity-50">
+      <View className=" flex-1 bg-black bg-opacity-50 justify-center items-center">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1 justify-center items-center"
@@ -400,7 +399,7 @@ const DishModal: React.FC<{
                       </Text>
                     </TouchableHighlight>
                     <TouchableHighlight
-                      onPress={handleCreateDish}
+                      onPress={handleSubmitDish}
                       className="bg-[#389C9A] p-3 rounded-lg flex-1"
                     >
                       <Text className="text-white text-center font-medium">

@@ -24,10 +24,10 @@ export default function Menu() {
         </TouchableOpacity>
         <Text className="font-bold text-2xl">Menu</Text>
         <TouchableOpacity
-          className="bg-black rounded-md w-8 h-8 items-center justify-center"
+          className="bg-[#FFC515] rounded-md w-8 h-8 items-center justify-center"
           onPress={() => handleCreateDish()}
         >
-          <FontAwesome6 name="plus" size={18} color="#FFC515" />
+          <FontAwesome6 name="plus" size={18} color="white" />
         </TouchableOpacity>
       </View>
 

@@ -1,11 +1,8 @@
 import {
-  Button,
-  FlatList,
-  Image,
-  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableHighlight,
@@ -14,22 +11,35 @@ import {
   View,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { Item } from "./menuItem";
 import { useMutation } from "@tanstack/react-query";
-import { fetchAllCategory } from "@/services/api/categoryApi";
-import { Voucher } from "@/interfaces/VoucherInterface";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { CreateVoucherDto, VoucherData } from "@/interfaces/VoucherInterface";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { CustomToast } from "./toast";
+import { createVoucher, editVoucher } from "@/services/api/voucherApi";
+import { useSelector } from "react-redux";
+import { formatDate } from "@/utils/format";
 
 const VoucherModal: React.FC<{
   setShowModal: (value: boolean) => void;
-  voucher: Voucher | null;
-}> = ({ setShowModal, voucher }) => {
-  const [vouchers, setVouchers] = useState([]);
-
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  setRefresh: (value: boolean) => void;
+  voucher: VoucherData | null;
+}> = ({ setShowModal, setRefresh, voucher }) => {
+  const restaurantId = useSelector(
+    (state: { restaurant: { restaurantId: string | null } }) =>
+      state.restaurant.restaurantId
+  );
+  const [name, setName] = useState(voucher?.name || "");
+  const [content, setContent] = useState(voucher?.content || "");
+  const [value, setValue] = useState(voucher?.value?.toString() || "");
+  const [max, setMax] = useState(voucher?.max?.toString() || "");
+  const [min, setMin] = useState(voucher?.min?.toString() || "");
+  const [quantity, setQuantity] = useState(voucher?.quantity?.toString() || "");
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
   const [show, setShow] = useState(false);
+
+  const [showError, setShowError] = useState<boolean>(false);
+  const [contentError, setContentError] = useState<string>("");
 
   const handleConfirmStartDate = (date: Date) => {
     setStartDate(date);
@@ -41,15 +51,71 @@ const VoucherModal: React.FC<{
     setShow(false);
   };
 
+  const handleSubmitVoucher = () => {
+    if (Number(min) > Number(max)) {
+      setShowError(true);
+      setContentError("Min value cannot be greater than Max value!");
+      return;
+    }
+    const data: CreateVoucherDto = {
+      restaurant_id: restaurantId || "",
+      name: name,
+      content: content,
+      quantity: Number(quantity),
+      value: Number(value),
+      max: Number(max),
+      min: Number(min),
+      start_date: startDate.toLocaleDateString(),
+      expire_date: endDate.toLocaleDateString(),
+    };
+    if (voucher) {
+      editVoucherMutation.mutate({ id: voucher._id, data: data });
+    } else {
+      createVoucherMutation.mutate(data);
+    }
+  };
+
+  const createVoucherMutation = useMutation({
+    mutationFn: createVoucher,
+    onSuccess: (data) => {
+      CustomToast("success", "Success", "Created voucher successfully!");
+      setShowModal(false);
+      setRefresh(true);
+    },
+    onError: (error: any) => {
+      console.error("Error creating voucher:", error);
+      CustomToast("error", "Error", "Created voucher failed! Please try again");
+    },
+  });
+
+  const editVoucherMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateVoucherDto }) =>
+      editVoucher(id, data),
+    onSuccess: (data) => {
+      CustomToast("success", "Success", "Edited voucher successfully!");
+      setShowModal(false);
+      setRefresh(true);
+    },
+    onError: (error: any) => {
+      console.error("Error editing voucher:", error);
+      CustomToast("error", "Error", "Edited voucher failed! Please try again");
+    },
+  });
+
   return (
     <Modal animationType="slide" transparent={true} visible={true}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            className="w-full items-center"
-          >
-            <View className="bg-white w-full h-full px-6 pt-20 rounded-lg shadow-lg">
+      <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1 justify-center items-center"
+        >
+          <View className="bg-white w-10/12 h-min-[90%] p-4 rounded-lg shadow-lg">
+            <ScrollView
+              contentContainerStyle={{
+                paddingBottom: 24,
+              }}
+              showsVerticalScrollIndicator={false}
+            >
               <Text className="text-slate-900 font-extrabold text-2xl text-center mb-4">
                 {voucher ? "Edit Voucher" : "Create Voucher"}
               </Text>
@@ -58,53 +124,89 @@ const VoucherModal: React.FC<{
                 <View className="flex-col justify-between items-start gap-2">
                   <Text className="font-semibold text-base">Name</Text>
                   <TextInput
+                    value={name}
+                    onChangeText={setName}
                     multiline
                     numberOfLines={1}
                     className="w-full p-2 border border-slate-400 rounded-lg"
-                    placeholder={voucher?.name || "Enter name"}
+                    placeholder={name || "Enter name"}
                     placeholderTextColor="#94a3b8"
                   />
                 </View>
 
-                <View className="flex-row flex items-center gap-3">
+                {/* content */}
+                <View className="flex-col justify-between items-start gap-2">
+                  <Text className="font-semibold text-base">Content</Text>
+                  <TextInput
+                    value={content}
+                    onChangeText={setContent}
+                    multiline
+                    numberOfLines={2}
+                    className="w-full p-2 border border-slate-400 rounded-lg"
+                    placeholder={content || "Enter content"}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+
+                <View className="flex-row items-center gap-3">
                   {/* value */}
-                  <View className="flex-col justify-between items-start gap-2">
+                  <View className="flex-1 flex-col justify-between gap-2">
                     <Text className="font-semibold text-base">Value</Text>
                     <TextInput
+                      value={value}
+                      onChangeText={setValue}
                       numberOfLines={1}
                       keyboardType="numeric"
-                      className="w-full p-2 border border-slate-400 rounded-lg"
-                      placeholder={voucher?.value.toString() || "Enter value"}
+                      className="p-2 border border-slate-400 rounded-lg w-full"
+                      placeholder={value || "Enter value"}
                       placeholderTextColor="#94a3b8"
                     />
                   </View>
 
-                  {/* max */}
-                  <View className="flex-col items-start gap-2">
-                    <Text className="font-semibold text-base flex-1">Max</Text>
+                  {/* quantity */}
+                  <View className="flex-1 flex-col gap-2">
+                    <Text className="font-semibold text-base">Quantity</Text>
                     <TextInput
+                      value={quantity}
+                      onChangeText={setQuantity}
                       keyboardType="numeric"
-                      className="w-full p-2 border border-slate-400 rounded-lg"
-                      placeholder={voucher?.max.toString() || "Enter max"}
+                      className="p-2 border border-slate-400 rounded-lg w-full"
+                      placeholder={quantity || "Enter quantity"}
                       placeholderTextColor="#94a3b8"
                     />
                   </View>
                 </View>
 
-                {/* quantity */}
-                <View className="flex-col justify-between items-start gap-2">
-                  <Text className="font-semibold text-base">Quantity</Text>
-                  <TextInput
-                    className="w-full p-2 border border-slate-400 rounded-lg"
-                    placeholder={
-                      voucher?.quantity.toString() || "Enter quantity"
-                    }
-                    keyboardType="numeric"
-                    placeholderTextColor="#94a3b8"
-                  />
+                <View className="flex-row items-center gap-3">
+                  {/* max */}
+                  <View className="flex-1 flex-col justify-between gap-2">
+                    <Text className="font-semibold text-base">Max</Text>
+                    <TextInput
+                      value={max}
+                      onChangeText={setMax}
+                      numberOfLines={1}
+                      keyboardType="numeric"
+                      className="p-2 border border-slate-400 rounded-lg w-full"
+                      placeholder={max || "Enter max"}
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
+
+                  {/* min */}
+                  <View className="flex-1 flex-col gap-2">
+                    <Text className="font-semibold text-base">Min</Text>
+                    <TextInput
+                      value={min}
+                      onChangeText={setMin}
+                      keyboardType="numeric"
+                      className="p-2 border border-slate-400 rounded-lg w-full"
+                      placeholder={min || "Enter min"}
+                      placeholderTextColor="#94a3b8"
+                    />
+                  </View>
                 </View>
 
-                {/* start date and end date */}
+                {/* start date */}
                 <View className="flex-col justify-between items-start gap-2">
                   <Text className="font-semibold text-base">Start date</Text>
 
@@ -116,7 +218,7 @@ const VoucherModal: React.FC<{
                       <TextInput
                         className="w-full p-2 border border-slate-400 rounded-lg text-black"
                         value={
-                          voucher?.start_date.toLocaleDateString() ||
+                          formatDate(voucher?.start_date) ||
                           startDate.toLocaleDateString()
                         }
                         placeholderTextColor="#94a3b8"
@@ -139,6 +241,7 @@ const VoucherModal: React.FC<{
                     onCancel={() => setShow(false)}
                   />
                 </View>
+                {/* end date */}
                 <View className="flex-col justify-between items-start gap-2">
                   <Text className="font-semibold text-base">End date</Text>
 
@@ -150,7 +253,7 @@ const VoucherModal: React.FC<{
                       <TextInput
                         className="w-full p-2 border border-slate-400 rounded-lg text-black"
                         value={
-                          voucher?.expire_date.toLocaleDateString() ||
+                          formatDate(voucher?.expire_date) ||
                           startDate.toLocaleDateString()
                         }
                         placeholderTextColor="#94a3b8"
@@ -173,7 +276,10 @@ const VoucherModal: React.FC<{
                     onCancel={() => setShow(false)}
                   />
                 </View>
-
+                {showError && (
+                  <Text className="text-red-500">{contentError}</Text>
+                )}
+                {/* button cancel and submit */}
                 <View className="flex-row items-center gap-4 justify-between">
                   <TouchableHighlight
                     onPress={() => setShowModal(false)}
@@ -184,7 +290,7 @@ const VoucherModal: React.FC<{
                     </Text>
                   </TouchableHighlight>
                   <TouchableHighlight
-                    onPress={() => setShowModal(false)}
+                    onPress={() => handleSubmitVoucher()}
                     className="bg-[#389C9A] p-3 rounded-lg flex-1"
                   >
                     <Text className="text-white text-center font-medium">
@@ -193,10 +299,10 @@ const VoucherModal: React.FC<{
                   </TouchableHighlight>
                 </View>
               </View>
-            </View>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
