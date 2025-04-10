@@ -24,3 +24,17 @@ export function formatRatio(value: number): string {
     maximumFractionDigits: 0,
   });
 }
+
+export function formatDate(isoString: string): string {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export const formatCode = (id: string): string => {
+  if (!id) return "";
+  const shortId = id.slice(-6).toUpperCase();
+  return `VC-${shortId}`;
+};

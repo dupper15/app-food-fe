@@ -8,7 +8,8 @@ import { Text, TouchableOpacity, View } from "react-native";
 export default function Voucher() {
   const route = useRouter();
 
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   const handleCreateVoucher = () => {
     setOpenModal(true);
@@ -23,17 +24,23 @@ export default function Voucher() {
         </TouchableOpacity>
         <Text className="font-bold text-2xl">Voucher</Text>
         <TouchableOpacity
-          className="bg-black rounded-md w-8 h-8 items-center justify-center"
+          className="bg-[#FFC515] rounded-md w-8 h-8 items-center justify-center"
           onPress={() => handleCreateVoucher()}
         >
-          <FontAwesome6 name="plus" size={18} color="#FFC515" />
+          <FontAwesome6 name="plus" size={18} color="white" />
         </TouchableOpacity>
       </View>
 
       {/* list voucher */}
-      <ListVoucherItem />
+      <ListVoucherItem setRefresh={setRefresh} refresh={refresh} />
 
-      {openModal && <VoucherModal setShowModal={setOpenModal} voucher={null} />}
+      {openModal && (
+        <VoucherModal
+          setShowModal={setOpenModal}
+          setRefresh={setRefresh}
+          voucher={null}
+        />
+      )}
     </View>
   );
 }

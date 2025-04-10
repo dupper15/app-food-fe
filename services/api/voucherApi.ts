@@ -1,3 +1,4 @@
+import { CreateVoucherDto, VoucherData } from "@/interfaces/VoucherInterface";
 import axiosInstance from "./axiosInstance";
 
 export interface Voucher {
@@ -37,5 +38,27 @@ export const fetchVouchers = async (
 
 export const getVouchers = async (restaurantId: string) => {
   const response = await axiosInstance.get(`voucher/available/${restaurantId}`);
+  return response.data;
+};
+
+export const getAllVouchers = async (restaurantId: string) => {
+  const response = await axiosInstance.get(
+    `voucher/all-voucher/${restaurantId}`
+  );
+  return response.data;
+};
+
+export const createVoucher = async (data: CreateVoucherDto) => {
+  const response = await axiosInstance.post("voucher/create", data);
+  return response.data;
+};
+
+export const editVoucher = async (id: string, data: CreateVoucherDto) => {
+  const response = await axiosInstance.put(`voucher/edit/${id}`, data);
+  return response.data;
+};
+
+export const deleteVoucher = async (id: string) => {
+  const response = await axiosInstance.delete(`voucher/delete/${id}`);
   return response.data;
 };
