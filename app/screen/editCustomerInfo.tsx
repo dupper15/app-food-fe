@@ -46,7 +46,7 @@ const EditCustomerInfo = () => {
       setEditUser({});
       setIsEdit(false);
     },
-    onError: (error) => {
+    onError: (error) => { 
       console.log("Edit error", error);
     },
   });
