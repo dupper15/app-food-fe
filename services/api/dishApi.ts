@@ -48,4 +48,3 @@ export const fetchDishById = async (id: string): Promise<DishData> => {
   const response = await axiosInstance.get(`dish/fetch-detail-dish/${id}`);
   return response.data;
 };
-

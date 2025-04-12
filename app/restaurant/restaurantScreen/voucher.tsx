@@ -1,31 +1,38 @@
 import ListVoucherItem from "@/app/components/voucherItem";
-import VoucherModal from "@/app/components/voucherModal";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Voucher() {
-  const route = useRouter();
-
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const router = useRouter();
   const [refresh, setRefresh] = useState<boolean>(false);
 
   const handleCreateVoucher = () => {
-    setOpenModal(true);
+    router.push({
+      pathname: "/components/voucherModal",
+      params: {
+        voucher: null,
+      },
+    });
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setRefresh((prev) => !prev);
+    }, [])
+  );
   return (
-    <View className="h-full flex-col  bg-white">
+    <View className="h-full flex-col bg-white">
       {/* header */}
       <View className="flex-row w-full h-14 bg-white items-center justify-between px-4 border-b border-gray-100">
-        <TouchableOpacity onPress={() => route.back()}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back-outline" size={24} color="black" />
         </TouchableOpacity>
         <Text className="font-bold text-2xl">Voucher</Text>
         <TouchableOpacity
           className="bg-[#FFC515] rounded-md w-8 h-8 items-center justify-center"
-          onPress={() => handleCreateVoucher()}
+          onPress={handleCreateVoucher}
         >
           <FontAwesome6 name="plus" size={18} color="white" />
         </TouchableOpacity>
@@ -33,14 +40,6 @@ export default function Voucher() {
 
       {/* list voucher */}
       <ListVoucherItem setRefresh={setRefresh} refresh={refresh} />
-
-      {openModal && (
-        <VoucherModal
-          setShowModal={setOpenModal}
-          setRefresh={setRefresh}
-          voucher={null}
-        />
-      )}
     </View>
   );
 }

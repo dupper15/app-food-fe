@@ -1,24 +1,30 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import {
-  FlatList,
-  Text,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation, useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+// Khai báo các route name ở đây
+type RootStackParamList = {
+  EditRestaurant: undefined;
+  Menu: undefined;
+  Voucher: undefined;
+  Rating: undefined;
+  DarkMode: undefined;
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Item {
   id: string;
   title: string;
   iconName: string;
   color: string;
-  path: string;
+  path: keyof RootStackParamList;
 }
 
-const settingsData = [
+const settingsData: Item[] = [
   {
     id: "1",
     title: "Edit Restaurant",
@@ -57,8 +63,7 @@ const settingsData = [
 ];
 
 export default function ListSetting() {
-  const router = useRouter();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   const renderItem = ({ item }: { item: Item }) => {
     return (
@@ -67,7 +72,7 @@ export default function ListSetting() {
         onPress={() => navigation.navigate(item.path)}
       >
         <View className="bg-white rounded-full p-2">
-          <Ionicons name={item.iconName} size={20} color={item.color} />
+          <Ionicons name={item.iconName as any} size={20} color={item.color} />
         </View>
         <Text className="flex-1 ml-4 text-base">{item.title}</Text>
         <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
@@ -80,7 +85,7 @@ export default function ListSetting() {
       data={settingsData}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      className="rounded-2xl"
+      className="rounded-xl"
       scrollEnabled={false}
     />
   );

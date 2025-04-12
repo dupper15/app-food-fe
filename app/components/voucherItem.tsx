@@ -20,6 +20,7 @@ import { deleteVoucher, getAllVouchers } from "@/services/api/voucherApi";
 import { CustomToast } from "./toast";
 import { useSelector } from "react-redux";
 import ConfirmDeleteModal from "./deleteModal";
+import { useRouter } from "expo-router";
 
 interface ListVoucherItemProps {
   setRefresh: (value: boolean) => void;
@@ -30,7 +31,7 @@ export default function ListVoucherItem({
   setRefresh,
   refresh,
 }: ListVoucherItemProps) {
-  const [openModal, setOpenModal] = useState(false);
+  const router = useRouter();
   const [selectVoucher, setSelectVoucher] = useState<VoucherData | null>(null);
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string | null } }) =>
@@ -40,7 +41,12 @@ export default function ListVoucherItem({
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
 
   const handleEditVoucher = (item: VoucherData) => {
-    setOpenModal(true);
+    router.push({
+      pathname: "/components/voucherModal",
+      params: {
+        voucher: JSON.stringify(item),
+      },
+    });
     setSelectVoucher(item);
   };
 
@@ -82,11 +88,6 @@ export default function ListVoucherItem({
       setRefresh(false);
     }
   }, [restaurantId, refresh]);
-
-  const handleEditDish = (item: VoucherData) => {
-    setOpenModal(true);
-    setSelectVoucher(item);
-  };
 
   const handleDeleteVoucher = (id: string) => {
     deleteVoucherMutation.mutate(id);
@@ -180,14 +181,6 @@ export default function ListVoucherItem({
         keyExtractor={(item) => item._id}
         className="pb-20"
       />
-
-      {openModal && (
-        <VoucherModal
-          setShowModal={setOpenModal}
-          setRefresh={setRefresh}
-          voucher={selectVoucher}
-        />
-      )}
       <ConfirmDeleteModal
         visible={deleteModalVisible}
         onClose={closeDeleteConfirmation}
