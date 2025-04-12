@@ -5,6 +5,7 @@ import Menu from "./menu";
 import Voucher from "./voucher";
 import Rating from "./rating";
 import DarkMode from "./darkmode";
+import VoucherModal from "@/app/components/voucherModal";
 
 const Stack = createStackNavigator();
 
@@ -33,6 +34,7 @@ export const RestaurantStackNavigator = () => {
       />
       <Stack.Screen name="Rating" component={Rating} />
       <Stack.Screen name="DarkMode" component={DarkMode} />
+      <Stack.Screen name="VoucherModal" component={VoucherModal} />
     </Stack.Navigator>
   );
 };

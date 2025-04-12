@@ -178,7 +178,7 @@ export default function EditRestaurant() {
                 />
               ) : (
                 <Image className="w-full h-full" resizeMode="cover" />
-              )}{" "}
+              )}
             </View>
             <TouchableHighlight
               onPress={() => {
@@ -258,7 +258,7 @@ export default function EditRestaurant() {
                 className="w-48 h-40 bg-slate-200 rounded-md"
               >
                 <View className="w-full h-full flex justify-center items-center">
-                  <Ionicons name="add" size={36} color="white" />{" "}
+                  <Ionicons name="add" size={36} color="white" />
                 </View>
               </TouchableHighlight>
             </ScrollView>
