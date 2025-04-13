@@ -1,28 +1,50 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import ListSetting from "@/app/components/settingItem";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-
-interface User {
-  name: string;
-  avatar: string;
-}
-
-const user: User = {
-  name: "Cao Dương Lâm",
-  avatar: "https://picsum.photos/seed/picsum/200/300",
-};
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
+import { getDetailOwner } from "@/services/api/owner";
+import { useEffect, useState } from "react";
+import { CustomToast } from "@/app/components/toast";
 
 export default function Restaurant() {
+  const ownerId = useSelector(
+    (state: { user: { userId: string } }) => state.user.userId
+  );
+  const name = useSelector(
+    (state: { restaurant: { name: string } }) => state.restaurant.name
+  );
+  const avatar = useSelector(
+    (state: { user: { image: string } }) => state.user.image
+  );
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (ownerId) {
+      fetchDetailOwnerMutation.mutate(ownerId);
+    }
+  }, [ownerId]);
+
+  const fetchDetailOwnerMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await getDetailOwner(id);
+    },
+    onSuccess: (data: any) => {
+      setAvatarUrl(data.data.avatar);
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "An unknown error occurred";
+      CustomToast("error", "Error", errorMessage);
+    },
+  });
+
   return (
-    <View className="bg-white px-6 py-8 flex-col h-full gap-10">
+    <View className="bg-white px-6 py-20 flex-col h-full gap-10">
       {/* avatar and fullname */}
       <View className="flex-row items-center gap-10">
-        <Image
-          source={{ uri: user.avatar }}
-          className="rounded-full w-24 h-24"
-        />
+        <Image source={{ uri: avatarUrl }} className="rounded-full w-24 h-24" />
         <View className="gap-1">
-          <Text className="font-semibold text-xl">{user.name}</Text>
+          <Text className="font-semibold text-xl">{name}</Text>
           <Text className="text-base text-gray-400">I love fast food</Text>
         </View>
       </View>

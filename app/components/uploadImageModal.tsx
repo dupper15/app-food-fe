@@ -5,16 +5,23 @@ import { CustomToast } from "./toast";
 const UploadImageModal: React.FC<{
   setShowModal: (value: boolean) => void;
   type: string;
-  handleImagePicker: (file: File) => void;
+  handleImagePicker: (
+    file: { uri: string; name: string; type: string },
+    uri: string
+  ) => void;
 }> = ({ setShowModal, handleImagePicker, type }) => {
-  const createFileFromUri = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-
+  const createFileFromUri = (uri: string, type: string) => {
     const fileExtension = uri.split(".").pop() || "jpg";
-    const finalFileName = `${type}_${Date.now()}.${fileExtension}`;
+    const mimeType = `image/${
+      fileExtension === "jpg" ? "jpeg" : fileExtension
+    }`;
+    const name = `${type}_${Date.now()}.${fileExtension}`;
 
-    return new File([blob], finalFileName, { type: blob.type });
+    return {
+      uri,
+      name,
+      type: mimeType,
+    };
   };
 
   const openCamera = async () => {
@@ -29,8 +36,9 @@ const UploadImageModal: React.FC<{
       quality: 1,
     });
     if (!result.canceled) {
-      const file = await createFileFromUri(result.assets[0].uri);
-      handleImagePicker(file);
+      const uri = result.assets[0].uri;
+      const file = createFileFromUri(uri, type);
+      handleImagePicker(file, uri);
       setShowModal(false);
     }
   };
@@ -49,9 +57,12 @@ const UploadImageModal: React.FC<{
       quality: 1,
     });
 
+    console.log(result);
+
     if (!result.canceled) {
-      const file = await createFileFromUri(result.assets[0].uri);
-      handleImagePicker(file); // Truyền File thay vì object thường
+      const uri = result.assets[0].uri;
+      const file = createFileFromUri(uri, type);
+      handleImagePicker(file, uri);
       setShowModal(false);
     }
   };
