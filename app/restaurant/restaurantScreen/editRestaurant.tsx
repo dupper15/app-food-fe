@@ -17,16 +17,30 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getDetailOwner, setAvatarRes } from "@/services/api/owner";
 import UploadImageModal from "@/app/components/uploadImageModal";
+import { ActivityIndicator } from "react-native-paper";
+import {
+  setRestaurant,
+  updateRestaurant,
+} from "@/features/counter/restaurantSlice";
+import { updateUser } from "@/features/counter/userSlice";
+
+type ReactNativeFile = {
+  uri: string;
+  name: string;
+  type: string;
+};
 
 export default function EditRestaurant() {
   const ownerId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
+  const dispatch = useDispatch();
+
   const route = useRouter();
-  const [restaurant, setRestaurant] = useState<RestaurantData>();
+  const [res, setRes] = useState<RestaurantData>();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
@@ -34,13 +48,29 @@ export default function EditRestaurant() {
   const [showModal, setShowModal] = useState(false);
   const [type, setType] = useState("");
   const [imagesUrl, setImagesUrl] = useState<string[]>([]);
-  const [imagesFile, setImagesFile] = useState<File[]>([]);
-  const [avatarFile, setAvatarFile] = useState<File>();
+  const [imagesFile, setImagesFile] = useState<ReactNativeFile[]>([]);
+  const [avatarFile, setAvatarFile] = useState<ReactNativeFile>();
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [selectedBannerIndex, setSelectedBannerIndex] = useState<number | null>(
     null
   );
   const [existingBanners, setExistingBanners] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchDetailMutation.mutate(ownerId);
+    fetchDetailOwnerMutation.mutate(ownerId);
+  }, [ownerId]);
+
+  useEffect(() => {
+    if (res?._id) {
+      setName(res.name || "");
+      setAddress(res.address || "");
+      setDescription(res.description || "");
+      setImagesUrl(res.banners || []);
+      setExistingBanners(res.banners || []);
+    }
+  }, [res]);
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -48,22 +78,44 @@ export default function EditRestaurant() {
     formData.append("description", description || "");
     formData.append("address", address || "");
     for (const file of imagesFile) {
-      formData.append("banners", file, "image.jpg");
+      formData.append("banners", {
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      } as any);
     }
     for (const url of existingBanners) {
       formData.append("bannersRemaining", url);
     }
     editRestaurantMutation.mutate({
-      id: restaurant?._id || "",
+      id: res?._id || "",
       data: formData,
     });
 
     const formDataAvatar = new FormData();
     if (avatarFile) {
-      formDataAvatar.append("images", avatarFile, "image.jpg");
+      formDataAvatar.append("images", {
+        uri: avatarFile.uri,
+        name: avatarFile.name,
+        type: avatarFile.type,
+      } as any);
     }
     formDataAvatar.append("owner_id", ownerId);
     avatarMutation.mutate(formDataAvatar);
+
+    dispatch(
+      updateRestaurant({
+        name: name,
+      })
+    );
+
+    dispatch(
+      updateUser({
+        image: avatarUrl,
+      })
+    );
+
+    setIsLoading(true);
   };
 
   const fetchDetailMutation = useMutation({
@@ -71,11 +123,11 @@ export default function EditRestaurant() {
       return await fetchRestaurantByOwner(id);
     },
     onSuccess: (data: any) => {
-      setRestaurant(data.data);
+      setRes(data.data);
     },
     onError: (error: any) => {
-      console.error("Full error:", error);
-      CustomToast("error", "Error", "Login failed");
+      const errorMessage = error?.message || "An unknown error occurred";
+      CustomToast("error", "Error", errorMessage);
     },
   });
 
@@ -87,8 +139,8 @@ export default function EditRestaurant() {
       setAvatarUrl(data.data.avatar);
     },
     onError: (error: any) => {
-      console.error("Full error:", error);
-      CustomToast("error", "Error", "Login failed");
+      const errorMessage = error?.message || "An unknown error occurred";
+      CustomToast("error", "Error", errorMessage);
     },
   });
 
@@ -97,12 +149,14 @@ export default function EditRestaurant() {
       return await editRestaurant(id, data);
     },
     onSuccess: (data: any) => {
-      setRestaurant(data.data);
+      setRes(data.data);
+      setIsLoading(false);
       CustomToast("success", "Success", "Updated restaurant successfully!");
     },
-    onError: (error: any) => {
-      console.error("Full error:", error);
-      CustomToast("error", "Error", "Editing restaurant failed");
+    onError: () => {
+      console.error = () => {};
+      setIsLoading(false);
+      CustomToast("error", "Error", "Failed to save changes! Please try again");
     },
   });
 
@@ -110,40 +164,22 @@ export default function EditRestaurant() {
     mutationFn: setAvatarRes,
     onSuccess: (data) => {
       setAvatarUrl(data.avatar);
+      setIsLoading(false);
     },
-    onError: (data) => {
-      console.log("error", data);
-      CustomToast("error", "Error", "Upload failed");
+    onError: () => {
+      console.error = () => {};
+      setIsLoading(false);
+      CustomToast("error", "Error", "Failed to save changes! Please try again");
     },
   });
 
-  useEffect(() => {
-    fetchDetailMutation.mutate(ownerId);
-    fetchDetailOwnerMutation.mutate(ownerId);
-  }, [ownerId]);
-
-  useEffect(() => {
-    if (restaurant) {
-      setName(restaurant.name || "");
-      setAddress(restaurant.address || "");
-      setDescription(restaurant.description || "");
-      setImagesUrl(restaurant.banners || "");
-      setExistingBanners(restaurant.banners || []);
-    }
-  }, [restaurant]);
-
-  const handleImagePicker = async (file: File) => {
-    if (!(file instanceof File)) {
-      console.error("Invalid file type", file);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    if (type == "avatar") {
-      setAvatarUrl(url);
+  const handleImagePicker = async (file: ReactNativeFile, uri: string) => {
+    if (type === "avatar") {
+      setAvatarUrl(uri);
       setAvatarFile(file);
     } else {
       setImagesFile((prev) => [...prev, file]);
-      setImagesUrl((prev) => [...prev, url]);
+      setImagesUrl((prev) => [...prev, uri]);
     }
   };
 
@@ -165,6 +201,12 @@ export default function EditRestaurant() {
         </Text>
         <View className="w-2" />
       </View>
+
+      {isLoading && (
+        <View className="absolute inset-0 justify-center items-center bg-white/90">
+          <ActivityIndicator size="large" color="#FFD700" />
+        </View>
+      )}
 
       <ScrollView className="relative flex-1 flex-col w-full">
         <View className="flex-1 flex-col items-center w-full p-8">
@@ -276,29 +318,13 @@ export default function EditRestaurant() {
               value={address}
               onChangeText={setAddress}
             />
-            {/* <MapView>
-                className='w-full h-52'
-                initialRegion={{
-                  latitude: 10.762622,
-                  longitude: 106.660172,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-                onPress={handlePress}>
-                {selectedLocation && (
-                  <Marker
-                    coordinate={selectedLocation}
-                    title='Selected Location'
-                  />
-                )}
-              </MapView> */}
           </View>
         </View>
-        <TouchableOpacity className="bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4">
-          <Text
-            onPress={handleSubmit}
-            className="text-white font-medium text-lg text-center"
-          >
+        <TouchableOpacity
+          onPress={handleSubmit}
+          className="bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4"
+        >
+          <Text className="text-white font-medium text-lg text-center">
             Save
           </Text>
         </TouchableOpacity>

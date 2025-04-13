@@ -44,7 +44,12 @@ const LoginScreen: React.FC = () => {
               "restaurant_id",
               String(result?.data?._id)
             );
-            dispatch(setRestaurant(result.data._id));
+            dispatch(
+              setRestaurant({
+                restaurantId: result.data._id,
+                name: result.data.name,
+              })
+            );
           }
           router.push("/restaurant/orderScreen/order");
         } catch (error) {

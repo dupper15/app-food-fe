@@ -32,7 +32,11 @@ export const RestaurantStackNavigator = () => {
         component={Voucher}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="Rating" component={Rating} />
+      <Stack.Screen
+        name="Rating"
+        component={Rating}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="DarkMode" component={DarkMode} />
       <Stack.Screen name="VoucherModal" component={VoucherModal} />
     </Stack.Navigator>

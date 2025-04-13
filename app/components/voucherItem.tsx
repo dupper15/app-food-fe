@@ -10,6 +10,7 @@ import {
   FlatList,
   TouchableOpacity,
   TouchableHighlight,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useEffect, useState } from "react";
@@ -39,6 +40,7 @@ export default function ListVoucherItem({
   );
   const [vouchers, setVouchers] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleEditVoucher = (item: VoucherData) => {
     router.push({
@@ -54,6 +56,7 @@ export default function ListVoucherItem({
     mutationFn: getAllVouchers,
     onSuccess: (data) => {
       setVouchers(data.reverse());
+      setIsLoading(false);
       setRefresh(false);
     },
     onError: (error: any) => {
@@ -174,13 +177,18 @@ export default function ListVoucherItem({
 
   return (
     <View className="bg-white h-full">
-      <FlatList
-        data={vouchers}
-        renderItem={renderItem}
-        horizontal={false}
-        keyExtractor={(item) => item._id}
-        className="pb-20"
-      />
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
+      ) : (
+        <FlatList
+          data={vouchers}
+          renderItem={renderItem}
+          horizontal={false}
+          keyExtractor={(item) => item._id}
+          className="pb-20"
+        />
+      )}
+
       <ConfirmDeleteModal
         visible={deleteModalVisible}
         onClose={closeDeleteConfirmation}
