@@ -72,8 +72,15 @@ export const getRestaurantByCriteria = async (data: any) => {
   } else if (restaurantCriteriaString === "Multiple deals") {
     const response = await axiosInstance.get(`restaurants/multiple-deals`);
     return response.data;
-  } else {
+  } else if (restaurantCriteriaString === "Multiple buyers") {
     const response = await axiosInstance.get(`restaurants/multiple-buyers`);
+    return response.data;
+  } else {
+    console.log("o day", restaurantCriteriaString);
+    const response = await axiosInstance.get(
+      `categories/fetch-restaurant-have-category/${restaurantCriteriaString}`
+    );
+    console.log("day ne", response.data);
     return response.data;
   }
 };

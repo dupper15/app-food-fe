@@ -120,8 +120,7 @@ export default function Favorite() {
                 </TouchableHighlight>
               </View>
 
-              <View className='flex-row justify-between items-center mt-4'>
-                <Text className='text-gray-700'>3.5km</Text>
+              <View className='flex-row justify-end items-center'>
                 <TouchableHighlight
                   className='bg-customYellow px-6 py-2 rounded-lg'
                   onPress={() => handleNavigateToRestaurant(restaurant)}>

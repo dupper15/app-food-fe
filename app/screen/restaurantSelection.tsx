@@ -17,17 +17,14 @@ import {
   removeFavoriteRestaurant,
 } from "@/services/api/userApi";
 const RestaurantSelection = () => {
-  const { restaurantCriteria } = useLocalSearchParams();
+  const { restaurantCriteria, header } = useLocalSearchParams();
+  useEffect(() => {
+    console.log("restaurantCriteria", restaurantCriteria);
+    console.log("header", header);
+  }, [restaurantCriteria, header]);
   const [restaurants, setRestaurants] = useState([0]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const userId = useSelector((state) => state.user.userId);
-  const toggleFavorite = (id) => {
-    setFavoriteRestaurants((prevFavorites) =>
-      prevFavorites.includes(id)
-        ? prevFavorites.filter((restaurantId) => restaurantId !== id)
-        : [...prevFavorites, id]
-    );
-  };
 
   const getRestaurantMutation = useMutation({
     mutationFn: getRestaurantByCriteria,
@@ -38,18 +35,9 @@ const RestaurantSelection = () => {
       console.error("Error fetching restaurant data:", error);
     },
   });
-  //   const getFavoriteRestaurants = useMutation({
-  //     mutationFn: getFavoriteRestaurants,
-  //     onSuccess: (data) => {
-  //       setFavoriteRestaurants(data);
-  //     },
-  //     onError: (error) => {
-  //       console.error("Error fetching favorite restaurants:", error);
-  //     },
-  //   });
+
   useEffect(() => {
     if (restaurantCriteria && userId) {
-      console.log("Restaurant criteria:", restaurantCriteria);
       const data = {
         restaurantCriteria: restaurantCriteria,
         userId: userId,
@@ -120,9 +108,7 @@ const RestaurantSelection = () => {
           }}>
           <Icon name='arrow-back' size={24} color='gray' />
         </TouchableHighlight>
-        <Text className='text-2xl font-semibold text-gray-800'>
-          {restaurantCriteria.toString().slice(1, -1)}
-        </Text>
+        <Text className='text-2xl font-semibold text-gray-800'>{header}</Text>
       </View>
       <ScrollView className='px-4' showsVerticalScrollIndicator={false}>
         {restaurants.length > 0 &&
