@@ -17,15 +17,56 @@ import {
 import { useSelector } from "react-redux";
 import { router } from "expo-router";
 import OrderComponent from "@/app/components/orderItem";
+import RatingPopup from "@/app/components/rating";
+import ratingApi from "@/services/api/ratingApi";
 
 // Tab options
 const TABS = ["Ongoing", "History"];
 
 const OrderHistoryScreen = () => {
-  const [activeTab, setActiveTab] = useState(0); // Default to Ongoing tab
+  const [ratingVisible, setRatingVisible] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState("");
+  const [activeTab, setActiveTab] = useState(0);
+  const [existingRatingId, setExistingRatingId] = useState<string | null>(null);
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
+
+  // Handle rating order
+  const handleRateOrder = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setRatingVisible(true);
+  };
+
+  const handleSubmitRating = async (
+    rating: number,
+    feedback: string,
+    images: string[],
+    ratingId?: string
+  ) => {
+    try {
+      if (ratingId) {
+        // Update existing rating
+        await ratingApi.updateRating(ratingId, {
+          content: feedback,
+          rating: rating,
+          image: images,
+        });
+      } else {
+        // Create new rating
+        await ratingApi.createRating({
+          order_id: selectedOrderId,
+          customer_id: userId,
+          content: feedback,
+          rating: rating,
+          image: images,
+        });
+      }
+      // You might want to refresh the data after rating
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
+  };
 
   // Fetch complete history data
   const {
@@ -75,12 +116,6 @@ const OrderHistoryScreen = () => {
   const handleCancelOrder = (orderId: string) => {
     console.log("Cancel order:", orderId);
     // Implement cancel order logic
-  };
-
-  // Handle rating a completed order
-  const handleRateOrder = (orderId: string) => {
-    console.log("Rate order:", orderId);
-    // Implement rate order logic
   };
 
   // Handle reordering a completed order
@@ -182,6 +217,13 @@ const OrderHistoryScreen = () => {
           }
         />
       )}
+      <RatingPopup
+        visible={ratingVisible}
+        onClose={() => setRatingVisible(false)}
+        onSubmit={handleSubmitRating}
+        orderId={selectedOrderId}
+        userId={userId}
+      />
     </SafeAreaView>
   );
 };
