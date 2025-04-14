@@ -13,7 +13,7 @@ export default function Personal() {
 
   const menuItems = [
     {
-      icon: "person",
+      icon: "person", // Giữ nguyên icon cho Personal Info
       label: "Personal Info",
       iconColor: "#3b82f6", // blue-500
       onPress: () => {
@@ -26,19 +26,27 @@ export default function Personal() {
       },
     },
     {
-      icon: "location-on",
-      label: "Addresses",
+      icon: "report", // Dùng icon favorite cho Reflect
+      label: "Reflect",
       iconColor: "#10b981", // green-500
       onPress: () => {},
     },
     {
-      icon: "settings",
-      label: "Settings",
+      icon: "lock", // Dùng icon lock cho Change password
+      label: "Change password",
+      iconColor: "#f59e0b", // amber-500
+      onPress: () => {
+        router.push("/screen/changePasswordPage");
+      },
+    },
+    {
+      icon: "lock-outline", // Dùng icon lock-outline cho Privacy
+      label: "Privacy",
       iconColor: "#f97316", // orange-500
       onPress: () => {},
     },
     {
-      icon: "logout",
+      icon: "logout", // Giữ nguyên icon logout
       label: "Logout",
       iconColor: "#ef4444", // red-500
       onPress: () => {},

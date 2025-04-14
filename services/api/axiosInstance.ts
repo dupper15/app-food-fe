@@ -3,7 +3,8 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const getBaseUrl = () => {
-  return "http://localhost:3000/"; // https://app-food-be-production.up.railway.app/
+  return "https://app-food-be-production.up.railway.app/";
+  // return "http://localhost:3000/";
 };
 
 const axiosInstance = axios.create({
