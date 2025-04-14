@@ -1,3 +1,5 @@
+import { Topping } from "./ToppingInterface";
+
 export interface CreatDishData {
   name: string;
   introduce: string;
@@ -17,7 +19,7 @@ export interface DishData {
   restaurant_id: string;
   price: number;
   time: number;
-  topping: string[];
+  topping: Topping[];
   category_id: string;
   bestSeller: boolean;
 }

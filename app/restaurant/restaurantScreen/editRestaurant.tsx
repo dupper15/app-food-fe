@@ -21,11 +21,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getDetailOwner, setAvatarRes } from "@/services/api/owner";
 import UploadImageModal from "@/app/components/uploadImageModal";
 import { ActivityIndicator } from "react-native-paper";
-import {
-  setRestaurant,
-  updateRestaurant,
-} from "@/features/counter/restaurantSlice";
-import { updateUser } from "@/features/counter/userSlice";
+import { updateRestaurant } from "@/features/counter/restaurantSlice";
+import { setUser } from "@/features/counter/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ReactNativeFile = {
   uri: string;
@@ -34,12 +32,10 @@ type ReactNativeFile = {
 };
 
 export default function EditRestaurant() {
-  const ownerId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
-  );
   const dispatch = useDispatch();
 
   const route = useRouter();
+  const [ownerId, setOwnerId] = useState<string | null>(null);
   const [res, setRes] = useState<RestaurantData>();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -58,9 +54,18 @@ export default function EditRestaurant() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    fetchDetailMutation.mutate(ownerId);
-    fetchDetailOwnerMutation.mutate(ownerId);
-  }, [ownerId]);
+    const fetchData = async () => {
+      const id = await AsyncStorage.getItem("owner_id");
+      if (id) {
+        setOwnerId(id);
+        fetchDetailMutation.mutate(id);
+        fetchDetailOwnerMutation.mutate(id);
+      } else {
+        setOwnerId(null);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (res?._id) {
@@ -100,7 +105,7 @@ export default function EditRestaurant() {
         type: avatarFile.type,
       } as any);
     }
-    formDataAvatar.append("owner_id", ownerId);
+    formDataAvatar.append("owner_id", ownerId || "");
     avatarMutation.mutate(formDataAvatar);
 
     dispatch(
@@ -110,7 +115,8 @@ export default function EditRestaurant() {
     );
 
     dispatch(
-      updateUser({
+      setUser({
+        userId: ownerId,
         image: avatarUrl,
       })
     );
