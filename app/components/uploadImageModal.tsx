@@ -49,16 +49,12 @@ const UploadImageModal: React.FC<{
       CustomToast("error", "Error", "Permission denied");
       return;
     }
-
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-
-    console.log(result);
-
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       const file = createFileFromUri(uri, type);

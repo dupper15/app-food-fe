@@ -21,6 +21,7 @@ import { useSelector } from "react-redux";
 import { formatDate } from "@/utils/format";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function VoucherModal() {
   const restaurantId = useSelector(
@@ -134,7 +135,17 @@ export default function VoucherModal() {
   });
 
   return (
-    <View className="flex-1 bg-white pt-20">
+    <View className="h-full flex-col bg-white">
+      {/* header */}
+      <View className="flex-row w-full h-14 bg-white items-center px-4 border-b border-gray-100">
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back-outline" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="font-bold text-2xl text-center flex-1">
+          {voucher ? "Edit Voucher" : "Create Voucher"}
+        </Text>
+        <View className="w-2" />
+      </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -143,10 +154,6 @@ export default function VoucherModal() {
           contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="text-slate-900 font-extrabold text-2xl text-center mb-4">
-            {voucher ? "Edit Voucher" : "Create Voucher"}
-          </Text>
-
           <View className="flex flex-col gap-4">
             {/* Name */}
             <View>
