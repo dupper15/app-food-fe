@@ -94,3 +94,15 @@ export const editCustomerInfo = async (data) => {
   });
   return response.data;
 };
+export const changePassword = async (data) => {
+  const { userId, currentPassword, newPassword, confirmPassword } = data;
+  if (!userId || !currentPassword || !newPassword || !confirmPassword) {
+    throw new Error("All fields are required");
+  }
+  const response = await axiosInstance.put(`users/change-password/${userId}`, {
+    currentPassword,
+    newPassword,
+    confirmPassword,
+  });
+  return response.data;
+};

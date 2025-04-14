@@ -70,7 +70,6 @@ const RestaurantSelection = () => {
   const addToFavoriteRestaurant = useMutation({
     mutationFn: addFavoriteRestaurant,
     onSuccess: () => {
-      console.log("Added to favorites");
       getFavoriteResMutation.mutate(userId);
     },
     onError: (error) => {
