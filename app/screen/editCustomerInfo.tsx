@@ -46,7 +46,7 @@ const EditCustomerInfo = () => {
       setEditUser({});
       setIsEdit(false);
     },
-    onError: (error) => { 
+    onError: (error) => {
       console.log("Edit error", error);
     },
   });
@@ -176,14 +176,6 @@ const EditCustomerInfo = () => {
                   {user.total_points}
                 </Text>
               </View>
-            </View>
-            <View className='border-t flex-row flex-1 justify-between border-gray-300 pt-6 mt-4'>
-              <Text className='text-sm text-gray-500 mb-2'>Security</Text>
-              <TouchableOpacity className='' onPress={() => {}}>
-                <Text className='text-customYellow font-medium underline '>
-                  Change Password
-                </Text>
-              </TouchableOpacity>
             </View>
 
             {isEdit && (
