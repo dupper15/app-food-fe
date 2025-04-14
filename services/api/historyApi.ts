@@ -1,18 +1,26 @@
 import axiosInstance from "./axiosInstance";
 
-export interface HistoryItem {
+export interface OrderItem {
   _id: string;
-  order_id: string;
+  array_item: string | string[];
   customer_id: string;
-  cost: number;
-  sum_dishes: number;
+  restaurant_id: string;
+  voucher_id: string[] | null;
+  total_price: number;
+  used_point: number;
+  time_receive: number;
+  status: string;
+  note?: string;
   createdAt: string;
   updatedAt: string;
+  __v: number;
 }
 
 export const fetchUserHistory = async (
   userId: string
-): Promise<HistoryItem[]> => {
-  const response = await axiosInstance.get(`/history/customer/${userId}`);
+): Promise<OrderItem[]> => {
+  const response = await axiosInstance.get(
+    `/order/fetchall-order-by-customer/${userId}`
+  );
   return response.data;
 };

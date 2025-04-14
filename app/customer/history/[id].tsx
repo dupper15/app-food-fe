@@ -19,6 +19,8 @@ import {
 } from "lucide-react-native";
 import { fetchCompleteHistory } from "@/services/historyService";
 import { useSelector } from "react-redux";
+import { transPrice } from "@/utils/transPrice";
+import ReorderButton from "@/app/components/reorderButton";
 
 const OrderDetailScreen = () => {
   const router = useRouter();
@@ -33,6 +35,19 @@ const OrderDetailScreen = () => {
     (state: { user: { userId: string } }) => state.user.userId
   );
 
+  const getStatusColor = (status: string) => {
+    const statusLower = status.toLowerCase();
+    if (statusLower === "cancel" || statusLower === "cancelled")
+      return "#FF3B30"; // Red
+    if (statusLower === "complete" || statusLower === "completed")
+      return "#34C759"; // Green
+    if (statusLower === "pending") return "#FF9500"; // Orange
+    if (statusLower === "received") return "#5AC8FA"; // Light Blue
+    if (statusLower === "preparing") return "#007AFF"; // Blue
+    if (statusLower === "ready") return "#4CD964"; // Bright Green
+    return "#007AFF"; // Default Blue for unknown statuses
+  };
+
   useEffect(() => {
     const loadOrderDetails = async () => {
       try {
@@ -40,9 +55,6 @@ const OrderDetailScreen = () => {
         setError(null);
 
         const historyItems = await fetchCompleteHistory(userId);
-        console.log("History Items:", historyItems);
-
-        // Add historyItem._id to the search criteria
         const order = historyItems.find(
           (item) =>
             item.order._id === orderId ||
@@ -70,31 +82,29 @@ const OrderDetailScreen = () => {
     }
   }, [orderId, userId]);
 
-  // Show loading state
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size='large' color='#FFCC00' />
+        <ActivityIndicator size="large" color="#FFCC00" />
         <Text style={styles.loadingText}>Loading order details...</Text>
       </SafeAreaView>
     );
   }
 
-  // Show error state
   if (error || !orderDetail) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
         <Text style={styles.errorText}>{error || "Order not found"}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}>
+          onPress={() => router.back()}
+        >
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  // Calculate totals
   const subtotal = orderDetail.orderItems.reduce(
     (sum: number, item: any) => sum + item.dish.price * item.quantity,
     0
@@ -118,29 +128,27 @@ const OrderDetailScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle='dark-content' />
+      <StatusBar barStyle="dark-content" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}>
-          <ChevronLeft size={24} color='#000' />
+          onPress={() => router.back()}
+        >
+          <ChevronLeft size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Orders</Text>
         <TouchableOpacity style={styles.menuButton}>
-          <MoreVertical size={24} color='#000' />
+          <MoreVertical size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Order ID */}
         <View style={styles.idContainer}>
           <Text style={styles.idLabel}>ID: </Text>
           <Text style={styles.idValue}>#{orderDetail.order._id.slice(-5)}</Text>
         </View>
 
-        {/* Restaurant Info */}
         <View style={styles.restaurantContainer}>
           <Image
             source={{
@@ -154,28 +162,30 @@ const OrderDetailScreen = () => {
             <Text style={styles.restaurantName}>
               {orderDetail.restaurant.name}
             </Text>
-            <Text style={[styles.statusText, { color: "#129575" }]}>
+            <Text
+              style={[
+                styles.statusText,
+                { color: getStatusColor(orderDetail.order.status) },
+              ]}
+            >
               {orderDetail.order.status.charAt(0).toUpperCase() +
                 orderDetail.order.status.slice(1)}
             </Text>
           </View>
         </View>
 
-        {/* Location */}
         <View style={styles.locationContainer}>
           <View style={styles.locationRow}>
-            <MapPin size={18} color='#e74c3c' style={styles.locationIcon} />
+            <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
             <Text style={styles.locationText}>
               {orderDetail.restaurant.address}
             </Text>
           </View>
         </View>
 
-        {/* Order Details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Order Detail</Text>
 
-          {/* Order Items */}
           {orderDetail.orderItems.map((item: any, index: number) => (
             <View key={index} style={styles.orderItem}>
               <View style={styles.itemQuantity}>
@@ -194,25 +204,22 @@ const OrderDetailScreen = () => {
                 )}
               </View>
               <Text style={styles.itemPrice}>
-                {(item.dish.price * item.quantity).toLocaleString()}đ
+                {transPrice(item.dish.price * item.quantity)}
               </Text>
             </View>
           ))}
 
-          {/* Order Summary */}
           <View style={styles.summaryContainer}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Tổng tạm phí</Text>
-              <Text style={styles.summaryValue}>
-                {subtotal.toLocaleString()}đ
-              </Text>
+              <Text style={styles.summaryValue}>{transPrice(subtotal)}</Text>
             </View>
 
             {voucherDiscount > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Voucher</Text>
                 <Text style={styles.summaryValue}>
-                  {voucherDiscount.toLocaleString()}đ
+                  {transPrice(voucherDiscount)}
                 </Text>
               </View>
             )}
@@ -220,18 +227,20 @@ const OrderDetailScreen = () => {
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Tổng cộng</Text>
               <Text style={styles.totalValue}>
-                {orderDetail.order.total_price},000đ
+                {transPrice(orderDetail.order.total_price)}
               </Text>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Re-Order Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.reorderButton}>
-          <Text style={styles.reorderButtonText}>Re-Order</Text>
-        </TouchableOpacity>
+        <ReorderButton
+          orderId={orderDetail.order._id}
+          style={styles.fullWidthReorderButton}
+          textStyle={styles.reorderButtonText}
+          returnToHistory={true}
+        />
       </View>
     </SafeAreaView>
   );
@@ -424,11 +433,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#EEEEEE",
   },
-  reorderButton: {
+  fullWidthReorderButton: {
     backgroundColor: "#FFCC00",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
+    width: "100%",
   },
   reorderButtonText: {
     color: "#FFFFFF",

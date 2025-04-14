@@ -20,3 +20,15 @@ export const fetchOrderById = async (orderId: string): Promise<Order> => {
   );
   return response.data;
 };
+
+export const reorder = async (orderId: string): Promise<Order> => {
+  const response = await axiosInstance.post(`/order/re-order/${orderId}`);
+  return response.data;
+};
+
+export const cancelOrder = async (
+  orderId: string
+): Promise<{ msg: string }> => {
+  const response = await axiosInstance.put(`/order/cancel-order/${orderId}`);
+  return response.data;
+};
