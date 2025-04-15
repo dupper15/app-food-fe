@@ -161,13 +161,11 @@ export default function VoucherModal() {
           ? "bg-[#FFC515] text-white"
           : "bg-white border border-[#FFC515]"
       }`}
-      onPress={() => setSelectedCategory(item._id)}
-    >
+      onPress={() => setSelectedCategory(item._id)}>
       <Text
         className={`${
           selectedCategory === item._id ? "text-white" : "text-[#FFC515]"
-        } text-base text-center`}
-      >
+        } text-base text-center`}>
         {item.name}
       </Text>
     </TouchableOpacity>
@@ -188,13 +186,11 @@ export default function VoucherModal() {
               return [...prevSelectedToppings, item._id];
             }
           });
-        }}
-      >
+        }}>
         <Text
           className={`${
             isSelected ? "text-white" : "text-[#FFC515]"
-          } text-base text-center`}
-        >
+          } text-base text-center`}>
           {item.name}
         </Text>
       </TouchableOpacity>
@@ -248,93 +244,89 @@ export default function VoucherModal() {
   };
 
   return (
-    <View className="h-full flex-col bg-white">
+    <View className='h-full flex-col bg-white'>
       {/* header */}
-      <View className="flex-row w-full h-14 bg-white items-center px-4 border-b border-gray-100">
+      <View className='flex-row w-full h-14 bg-white items-center px-4 border-b border-gray-100'>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back-outline" size={24} color="black" />
+          <Ionicons name='chevron-back-outline' size={24} color='black' />
         </TouchableOpacity>
-        <Text className="font-bold text-2xl text-center flex-1">
+        <Text className='font-bold text-2xl text-center flex-1'>
           {dish ? "Edit Dish" : "Create Dish"}
         </Text>
-        <View className="w-2" />
+        <View className='w-2' />
       </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
+        className='flex-1'>
         <ScrollView
           contentContainerStyle={{ padding: 20 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="w-full flex flex-col gap-3">
-            <View className="w-full flex flex-col gap-3">
+          showsVerticalScrollIndicator={false}>
+          <View className='w-full flex flex-col gap-3'>
+            <View className='w-full flex flex-col gap-3'>
               {/* image */}
               {imageUrl ? (
                 <Image
                   source={{ uri: imageUrl }}
-                  className="w-full h-60 pt-2 rounded-lg"
-                  resizeMode="cover"
+                  className='w-full h-60 pt-2 rounded-lg'
+                  resizeMode='cover'
                 />
               ) : parsedDish?.image ? (
                 <Image
                   source={{ uri: parsedDish.image }}
-                  className="w-full h-40 pt-2 rounded-lg"
-                  resizeMode="cover"
+                  className='w-full h-40 pt-2 rounded-lg'
+                  resizeMode='cover'
                 />
               ) : null}
 
-              <View className="flex-row justify-between items-start gap-2">
+              <View className='flex-row justify-between items-start gap-2'>
                 <TouchableOpacity
-                  className="bg-[#389C9A] rounded-md py-1 px-2"
-                  onPress={() => pickImage(true)}
-                >
-                  <Text className="text-white text-base">Take Photo</Text>
+                  className='bg-[#389C9A] rounded-md py-1 px-2'
+                  onPress={() => pickImage(true)}>
+                  <Text className='text-white text-base'>Take Photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="bg-[#FFC515] rounded-md py-1 px-2"
-                  onPress={() => pickImage(false)}
-                >
-                  <Text className="text-white text-base">
+                  className='bg-[#FFC515] rounded-md py-1 px-2'
+                  onPress={() => pickImage(false)}>
+                  <Text className='text-white text-base'>
                     Choose from Gallery
                   </Text>
                 </TouchableOpacity>
               </View>
 
               {/* name */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Name</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Name</Text>
                 <TextInput
                   value={name}
                   onChangeText={setName}
                   multiline
                   numberOfLines={4}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
-                  placeholder="Enter name"
-                  placeholderTextColor="#94a3b8"
+                  className='w-full p-2 border border-slate-400 rounded-lg'
+                  placeholder='Enter name'
+                  placeholderTextColor='#94a3b8'
                 />
               </View>
 
               {/* introduce */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Introduce</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Introduce</Text>
                 <TextInput
                   multiline
                   numberOfLines={4}
                   value={introduce}
                   onChangeText={setIntroduce}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
+                  className='w-full p-2 border border-slate-400 rounded-lg'
                   placeholder={"Enter introduce"}
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor='#94a3b8'
                 />
               </View>
 
               {/* category */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Category</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Category</Text>
                 {fetchAllCategoryMutation.isError && (
-                  <Text className="text-center text-red-500">
+                  <Text className='text-center text-red-500'>
                     Failed to load categories
                   </Text>
                 )}
@@ -347,42 +339,42 @@ export default function VoucherModal() {
                     renderItem={renderItemCategory}
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={{ gap: 10 }}
-                    className="w-full"
+                    className='w-full'
                   />
                 )}
               </View>
 
               {/* price */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Price</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Price</Text>
                 <TextInput
                   value={price}
                   onChangeText={setPrice}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
+                  className='w-full p-2 border border-slate-400 rounded-lg'
                   placeholder={parsedDish?.price.toString() || "Enter price"}
-                  keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
+                  keyboardType='numeric'
+                  placeholderTextColor='#94a3b8'
                 />
               </View>
 
               {/* time */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Time</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Time</Text>
                 <TextInput
                   value={time}
                   onChangeText={setTime}
-                  className="w-full p-2 border border-slate-400 rounded-lg"
+                  className='w-full p-2 border border-slate-400 rounded-lg'
                   placeholder={parsedDish?.time.toString() || "Enter time"}
-                  keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
+                  keyboardType='numeric'
+                  placeholderTextColor='#94a3b8'
                 />
               </View>
 
               {/* topping */}
-              <View className="flex-col justify-between items-start gap-2">
-                <Text className="font-semibold text-base">Topping</Text>
+              <View className='flex-col justify-between items-start gap-2'>
+                <Text className='font-semibold text-base'>Topping</Text>
                 {fetchAllCategoryMutation.isError && (
-                  <Text className="text-center text-red-500">
+                  <Text className='text-center text-red-500'>
                     Failed to load topping
                   </Text>
                 )}
@@ -395,29 +387,27 @@ export default function VoucherModal() {
                     renderItem={renderItemTopping}
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={{ gap: 10 }}
-                    className="w-full"
+                    className='w-full'
                   />
                 )}
               </View>
 
               {showError && (
-                <Text className="text-red-500">{contentError}</Text>
+                <Text className='text-red-500'>{contentError}</Text>
               )}
 
-              <View className="flex-row items-center gap-4 justify-between">
+              <View className='flex-row items-center gap-4 justify-between'>
                 <TouchableHighlight
                   onPress={() => router.back()}
-                  className="bg-red-500 p-3 rounded-lg flex-1"
-                >
-                  <Text className="text-white text-center font-medium">
+                  className='bg-red-500 p-3 rounded-lg flex-1'>
+                  <Text className='text-white text-center font-medium'>
                     Cancel
                   </Text>
                 </TouchableHighlight>
                 <TouchableHighlight
                   onPress={handleSubmitDish}
-                  className="bg-[#389C9A] p-3 rounded-lg flex-1"
-                >
-                  <Text className="text-white text-center font-medium">
+                  className='bg-[#389C9A] p-3 rounded-lg flex-1'>
+                  <Text className='text-white text-center font-medium'>
                     {dish !== null ? "Save" : "Create"}
                   </Text>
                 </TouchableHighlight>
@@ -427,8 +417,8 @@ export default function VoucherModal() {
         </ScrollView>
       </KeyboardAvoidingView>
       {isLoading && (
-        <View className="absolute inset-0 justify-center items-center bg-white/90 z-10">
-          <ActivityIndicator size="large" color="#FFD700" />
+        <View className='absolute inset-0 justify-center items-center bg-white/90 z-10'>
+          <ActivityIndicator size='large' color='#FFD700' />
         </View>
       )}
     </View>
