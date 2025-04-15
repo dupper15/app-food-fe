@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VoucherData } from "@/interfaces/VoucherInterface";
 import VoucherModal from "./voucherModal";
 import { useMutation } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ export default function ListVoucherItem({
   const [vouchers, setVouchers] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   const handleEditVoucher = (item: VoucherData) => {
     router.push({
@@ -84,11 +85,17 @@ export default function ListVoucherItem({
   });
 
   useEffect(() => {
-    if (restaurantId) {
-      fetchAllVoucherMutation.mutate(restaurantId);
-    }
+    if (!restaurantId) return;
+
     if (refresh) {
+      fetchAllVoucherMutation.mutate(restaurantId);
       setRefresh(false);
+      return;
+    }
+
+    if (!hasFetched.current) {
+      fetchAllVoucherMutation.mutate(restaurantId);
+      hasFetched.current = true;
     }
   }, [restaurantId, refresh]);
 
