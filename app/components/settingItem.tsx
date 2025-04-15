@@ -4,6 +4,7 @@ import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import ChangePassword from "./../restaurant/restaurantScreen/changePassword";
 
 // Khai báo các route name ở đây
 type RootStackParamList = {
@@ -12,7 +13,7 @@ type RootStackParamList = {
   Topping: undefined;
   Voucher: undefined;
   Rating: undefined;
-  DarkMode: undefined;
+  ChangePassword: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -53,10 +54,10 @@ const settingsData: Item[] = [
   },
   {
     id: "4",
-    title: "Dark mode",
-    iconName: "light-up",
+    title: "Change password",
+    iconName: "lock",
     color: "black",
-    path: "DarkMode",
+    path: "ChangePassword",
     iconType: "entypo",
   },
 ];
