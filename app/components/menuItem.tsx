@@ -8,8 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useState } from "react";
-import DishModal from "./dishModal";
+import { useEffect, useRef, useState } from "react";
 import { DishData } from "@/interfaces/DishInterface";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
@@ -19,7 +18,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ConfirmDeleteModal from "./deleteModal";
 import { useRouter } from "expo-router";
-import { FontAwesome6 } from "@expo/vector-icons";
 
 interface ListMenuItemProps {
   setRefresh: (value: boolean) => void;
@@ -41,6 +39,7 @@ export default function ListMenuItem({
   const [dishes, setDishes] = useState<DishData[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hasFetched = useRef(false);
 
   const fetchAllDishByRestaurantMution = useMutation({
     mutationFn: async (id: string) => {
@@ -51,8 +50,8 @@ export default function ListMenuItem({
       setRefresh(false);
       setIsLoading(false);
     },
-    onError: (error: any) => {
-      console.error("Error fetching dishes:", error);
+    onError: () => {
+      console.error = () => {};
       CustomToast("error", "Error", "Failed to fetch dishes");
     },
   });
@@ -61,14 +60,14 @@ export default function ListMenuItem({
     mutationFn: async (id: string) => {
       return await deleteDish(id);
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       CustomToast("success", "Succes", "Deleted dish successfully!");
       setRefresh(true);
       setDeleteModalVisible(false);
       setSelectDish(null);
     },
-    onError: (error: any) => {
-      console.error("Error deleting dish:", error);
+    onError: () => {
+      console.error = () => {};
       CustomToast("error", "Error", "Failed to delete dish");
     },
   });
@@ -76,23 +75,17 @@ export default function ListMenuItem({
   useEffect(() => {
     if (!restaurantId) return;
 
-    if (dishes.length === 0 || refresh) {
-      fetchAllDishByRestaurantMution.mutate(restaurantId);
-    }
-
     if (refresh) {
+      fetchAllDishByRestaurantMution.mutate(restaurantId);
       setRefresh(false);
+      return;
     }
-  }, [refresh, restaurantId]);
 
-  const handleCreateDish = () => {
-    router.push({
-      pathname: "/components/dishModal",
-      params: {
-        dish: null,
-      },
-    });
-  };
+    if (!hasFetched.current) {
+      fetchAllDishByRestaurantMution.mutate(restaurantId);
+      hasFetched.current = true;
+    }
+  }, [restaurantId, refresh]);
 
   const handleEditDish = (item: DishData) => {
     router.push({

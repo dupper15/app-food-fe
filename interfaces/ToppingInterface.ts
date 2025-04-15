@@ -3,3 +3,8 @@ export interface Topping {
   name: string;
   price: number;
 }
+export interface ToppingCreate {
+  restaurant_id: string;
+  name: string;
+  price: number;
+}
