@@ -8,7 +8,6 @@ export const addToCart = async (data: any) => {
     topping: topping,
   };
   const response = await axiosInstance.post(`cart/${userId}`, newCart);
-  console.log(response.data);
   return response.data;
 };
 export const editCart = async (data: any) => {

@@ -18,7 +18,7 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   };
   return (
     <TouchableHighlight
-      className='rounded-lg bg-white shadow-md w-48'
+      className='rounded-lg bg-white shadow-md h-max w-48'
       onPress={() => handleNavigate()}>
       <View style={{ minHeight: 180 }}>
         <Image
