@@ -6,8 +6,8 @@ const getBaseUrl = () => {
   // return Platform.OS === "android"
   //   ? "http://10.0.2.2:3000"
   //   : "http://localhost:3000";
-  // return "https://app-food-be-production.up.railway.app/";
-  return "http://localhost:3000/";
+  return "https://app-food-be-production.up.railway.app/";
+  // return "http://localhost:3000/";
 };
 
 const axiosInstance = axios.create({

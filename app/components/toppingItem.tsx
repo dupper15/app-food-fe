@@ -147,7 +147,7 @@ export default function ToppingMenu({
   );
 
   return (
-    <View className="bg-white rounded-lg shadow-sm">
+    <View className="bg-white h-full">
       {isLoading ? (
         <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
       ) : (
