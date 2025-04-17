@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Order from "./orderScreen/order";
-import History from "./history";
+import History from "./historyScreen/history";
 import Notification from "./notification";
 import Revenue from "./revenue";
 import { RestaurantStackNavigator } from "./restaurantScreen/_layout";
