@@ -49,7 +49,7 @@ export const getFavoriteRestaurants = async (userId: string): Promise<any> => {
   );
   return response.data;
 };
-export const removeFavoriteRestaurant = async (data): Promise<any> => {
+export const removeFavoriteRestaurant = async (data: any): Promise<any> => {
   const { userId, restaurantId } = data;
   if (!userId || !restaurantId) {
     throw new Error("User ID and Restaurant ID are required");
@@ -59,7 +59,7 @@ export const removeFavoriteRestaurant = async (data): Promise<any> => {
   );
   return response.data;
 };
-export const addFavoriteRestaurant = async (data): Promise<any> => {
+export const addFavoriteRestaurant = async (data: any): Promise<any> => {
   const { userId, restaurantId } = data;
   if (!userId || !restaurantId) {
     throw new Error("User ID and Restaurant ID are required");
@@ -80,21 +80,21 @@ export const getFavoriteRestaurantIds = async (
   );
   return response.data;
 };
-export const getCustomerInfo = async (userId) => {
+export const getCustomerInfo = async (userId: any) => {
   if (!userId) {
     throw new Error("User ID is required");
   }
   const response = await axiosInstance.get(`customers/${userId}`);
   return response.data;
 };
-export const editCustomerInfo = async (data) => {
+export const editCustomerInfo = async (data: any) => {
   const { userId, editUser } = data;
   const response = await axiosInstance.put(`customers/${userId}`, {
     editUser,
   });
   return response.data;
 };
-export const changePassword = async (data) => {
+export const changePassword = async (data: any) => {
   const { userId, currentPassword, newPassword, confirmPassword } = data;
   if (!userId || !currentPassword || !newPassword || !confirmPassword) {
     throw new Error("All fields are required");

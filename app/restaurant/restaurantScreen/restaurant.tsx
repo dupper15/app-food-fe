@@ -1,11 +1,19 @@
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ListSetting from "@/app/components/settingItem";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { getDetailOwner } from "@/services/api/owner";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CustomToast } from "@/app/components/toast";
+import { useFocusEffect } from "expo-router";
+import { ScrollView } from "react-native";
 
 export default function Restaurant() {
   const ownerId = useSelector(
@@ -14,16 +22,16 @@ export default function Restaurant() {
   const name = useSelector(
     (state: { restaurant: { name: string } }) => state.restaurant.name
   );
-  const avatar = useSelector(
-    (state: { user: { image: string } }) => state.user.image
-  );
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (ownerId) {
-      fetchDetailOwnerMutation.mutate(ownerId);
-    }
-  }, [ownerId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (ownerId) {
+        fetchDetailOwnerMutation.mutate(ownerId);
+      }
+    }, [ownerId])
+  );
 
   const fetchDetailOwnerMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -31,6 +39,7 @@ export default function Restaurant() {
     },
     onSuccess: (data: any) => {
       setAvatarUrl(data.data.avatar);
+      setIsLoading(false);
     },
     onError: (error: any) => {
       const errorMessage = error?.message || "An unknown error occurred";
@@ -39,15 +48,24 @@ export default function Restaurant() {
   });
 
   return (
-    <View className="bg-white px-6 py-20 flex-col h-full gap-10">
-      {/* avatar and fullname */}
-      <View className="flex-row items-center gap-10">
-        <Image source={{ uri: avatarUrl }} className="rounded-full w-24 h-24" />
-        <View className="gap-1">
-          <Text className="font-semibold text-xl">{name}</Text>
-          <Text className="text-base text-gray-400">I love fast food</Text>
-        </View>
-      </View>
+    <View className="bg-white px-6 pt-6 flex-col h-full gap-8">
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
+      ) : (
+        <>
+          {/* avatar and fullname */}
+          <View className="flex-row items-center gap-10">
+            <Image
+              source={{ uri: avatarUrl }}
+              className="rounded-full w-24 h-24"
+            />
+            <View className="gap-1 flex-1">
+              <Text className="font-semibold text-xl">{name}</Text>
+              <Text className="text-base text-gray-400">I love fast food</Text>
+            </View>
+          </View>
+        </>
+      )}
 
       {/* list item setting */}
       <View>

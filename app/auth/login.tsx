@@ -36,7 +36,6 @@ const LoginScreen: React.FC = () => {
       CustomToast("success", "Success", "Login success");
       if (data.userType === "restaurantOwner") {
         await AsyncStorage.setItem("owner_id", String(userId));
-
         try {
           const result = await fetchRestaurantByOwner(userId);
           if (result?.data?._id) {

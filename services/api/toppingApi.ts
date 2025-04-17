@@ -47,3 +47,31 @@ export const fetchToppings = async (
     throw error;
   }
 };
+
+export const createTopping = async (data: any): Promise<Topping> => {
+  try {
+    const response = await axiosInstance.post("toppings/add", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating topping:", error);
+    throw error;
+  }
+};
+export const editTopping = async (id: string, data: any): Promise<Topping> => {
+  try {
+    const response = await axiosInstance.put(`toppings/edit/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error editing topping:", error);
+    throw error;
+  }
+};
+export const deleteTopping = async (id: string): Promise<Topping> => {
+  try {
+    const response = await axiosInstance.delete(`toppings/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting topping:", error);
+    throw error;
+  }
+};

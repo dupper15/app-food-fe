@@ -1,8 +1,14 @@
 import { formatPrice } from "@/utils/format";
-import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useState } from "react";
-import DishModal from "./dishModal";
+import { useEffect, useRef, useState } from "react";
 import { DishData } from "@/interfaces/DishInterface";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
@@ -11,6 +17,7 @@ import { CustomToast } from "./toast";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ConfirmDeleteModal from "./deleteModal";
+import { useRouter } from "expo-router";
 
 interface ListMenuItemProps {
   setRefresh: (value: boolean) => void;
@@ -26,22 +33,25 @@ export default function ListMenuItem({
       state.restaurant.restaurantId
   );
 
-  const [openModal, setOpenModal] = useState(false);
+  const router = useRouter();
   const [selectDish, setSelectDish] = useState<DishData | null>(null);
 
   const [dishes, setDishes] = useState<DishData[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hasFetched = useRef(false);
 
   const fetchAllDishByRestaurantMution = useMutation({
     mutationFn: async (id: string) => {
       return await fetchAllDishByRestaurant(id);
     },
     onSuccess: (data: any) => {
-      setDishes(data);
+      setDishes(data.reverse());
       setRefresh(false);
+      setIsLoading(false);
     },
-    onError: (error: any) => {
-      console.error("Error fetching dishes:", error);
+    onError: () => {
+      console.error = () => {};
       CustomToast("error", "Error", "Failed to fetch dishes");
     },
   });
@@ -50,14 +60,14 @@ export default function ListMenuItem({
     mutationFn: async (id: string) => {
       return await deleteDish(id);
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       CustomToast("success", "Succes", "Deleted dish successfully!");
       setRefresh(true);
       setDeleteModalVisible(false);
       setSelectDish(null);
     },
-    onError: (error: any) => {
-      console.error("Error deleting dish:", error);
+    onError: () => {
+      console.error = () => {};
       CustomToast("error", "Error", "Failed to delete dish");
     },
   });
@@ -65,17 +75,25 @@ export default function ListMenuItem({
   useEffect(() => {
     if (!restaurantId) return;
 
-    if (dishes.length === 0 || refresh) {
+    if (refresh) {
       fetchAllDishByRestaurantMution.mutate(restaurantId);
+      setRefresh(false);
+      return;
     }
 
-    if (refresh) {
-      setRefresh(false);
+    if (!hasFetched.current) {
+      fetchAllDishByRestaurantMution.mutate(restaurantId);
+      hasFetched.current = true;
     }
-  }, [refresh, restaurantId]);
+  }, [restaurantId, refresh]);
 
   const handleEditDish = (item: DishData) => {
-    setOpenModal(true);
+    router.push({
+      pathname: "/components/dishModal",
+      params: {
+        dish: JSON.stringify(item),
+      },
+    });
     setSelectDish(item);
   };
 
@@ -117,7 +135,7 @@ export default function ListMenuItem({
             </Text>
           </View>
 
-          <View className="flex-row items-center space-x-1">
+          <View className="flex-row items-center justify-center gap-1">
             <Entypo name="time-slot" size={18} color="black" />
             <Text className="text-base text-gray-600">{item.time}m</Text>
           </View>
@@ -126,7 +144,7 @@ export default function ListMenuItem({
           <Text className="text-start mt-2 text-xl text-[#E23637] font-extrabold">
             {formatPrice(item.price)}
           </Text>
-          <View className="flex-row space-x-2 mt-2">
+          <View className="flex-row mt-2 gap-1">
             <TouchableOpacity
               onPress={(e) => {
                 e.preventDefault();
@@ -156,24 +174,19 @@ export default function ListMenuItem({
   );
 
   return (
-    <View className="bg-white h-full">
-      <FlatList
-        data={dishes}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        className="pb-20"
-      />
-
-      {openModal && (
-        <DishModal
-          setShowModal={setOpenModal}
-          dish={selectDish}
-          setRefresh={setRefresh}
+    <View className="bg-white h-full relative">
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
+      ) : (
+        <FlatList
+          data={dishes}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         />
       )}
-
       <ConfirmDeleteModal
         visible={deleteModalVisible}
         onClose={closeDeleteConfirmation}

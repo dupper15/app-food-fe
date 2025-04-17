@@ -99,33 +99,28 @@ export default function Home() {
           paddingTop: 16,
           paddingHorizontal: 16,
         }}>
-        <View className='flex-row justify-between items-center gap-2'>
-          <View className='flex-1 flex-row bg-white rounded-lg px-3 py-1 items-center border border-gray-300'>
-            <Icon name='search' size={20} color={"#94a3b8"} />
-            <TextInput
-              placeholder='Search for products...'
-              placeholderTextColor={"#94a3b8"}
-              className='flex-1 pl-2 text-slate-900'
-            />
-            <TouchableOpacity>
-              <Ionicons name='camera' size={24} color={"#FFC515"} />
+        <View className='flex-row items-center w-full space-x-2'>
+          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 border border-gray-300'>
+            <TouchableOpacity
+              className='flex-1 flex-row items-center px-4 py-2 rounded-full'
+              onPress={() => router.push("/screen/search")}>
+              <Icon name='search' size={20} color='#94a3b8' className='mr-2' />
+              <Text className='text-slate-400'>Search for meals...</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity className='pl-3'>
+              <Ionicons name='camera' size={24} color='#FFC515' />
             </TouchableOpacity>
           </View>
-
           <TouchableOpacity
             onPress={navigateCart}
-            className='bg-customYellow p-1 rounded-lg'
+            className='bg-customYellow p-2 rounded-lg'
             style={{ zIndex: 30 }}>
-            <Icon name='cart-outline' size={24} color={"black"} />
+            <Icon name='cart-outline' size={20} color='black' />
           </TouchableOpacity>
-
           <TouchableOpacity
-            className='p-1'
-            style={{
-              backgroundColor: "black",
-              borderRadius: 8,
-              zIndex: 30,
-            }}
+            className='p-2 bg-black rounded-lg'
+            style={{ zIndex: 30 }}
             activeOpacity={0.7}
             onPress={() => {
               console.log("Chat button pressed");
@@ -133,8 +128,8 @@ export default function Home() {
             }}>
             <Ionicons
               name='chatbubble-ellipses-outline'
-              size={24}
-              color={"#FFC515"}
+              size={20}
+              color='#FFC515'
             />
           </TouchableOpacity>
         </View>

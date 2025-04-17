@@ -177,40 +177,44 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
+      <StatusBar barStyle='light-content' backgroundColor='#1A1A1A' />
       <Text style={styles.chatTitle}>chat</Text>
 
       <View style={styles.chatContainer}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
+            onPress={() => router.back()}>
+            <Ionicons name='chevron-back' size={24} color='#000' />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chat</Text>
+          <TouchableOpacity
+            className='mr-4'
+            onPress={() => router.push("/screen/chatBot")}>
+            <Ionicons name='logo-android' size={24} color='#000' />
+          </TouchableOpacity>
         </View>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons
-            name="search"
+            name='search'
             size={20}
-            color="#999"
+            color='#999'
             style={styles.searchIcon}
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search"
+            placeholder='Search'
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
+            placeholderTextColor='#999'
           />
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFC515" />
+            <ActivityIndicator size='large' color='#FFC515' />
             <Text style={styles.loadingText}>Loading conversations...</Text>
           </View>
         ) : (
@@ -226,8 +230,7 @@ export default function Chat() {
               return (
                 <TouchableOpacity
                   style={styles.chatItem}
-                  onPress={() => navigateToChatDetail(item._id)}
-                >
+                  onPress={() => navigateToChatDetail(item._id)}>
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>
                       {otherUserName.charAt(0).toUpperCase()}
