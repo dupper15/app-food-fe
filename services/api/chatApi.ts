@@ -30,3 +30,11 @@ export const sendMessage = async (data: any) => {
   const response = await axiosInstance.post("conversation", data);
   return response.data;
 };
+export const sendChatBotMessage = async (data: any) => {
+  const response = await axiosInstance.post("conversation/chat-bot", data);
+  return response.data;
+};
+export const getChatBotMessage = async (userId: string) => {
+  const response = await axiosInstance.get(`conversation/chat-bot/${userId}`);
+  return response.data;
+};
