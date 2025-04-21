@@ -39,36 +39,46 @@ export default function Successful() {
     }
   }, [restaurantId]);
 
+  const handleNavigateOrderDetails = (item: any) => {
+    console.log(item);
+    router.push({
+      pathname: "/screen/orderdetail",
+      params: { id: item._id },
+    });
+  };
+
   const renderItem = ({ item }: { item: any }) => (
-    <View className="bg-white rounded-lg p-4 flex-row items-center mb-3 border-l-4 border-l-amber-400">
-      <Image
-        source={{ uri: item.customer_id?.avatar }}
-        className="w-12 h-12 rounded-full bg-gray-200 mr-3"
-      />
+    <TouchableOpacity onPress={() => handleNavigateOrderDetails(item)}>
+      <View className="bg-white rounded-lg p-4 flex-row items-center mb-3 border-l-4 border-l-amber-400">
+        <Image
+          source={{ uri: item.customer_id?.avatar }}
+          className="w-12 h-12 rounded-full bg-gray-200 mr-3"
+        />
 
-      <View className="flex-1">
-        <View className="flex-row justify-between">
-          <Text className="font-bold text-gray-800">
-            {item.customer_id?.name || "Unknown"}
-          </Text>
-          <Text className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
-            {formatCodeOrder(item._id)}
-          </Text>
-        </View>
+        <View className="flex-1">
+          <View className="flex-row justify-between">
+            <Text className="font-bold text-gray-800">
+              {item.customer_id?.name || "Unknown"}
+            </Text>
+            <Text className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-md">
+              {formatCodeOrder(item._id)}
+            </Text>
+          </View>
 
-        <View className="flex-row flex-wrap mt-1 justify-between">
-          <Text className="text-gray-600 text-sm mr-3">
-            {item.sum_dishes} x item
-          </Text>
-          <Text className="text-[#389C9A] text-sm font-semibold mr-3">
-            {formatPrice(item.cost)}
-          </Text>
-          <Text className="text-gray-600 text-sm">
-            {formatDate(item.createdAt)}
-          </Text>
+          <View className="flex-row flex-wrap mt-1 justify-between">
+            <Text className="text-gray-600 text-sm mr-3">
+              {item.sum_dishes} x item
+            </Text>
+            <Text className="text-[#389C9A] text-sm font-semibold mr-3">
+              {formatPrice(item.cost)}
+            </Text>
+            <Text className="text-gray-600 text-sm">
+              {formatDate(item.createdAt)}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   if (fetchSuccess.isPending) {
