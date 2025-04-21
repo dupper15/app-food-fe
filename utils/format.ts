@@ -42,5 +42,5 @@ export const formatCode = (id: string): string => {
 export const formatCodeOrder = (id: string): string => {
   if (!id) return "";
   const shortId = id.slice(-6).toUpperCase();
-  return `OD-${shortId}`;
+  return `#${shortId}`;
 };

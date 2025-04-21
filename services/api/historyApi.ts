@@ -1,4 +1,4 @@
-import { HistoryData } from "@/interfaces/HistoryInterface";
+import { HistoryData, HistoryDetailData } from "@/interfaces/HistoryInterface";
 import axiosInstance from "./axiosInstance";
 
 export interface HistoryItem {
@@ -15,6 +15,13 @@ export const fetchUserHistory = async (
   userId: string
 ): Promise<HistoryItem[]> => {
   const response = await axiosInstance.get(`/history/customer/${userId}`);
+  return response.data;
+};
+
+export const fetchDetailHistoryByRestaurant = async (
+  id: string
+): Promise<HistoryDetailData> => {
+  const response = await axiosInstance.get(`/history/restaurant/detail/${id}`);
   return response.data;
 };
 
