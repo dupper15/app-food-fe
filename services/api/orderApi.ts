@@ -17,9 +17,25 @@ export const fetchPendingOrderByRestaurant = async (
   return response.data;
 };
 
+export const fetchOngoingOrderByRestaurant = async (
+  id: string
+): Promise<Order[]> => {
+  const response = await axiosInstance.get(
+    `/order/fetch-ongoing-order-by-restaurant/${id}`
+  );
+  return response.data;
+};
+
 export const cancelOrderByRestaurnat = async (id: string): Promise<string> => {
   const response = await axiosInstance.patch(
     `/order/restaurant/cancel-order/${id}`
   );
+  return response.data;
+};
+
+export const updateStatusOrderByRestaurant = async (
+  id: string
+): Promise<any> => {
+  const response = await axiosInstance.patch(`/order/update-status/${id}`);
   return response.data;
 };

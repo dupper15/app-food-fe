@@ -3,6 +3,7 @@ import { OrderPendingRestaurant } from "@/interfaces/OrderInterface";
 import {
   cancelOrderByRestaurnat,
   fetchPendingOrderByRestaurant,
+  updateStatusOrderByRestaurant,
 } from "@/services/api/orderApi";
 import { formatDate, formatPrice } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,8 +22,14 @@ import { useSelector } from "react-redux";
 
 export default function Pending({
   setCount,
+  data,
+  refresh,
+  setRefresh,
 }: {
   setCount: (count: number) => void;
+  data: OrderPendingRestaurant[];
+  refresh: boolean;
+  setRefresh: (refresh: boolean) => void;
 }) {
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
@@ -31,40 +38,34 @@ export default function Pending({
   const [items, setItems] = useState<OrderPendingRestaurant[]>([]);
   const hasFetched = useRef(false);
 
-  const fetchPending = useMutation({
-    mutationFn: fetchPendingOrderByRestaurant,
-    onSuccess: (data: any[]) => {
-      setItems(data.reverse());
-      setCount(data.length);
-    },
-    onError: (error) => {
-      console.error("Fetch history error", error);
-    },
-  });
-
   const cancelOrder = useMutation({
     mutationFn: (id: string) => cancelOrderByRestaurnat(id),
     onSuccess: () => {
       CustomToast("success", "Success", "Cancelled successfully!");
-      fetchPending.mutate(restaurantId);
+      setRefresh(!refresh);
     },
     onError: () => {
       CustomToast("error", "Error", "Failed to cancel order! Please try again");
     },
   });
 
-  useEffect(() => {
-    if (!restaurantId) return;
-
-    if (!hasFetched.current) {
-      fetchPending.mutate(restaurantId);
-      hasFetched.current = true;
-    }
-  }, [restaurantId]);
+  const confirmOrder = useMutation({
+    mutationFn: (id: string) => updateStatusOrderByRestaurant(id),
+    onSuccess: () => {
+      CustomToast("success", "Success", "Order received successfully!");
+      setRefresh(!refresh);
+    },
+    onError: () => {
+      CustomToast(
+        "error",
+        "Error",
+        "Failed to receive order! Please try again"
+      );
+    },
+  });
 
   const handleAccept = (orderId: string) => {
-    // TODO: Gọi API cập nhật trạng thái thành "In Progress"
-    console.log("Accept order:", orderId);
+    confirmOrder.mutate(orderId);
   };
 
   const handleCancel = (orderId: string) => {
@@ -81,7 +82,7 @@ export default function Pending({
         />
 
         <View className="flex-1 gap-1">
-          <Text className="font-bold">
+          <Text className="font-bold text-lg">
             {item.customer_id?.name || "Unknown"}
           </Text>
           {/* note */}
@@ -117,7 +118,7 @@ export default function Pending({
           <View className="flex-row justify-between">
             <View className="flex-row gap-2">
               <Text className="font-bold">Total price:</Text>
-              <Text className="text-[#E23637] text-sm mr-3">
+              <Text className="text-[#389C9A] text-md font-bold mr-3">
                 {formatPrice(item.total_price)}
               </Text>
             </View>
@@ -144,14 +145,6 @@ export default function Pending({
       </View>
     </View>
   );
-
-  if (fetchPending.isPending) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#FFC515" />
-      </View>
-    );
-  }
 
   return (
     <FlatList
