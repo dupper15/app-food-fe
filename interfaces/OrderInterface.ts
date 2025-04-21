@@ -32,6 +32,32 @@ export interface OrderPendingRestaurant {
     avatar: string;
   };
   total_price: number;
+  status: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface OrderOngoingRestaurant {
+  _id: string;
+  array_item: {
+    _id: string;
+    dish_id: {
+      _id: string;
+      name: string;
+    };
+    quantity: number;
+    topping: {
+      _id: string;
+      name: string;
+    }[];
+  }[];
+  customer_id: {
+    _id: string;
+    name: string;
+    avatar: string;
+  };
+  total_price: number;
+  status: string;
   note: string;
   createdAt: string;
 }
