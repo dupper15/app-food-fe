@@ -3,10 +3,11 @@ import { ScrollView, TextInput } from "react-native";
 import { Image, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView, View } from "react-native";
 import { useState, useRef, useEffect } from "react";
-import { router } from "expo-router"; // Nếu bạn dùng expo-router
+import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { getChatBotMessage, sendChatBotMessage } from "@/services/api/chatApi";
+import BotFunction from "../components/botFunction";
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
@@ -67,22 +68,18 @@ const ChatBot = () => {
   });
   return (
     <SafeAreaView className='flex-1 bg-gray-100'>
-      <View className='flex-row items-center justify-start gap-4 p-4 bg-white shadow'>
+      <View className='flex-row items-center p-4 bg-white shadow space-x-4'>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name='chevron-back' size={24} color='#000' />
         </TouchableOpacity>
-        <View className='flex-row items-center space-x-2'>
-          <Image
-            source={require("../../assets/images/chatbot.png")}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-            }}
-          />
-          <Text className='text-lg font-semibold'>Chat Bot</Text>
-        </View>
-        <View className='w-6' />
+
+        <Image
+          source={require("../../assets/images/chatbot.png")}
+          className='w-10 h-10 rounded-full'
+          style={{ width: 40, height: 40, borderRadius: 20 }}
+        />
+
+        <Text className='text-lg font-semibold text-gray-900'>Chat Bot</Text>
       </View>
 
       <ScrollView
@@ -100,42 +97,35 @@ const ChatBot = () => {
             </Text>
           </View>
         ) : (
-          messages.map((message) => {
-            return (
+          messages.map((message, index) =>
+            message.sender_id === "chat-bot" ? (
+              <BotFunction key={index} message={message} />
+            ) : (
               <View
-                key={message._id}
-                className={`mb-3 px-4 py-2 rounded-lg max-w-[75%] ${
-                  message.sender_id != "chat-bot"
-                    ? "bg-blue-500 self-end"
-                    : "bg-white self-start"
-                }`}>
-                <Text
-                  className={
-                    message.sender_id != "chat-bot"
-                      ? "text-white"
-                      : "text-gray-800"
-                  }>
-                  {message.content}
-                </Text>
+                key={index}
+                className='self-end bg-blue-500 rounded-lg px-4 py-2 mb-3 max-w-[75%]'>
+                <Text className='text-white'>{message.content}</Text>
               </View>
-            );
-          })
+            )
+          )
         )}
       </ScrollView>
 
-      <View className='flex-row items-center p-3 bg-white border-t border-gray-200'>
+      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 space-x-2'>
         <TouchableOpacity className='p-2'>
           <Ionicons name='camera' size={24} color='#666' />
         </TouchableOpacity>
         <TouchableOpacity className='p-2'>
           <Ionicons name='document' size={24} color='#666' />
         </TouchableOpacity>
+
         <TextInput
-          className='flex-1 mx-2 px-4 py-2 bg-gray-100 rounded-full text-base'
+          className='flex-1 px-4 py-2 bg-gray-100 rounded-full text-base'
           placeholder='Message...'
           value={inputMessage}
           onChangeText={setInputMessage}
         />
+
         <TouchableOpacity
           className='p-2'
           onPress={handleSendMessage}
