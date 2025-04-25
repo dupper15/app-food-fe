@@ -3,12 +3,13 @@ import { fetchAllHistorySuccess } from "@/services/api/historyApi";
 import { formatCodeOrder, formatDate, formatPrice } from "@/utils/format";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Image,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -25,10 +26,22 @@ export default function Successful({
   const router = useRouter();
 
   const [items, setItems] = useState<any[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
     setItems(data);
   }, [data]);
+
+  const filteredItems = useMemo(() => {
+      return items.filter((item) => {
+        const matchKeyword =
+          item.customer_id?.name
+            ?.toLowerCase()
+            .includes(searchKeyword.toLowerCase()) ||
+          formatCodeOrder(item._id).toLowerCase().includes(searchKeyword.toLowerCase());
+        return matchKeyword;
+      });
+    }, [items, searchKeyword]);
 
   const handleNavigateOrderDetails = (item: any) => {
     console.log(item);
@@ -81,16 +94,24 @@ export default function Successful({
   }
 
   return (
-    <FlatList
-      data={items}
-      keyExtractor={(item, index) => item._id || index.toString()}
-      renderItem={renderItem}
-      contentContainerStyle={{ paddingVertical: 12 }}
-      ListEmptyComponent={
-        <Text className="text-center text-gray-500 mt-4">
-          No history found.
-        </Text>
-      }
-    />
+    <View className="flex-1 px-4">
+          <TextInput
+            placeholder="Search by name or order code"
+            value={searchKeyword}
+            onChangeText={setSearchKeyword}
+            className="border border-gray-300 rounded-md px-4 py-2 mt-3 mb-2 bg-white"
+          />
+          <FlatList
+            data={filteredItems}
+            keyExtractor={(item, index) => item._id || index.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingVertical: 8 }}
+            ListEmptyComponent={
+              <Text className="text-center text-gray-500 mt-4">
+                No matching results found.
+              </Text>
+            }
+          />
+        </View>
   );
 }
