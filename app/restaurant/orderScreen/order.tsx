@@ -33,7 +33,7 @@ export default function Order() {
 
   const fetchOngoing = useMutation({
     mutationFn: fetchOngoingOrderByRestaurant,
-    onSuccess: (data: any[]) => {
+    onSuccess: (data: OrderOngoingRestaurant[]) => {
       setItemsInProgress(data.reverse());
       setCountInProgress(data.length);
     },
@@ -44,7 +44,7 @@ export default function Order() {
 
   const fetchPending = useMutation({
     mutationFn: fetchPendingOrderByRestaurant,
-    onSuccess: (data: any[]) => {
+    onSuccess: (data: OrderPendingRestaurant[]) => {
       setItemsPending(data.reverse());
       setCountPending(data.length);
     },

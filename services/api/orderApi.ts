@@ -1,4 +1,4 @@
-import { Order } from "@/interfaces/OrderInterface";
+import { Order, OrderOngoingRestaurant, OrderPendingRestaurant } from "@/interfaces/OrderInterface";
 import axiosInstance from "./axiosInstance";
 
 export const fetchOrderById = async (orderId: string): Promise<Order> => {
@@ -10,7 +10,7 @@ export const fetchOrderById = async (orderId: string): Promise<Order> => {
 
 export const fetchPendingOrderByRestaurant = async (
   id: string
-): Promise<Order[]> => {
+): Promise<OrderPendingRestaurant[]> => {
   const response = await axiosInstance.get(
     `/order/fetch-pending-order-by-restaurant/${id}`
   );
@@ -19,7 +19,7 @@ export const fetchPendingOrderByRestaurant = async (
 
 export const fetchOngoingOrderByRestaurant = async (
   id: string
-): Promise<Order[]> => {
+): Promise<OrderOngoingRestaurant[]> => {
   const response = await axiosInstance.get(
     `/order/fetch-ongoing-order-by-restaurant/${id}`
   );
