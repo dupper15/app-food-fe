@@ -52,7 +52,7 @@ const CartPage = () => {
 
     setSelectedDish(allSelected ? [] : [...restaurantItems]);
   };
-  const [cart, setCart] = useState(null);
+  const [cart, setCart] = useState<any[]>([]); 
   const getCartMutation = useMutation({
     mutationFn: CartApi.getCart,
     onSuccess: (data) => {

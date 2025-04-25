@@ -24,6 +24,10 @@ export interface HistoryDetailData {
       }[];
     }[];
     used_point: number;
+    voucher_id: {
+      _id: string;
+      value: number;
+    };
     note: string;
     status: string;
   };

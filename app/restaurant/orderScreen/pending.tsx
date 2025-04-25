@@ -31,12 +31,12 @@ export default function Pending({
   refresh: boolean;
   setRefresh: (refresh: boolean) => void;
 }) {
-  const restaurantId = useSelector(
-    (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
-  );
   const [items, setItems] = useState<OrderPendingRestaurant[]>([]);
-  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    setItems(data);
+    setCount(data.length);
+  }, [data]);
 
   const cancelOrder = useMutation({
     mutationFn: (id: string) => cancelOrderByRestaurnat(id),
@@ -129,7 +129,7 @@ export default function Pending({
         </View>
       </View>
       {/* action button */}
-      <View className="flex-row space-x-2 ml-3">
+      <View className="flex-row space-x-2 ml-3 gap-1">
         <TouchableOpacity
           onPress={() => handleAccept(item._id)}
           className="p-1 rounded-full bg-green-100"

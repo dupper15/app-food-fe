@@ -1,12 +1,60 @@
 import { Text, View, TouchableOpacity } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Successful from "./successfull";
 import Failed from "./failed";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
+import {
+  fetchAllHistoryFailed,
+  fetchAllHistorySuccess,
+} from "@/services/api/historyApi";
+import { HistoryData } from "@/interfaces/HistoryInterface";
 
 export default function History() {
   const [activeTab, setActiveTab] = useState<"successful" | "failed">(
     "successful"
   );
+
+  const restaurantId = useSelector(
+    (state: { restaurant: { restaurantId: string } }) =>
+      state.restaurant.restaurantId
+  );
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [itemsSuccess, setItemsSuccess] = useState<any[]>([]);
+  const [itemsFailed, setItemsFailed] = useState<any[]>([]);
+
+  const fetchSuccess = useMutation({
+    mutationFn: fetchAllHistorySuccess,
+    onSuccess: (data: HistoryData[]) => {
+      setItemsSuccess(data.reverse());
+    },
+    onError: (error) => {
+      console.error("Fetch history error", error);
+    },
+  });
+
+  const fetchFailed = useMutation({
+    mutationFn: fetchAllHistoryFailed,
+    onSuccess: (data: any[]) => {
+      setItemsFailed(data.reverse());
+    },
+    onError: (error) => {
+      console.error("Fetch history error", error);
+    },
+  });
+
+  useEffect(() => {
+    if (restaurantId) {
+      fetchSuccess.mutate(restaurantId);
+      fetchFailed.mutate(restaurantId);
+    }
+  }, [restaurantId, refresh]);
+
+  const handleTabChange = (tab: "successful" | "failed") => {
+    setActiveTab(tab);
+    // Trigger a refresh when tab changes
+    setRefresh((prev) => !prev);
+  };
 
   return (
     <View className="h-full flex-col bg-white">
@@ -15,7 +63,7 @@ export default function History() {
         {/* Successful tab */}
         <TouchableOpacity
           className="flex-1 items-center"
-          onPress={() => setActiveTab("successful")}
+          onPress={() => handleTabChange("successful")}
         >
           <Text
             className={`text-base font-medium ${
@@ -34,7 +82,7 @@ export default function History() {
         {/* Failed tab */}
         <TouchableOpacity
           className="flex-1 items-center"
-          onPress={() => setActiveTab("failed")}
+          onPress={() => handleTabChange("failed")}
         >
           <Text
             className={`text-base font-medium ${
@@ -53,7 +101,19 @@ export default function History() {
 
       {/* tab content */}
       <View className="flex-1 px-4">
-        {activeTab === "successful" ? <Successful /> : <Failed />}
+        {activeTab === "successful" ? (
+          <Successful
+            data={itemsSuccess}
+            refresh={refresh}
+            setRefresh={setRefresh}
+          />
+        ) : (
+          <Failed
+            data={itemsFailed}
+            refresh={refresh}
+            setRefresh={setRefresh}
+          />
+        )}
       </View>
     </View>
   );

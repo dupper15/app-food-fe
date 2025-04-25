@@ -1,3 +1,4 @@
+import { HistoryData } from "@/interfaces/HistoryInterface";
 import { fetchAllHistorySuccess } from "@/services/api/historyApi";
 import { formatCodeOrder, formatDate, formatPrice } from "@/utils/format";
 import { useMutation } from "@tanstack/react-query";
@@ -11,33 +12,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelector } from "react-redux";
 
-export default function Successful() {
+export default function Successful({
+  data,
+  refresh,
+  setRefresh,
+}: {
+  data: any[];
+  refresh: boolean;
+  setRefresh: (refresh: boolean) => void;
+}) {
   const router = useRouter();
-
-  const restaurantId = useSelector(
-    (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
-  );
 
   const [items, setItems] = useState<any[]>([]);
 
-  const fetchSuccess = useMutation({
-    mutationFn: fetchAllHistorySuccess,
-    onSuccess: (data: any[]) => {
-      setItems(data.reverse());
-    },
-    onError: (error) => {
-      console.error("Fetch history error", error);
-    },
-  });
-
   useEffect(() => {
-    if (restaurantId) {
-      fetchSuccess.mutate(restaurantId);
-    }
-  }, [restaurantId]);
+    setItems(data);
+  }, [data]);
 
   const handleNavigateOrderDetails = (item: any) => {
     console.log(item);
@@ -81,7 +72,7 @@ export default function Successful() {
     </TouchableOpacity>
   );
 
-  if (fetchSuccess.isPending) {
+  if (items.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#FFC515" />

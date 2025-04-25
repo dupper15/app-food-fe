@@ -15,9 +15,9 @@ import { useMutation } from "@tanstack/react-query";
 import { fetchDetailHistoryByRestaurant } from "@/services/api/historyApi";
 import { HistoryDetailData } from "@/interfaces/HistoryInterface";
 import { CustomToast } from "../components/toast";
-import { formatCodeOrder } from "@/utils/format";
+import { formatCodeOrder, formatRatio } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-import { formatPrice } from './../../utils/format';
+import { formatPrice } from "./../../utils/format";
 
 export default function OrderDetailScreen() {
   const { id }: { id: string } = useLocalSearchParams();
@@ -130,7 +130,7 @@ export default function OrderDetailScreen() {
         <View className="flex-row items-center mb-4 gap-2">
           <Text className="text-lg font-semibold">Note:</Text>
           <Text className="text-sm text-gray-500 mt-0.5">
-            {orderDetail.order_id.note ? orderDetail.order_id.note : 'None'}
+            {orderDetail.order_id.note ? orderDetail.order_id.note : "None"}
           </Text>
         </View>
 
@@ -140,42 +140,50 @@ export default function OrderDetailScreen() {
 
           {/* Order Items */}
           {orderDetail.order_id.array_item.map((item, index) => (
-           <View className="mb-4 flex-col" key={index}>
-             <View className="flex-row items-start">
-              {/* Quantity */}
-              <View className="w-10 items-center">
-                <Text className="text-sm font-medium text-gray-600">{item.quantity}x</Text>
+            <View className="mb-4 flex-col" key={index}>
+              <View className="flex-row items-start">
+                {/* Quantity */}
+                <View className="w-10 items-center">
+                  <Text className="text-sm font-medium text-gray-600">
+                    {item.quantity}x
+                  </Text>
+                </View>
+
+                {/* Dish and Toppings */}
+                <View className="flex-1">
+                  <Text className="text-sm font-semibold text-gray-800">
+                    {item.dish_id.name}
+                  </Text>
+                </View>
+
+                {/* Total Price */}
+                <View className="w-20 items-end">
+                  <Text className="text-sm font-medium text-gray-700">
+                    {formatPrice(item.dish_id.price * item.quantity)}
+                  </Text>
+                </View>
               </View>
 
-              {/* Dish and Toppings */}
-              <View className="flex-1">
-                <Text className="text-sm font-semibold text-gray-800">{item.dish_id.name}</Text>
-              </View>
-
-              {/* Total Price */}
-              <View className="w-20 items-end">
-                <Text className="text-sm font-medium text-gray-700">
-                  {formatPrice(item.dish_id.price * item.quantity)}
-                </Text>
+              {/* topping */}
+              <View className="flex-row items-start mb-6">
+                <View className="flex-1">
+                  {item.topping && item.topping.length > 0 && (
+                    <View className="mt-2">
+                      {item.topping.map((t, idx) => (
+                        <View key={idx} className="flex-row justify-between">
+                          <Text className="text-xs ps-8 text-gray-500">
+                            + {t.name}
+                          </Text>
+                          <Text className="text-xs text-gray-500">
+                            {formatPrice(t.price)}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
-
-            {/* topping */}
-            <View className="flex-row items-start mb-6">
-              <View className="flex-1">
-                {item.topping && item.topping.length > 0 && (
-                  <View className="mt-2">
-                    {item.topping.map((t, idx) => (
-                      <View key={idx} className="flex-row justify-between">
-                        <Text className="text-xs ps-8 text-gray-500">+ {t.name}</Text>
-                        <Text className="text-xs text-gray-500">{formatPrice(t.price)}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            </View>
-           </View>
           ))}
 
           {/* Order Summary */}
@@ -183,18 +191,46 @@ export default function OrderDetailScreen() {
             <View className="flex-row justify-between mb-2">
               <Text className="text-sm text-gray-600">Tổng tạm phí</Text>
               <Text className="text-sm text-gray-700">
-                {formatPrice(orderDetail.cost)}
+                {formatPrice(
+                  orderDetail?.order_id?.voucher_id?.value &&
+                    orderDetail?.order_id?.voucher_id?.value < 1
+                    ? (orderDetail.cost +
+                        (orderDetail?.order_id?.used_point * 1000 || 0)) /
+                        (1 - orderDetail.order_id.voucher_id.value)
+                    : orderDetail.cost +
+                        (orderDetail?.order_id?.used_point * 1000 || 0) +
+                        (orderDetail?.order_id?.voucher_id?.value || 0)
+                )}
               </Text>
             </View>
 
-            {/* {voucherDiscount > 0 && (
+            {/* point */}
+            {orderDetail?.order_id?.used_point > 0 && (
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-sm text-gray-600">Điểm đã sử dụng</Text>
+                <Text className="text-sm text-gray-700">
+                  - {formatPrice(orderDetail.order_id.used_point * 1000)}
+                </Text>
+              </View>
+            )}
+
+            {/* voucher */}
+            {orderDetail?.order_id?.voucher_id?.value && (
               <View className="flex-row justify-between mb-2">
                 <Text className="text-sm text-gray-600">Voucher</Text>
                 <Text className="text-sm text-gray-700">
-                  {voucherDiscount.toLocaleString()}đ
+                  -{" "}
+                  {orderDetail?.order_id?.voucher_id?.value < 1
+                    ? formatPrice(
+                        ((orderDetail.cost +
+                          (orderDetail?.order_id?.used_point * 1000 || 0)) *
+                          orderDetail.order_id.voucher_id.value) /
+                          (1 - orderDetail.order_id.voucher_id.value)
+                      )
+                    : formatPrice(orderDetail.order_id.voucher_id.value)}
                 </Text>
               </View>
-            )} */}
+            )}
 
             <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-200">
               <Text className="text-base font-semibold text-gray-700">

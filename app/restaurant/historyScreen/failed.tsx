@@ -13,7 +13,15 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 
-export default function Failed() {
+export default function Failed({
+  data,
+  refresh,
+  setRefresh,
+}: {
+  data: any[];
+  refresh: boolean;
+  setRefresh: (refresh: boolean) => void;
+}) {
   const router = useRouter();
 
   const restaurantId = useSelector(
@@ -23,21 +31,9 @@ export default function Failed() {
 
   const [items, setItems] = useState<any[]>([]);
 
-  const fetchFailed = useMutation({
-    mutationFn: fetchAllHistoryFailed,
-    onSuccess: (data: any[]) => {
-      setItems(data.reverse());
-    },
-    onError: (error) => {
-      console.error("Fetch history error", error);
-    },
-  });
-
   useEffect(() => {
-    if (restaurantId) {
-      fetchFailed.mutate(restaurantId);
-    }
-  }, [restaurantId]);
+    setItems(data);
+  }, [data]);
 
   const handleNavigateOrderDetails = (item: any) => {
     console.log(item);
@@ -87,7 +83,7 @@ export default function Failed() {
     </TouchableOpacity>
   );
 
-  if (fetchFailed.isPending) {
+  if (items.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#FFC515" />
