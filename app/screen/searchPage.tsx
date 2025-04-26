@@ -20,7 +20,9 @@ const SearchPage = () => {
       setRestaurants(JSON.parse(searchedRestaurants));
     }
   }, [searchedRestaurants]);
-
+  useEffect(() => {
+    console.log("Searched restaurants:", search);
+  }, [search]);
   return (
     <View className='flex-1 bg-white p-4'>
       {/* Header Search Box */}
