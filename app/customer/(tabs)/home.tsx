@@ -17,6 +17,7 @@ import Category from "@/app/components/category";
 import RestaurantBox from "@/app/components/restaurantBox";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import ImageSearch from "@/app/components/imageSearch";
 export default function Home() {
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
@@ -25,6 +26,7 @@ export default function Home() {
   const [restaurantHistory, setRestaurantHistory] = useState<RestaurantData[]>(
     []
   );
+  const [isImageSearch, setIsImageSearch] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [rcmRestaurant, setRcmRestaurant] = useState<RestaurantData[]>([]);
   const getRestaurantHistoryMutation = useMutation({
@@ -108,7 +110,9 @@ export default function Home() {
               <Text className='text-slate-400'>Search for meals...</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className='pl-3'>
+            <TouchableOpacity
+              onPress={() => setIsImageSearch(true)}
+              className='pl-3'>
               <Ionicons name='camera' size={24} color='#FFC515' />
             </TouchableOpacity>
           </View>
@@ -269,6 +273,7 @@ export default function Home() {
           </ScrollView>
         </View>
       </Animated.ScrollView>
+      {isImageSearch && <ImageSearch setShowModal={setIsImageSearch} />}
     </View>
   );
 }
