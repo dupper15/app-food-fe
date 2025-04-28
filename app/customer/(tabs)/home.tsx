@@ -102,7 +102,7 @@ export default function Home() {
           paddingHorizontal: 16,
         }}>
         <View className='flex-row items-center w-full space-x-2'>
-          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 border border-gray-300'>
+          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 gap-2 border border-gray-300'>
             <TouchableOpacity
               className='flex-1 flex-row items-center px-4 py-2 rounded-full'
               onPress={() => router.push("/screen/search")}>

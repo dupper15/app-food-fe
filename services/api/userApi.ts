@@ -106,3 +106,13 @@ export const changePassword = async (data: any) => {
   });
   return response.data;
 };
+export const setUsageTime = async (data) => {
+  const { userId, usageTime } = data;
+  if (!userId || !usageTime) {
+    throw new Error("User ID and usage time are required");
+  }
+  const response = await axiosInstance.put(`users/${userId}/usage-time`, {
+    total_time_spent: usageTime,
+  });
+  return response.data;
+};
