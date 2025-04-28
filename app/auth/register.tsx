@@ -41,7 +41,7 @@ const RegisterScreen: React.FC = () => {
         <ImageBackground
           source={require("@/assets/images/login.jpg")}
           className='flex-1 object-cover'>
-          <View className='flex-1 justify-end'>
+          <View className='flex-1 justify-end pt-4'>
             <View className='absolute inset-0 bg-black opacity-40' />
 
             <View className='bg-white rounded-t-3xl p-8 pb-10 w-full items-center shadow-lg'>
