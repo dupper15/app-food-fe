@@ -116,3 +116,60 @@ export const setUsageTime = async (data) => {
   });
   return response.data;
 };
+export const sendVerificationCode = async (data) => {
+  const { id, phone } = data;
+  if (!id || !phone) {
+    throw new Error("User ID and phone number are required");
+  }
+  const response = await axiosInstance.post(`sms`, {
+    id,
+    to: phone,
+  });
+  return response.data;
+};
+export const checkCode = async (data) => {
+  const { id, code } = data;
+  if (!id || !code) {
+    throw new Error("User ID and code are required");
+  }
+  const response = await axiosInstance.post(`sms/verify`, {
+    id,
+    code,
+  });
+  return response.data;
+};
+export const checkCodeNoDeleteCode = async (data) => {
+  const { id, code } = data;
+  if (!id || !code) {
+    throw new Error("User ID and code are required");
+  }
+  const response = await axiosInstance.post(`sms/verify-no-delete-code`, {
+    id,
+    code,
+  });
+  return response.data;
+};
+
+export const sendCodeByPhone = async (data) => {
+  const { phone } = data;
+  if (!phone) {
+    throw new Error("Phone number is required");
+  }
+  const response = await axiosInstance.post(`sms/find-Id`, {
+    phone,
+  });
+  return response.data;
+};
+export const resetPassword = async (data) => {
+  const { id, code, newPassword, confirmPassword } = data;
+  if (!id || !code || !newPassword || !confirmPassword) {
+    throw new Error("All fields are required");
+  }
+  const response = await axiosInstance.put(`sms/forget-password`, {
+    id,
+    code,
+    newPassword,
+    confirmPassword,
+  });
+  return response.data;
+};

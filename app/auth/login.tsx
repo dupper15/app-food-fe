@@ -29,37 +29,42 @@ const LoginScreen: React.FC = () => {
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: async (data: any) => {
-      const { accessToken, refreshToken, total_time_spent } = data;
+      const { accessToken, refreshToken, total_time_spent, isVerified } = data;
       const userId = getUserIdFromToken(accessToken);
       AsyncStorage.setItem("usageTime", total_time_spent.toString());
+      AsyncStorage.setItem("startTime", Date.now().toString());
       dispatch(setUser({ userId, refreshToken }));
       CustomToast("success", "Success", "Login success");
       AsyncStorage.setItem("userId", String(userId));
-      if (data.userType === "restaurantOwner") {
-        await AsyncStorage.setItem("owner_id", String(userId));
-        try {
-          const result = await fetchRestaurantByOwner(userId);
-          if (result?.data?._id) {
-            await AsyncStorage.setItem(
-              "restaurant_id",
-              String(result?.data?._id)
-            );
-            dispatch(
-              setRestaurant({
-                restaurantId: result.data._id,
-                name: result.data.name,
-              })
-            );
+      if (isVerified) {
+        if (data.userType === "restaurantOwner") {
+          await AsyncStorage.setItem("owner_id", String(userId));
+          try {
+            const result = await fetchRestaurantByOwner(userId);
+            if (result?.data?._id) {
+              await AsyncStorage.setItem(
+                "restaurant_id",
+                String(result?.data?._id)
+              );
+              dispatch(
+                setRestaurant({
+                  restaurantId: result.data._id,
+                  name: result.data.name,
+                })
+              );
+            }
+            router.push("/restaurant/orderScreen/order");
+          } catch (error) {
+            console.error("Error fetching restaurant details:", error);
+            CustomToast("error", "Error", "Failed to fetch restaurant details");
           }
-          router.push("/restaurant/orderScreen/order");
-        } catch (error) {
-          console.error("Error fetching restaurant details:", error);
-          CustomToast("error", "Error", "Failed to fetch restaurant details");
         }
-      }
-      if (data.userType === "customer") {
-        AsyncStorage.setItem("customer_id", String(userId));
-        router.push("/customer/(tabs)/home");
+        if (data.userType === "customer") {
+          AsyncStorage.setItem("customer_id", String(userId));
+          router.push("/customer/(tabs)/home");
+        }
+      } else {
+        router.push("/auth/verifiedScreen");
       }
     },
     onError: (data: any) => {
@@ -127,7 +132,11 @@ const LoginScreen: React.FC = () => {
               </View>
 
               <View className='w-4/5'>
-                <TouchableOpacity onPress={() => {}} className='self-end mb-6'>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push("/auth/forgetPassword");
+                  }}
+                  className='self-end mb-6'>
                   <Text className='text-blue-500'>Forgot password?</Text>
                 </TouchableOpacity>
               </View>
