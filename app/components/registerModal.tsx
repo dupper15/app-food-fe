@@ -26,6 +26,7 @@ const RegisterModal: React.FC<{
   const buyerMutation = useMutation({
     mutationFn: registerCustomer,
     onSuccess: (data) => {
+      console.log("register", data);
       setLoading(false);
       CustomToast("success", "Successfull", "Register successfully🎉");
       setShowModal(false);
