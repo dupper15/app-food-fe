@@ -22,7 +22,7 @@ const RegisterModal: React.FC<{
   password: string;
   confirmPassword: string;
 }> = ({ setShowModal, name, email, phone, password, confirmPassword }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  
   const buyerMutation = useMutation({
     mutationFn: registerCustomer,
     onSuccess: (data) => {
