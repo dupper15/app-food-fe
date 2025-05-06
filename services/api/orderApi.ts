@@ -1,4 +1,8 @@
-import { Order, OrderOngoingRestaurant, OrderPendingRestaurant } from "@/interfaces/OrderInterface";
+import {
+  Order,
+  OrderOngoingRestaurant,
+  OrderPendingRestaurant,
+} from "@/interfaces/OrderInterface";
 import axiosInstance from "./axiosInstance";
 
 export const fetchOrderById = async (orderId: string): Promise<Order> => {
@@ -37,5 +41,29 @@ export const updateStatusOrderByRestaurant = async (
   id: string
 ): Promise<any> => {
   const response = await axiosInstance.patch(`/order/update-status/${id}`);
+  return response.data;
+};
+
+export const fetchRevenueByRestaurant = async (id: string): Promise<any> => {
+  const response = await axiosInstance.get(`/order/fetch-total-revenue/${id}`);
+  return response.data;
+};
+
+export const fetchOrderRateByRestaurant = async (id: string): Promise<any> => {
+  const response = await axiosInstance.get(`/order/fetch-order-rate/${id}`);
+  return response.data;
+};
+
+export const fetchLoyalCustomerByRestaurant = async (
+  id: string
+): Promise<any> => {
+  const response = await axiosInstance.get(`/order/fetch-loyal-customer/${id}`);
+  return response.data;
+};
+
+export const fetchWeeklyRevenueByRestaurant = async (
+  id: string
+): Promise<any> => {
+  const response = await axiosInstance.get(`/order/fetch-weekly-revenue/${id}`);
   return response.data;
 };

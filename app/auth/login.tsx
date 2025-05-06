@@ -31,6 +31,7 @@ const LoginScreen: React.FC = () => {
     onSuccess: async (data: any) => {
       const { accessToken, refreshToken, total_time_spent, isVerified } = data;
       const userId = getUserIdFromToken(accessToken);
+      console.log("isVerified", isVerified);
       AsyncStorage.setItem("usageTime", total_time_spent.toString());
       AsyncStorage.setItem("startTime", Date.now().toString());
       dispatch(setUser({ userId, refreshToken }));
