@@ -71,6 +71,16 @@ export const ratingApi = {
       throw error;
     }
   },
+
+  fetchAverage: async (id: string): Promise<number> => {
+    try {
+      const response = await axiosInstance.get(`rating/average/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching average rating:", error);
+      throw error;
+    }
+  },
 };
 
 export default ratingApi;
