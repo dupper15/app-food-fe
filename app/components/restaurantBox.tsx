@@ -1,9 +1,15 @@
 import { useEffect } from "react";
-import { Image, Text, TouchableHighlight, View } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableHighlight,
+  View,
+  Dimensions,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Res from "../../interfaces/RestaurantInterface";
 import { useRouter } from "expo-router";
-
+const { width } = Dimensions.get("window");
 const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   restaurant,
 }) => {
@@ -18,9 +24,9 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   };
   return (
     <TouchableHighlight
-      className='rounded-lg bg-white shadow-md h-max w-48'
+      className='rounded-lg bg-white w-max h-max'
       onPress={() => handleNavigate()}>
-      <View style={{ minHeight: 180 }}>
+      <View style={{ minHeight: 180, width: width * 0.45 }}>
         <Image
           source={{ uri: restaurant.owner_id?.avatar }}
           className='w-full h-40 rounded-t-lg'
@@ -29,7 +35,7 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
         />
 
         <View className='p-2'>
-          <Text className='text-lg font-semibold text-gray-900 mb-1'>
+          <Text className='text-lg font-semibold text-gray-900 mb-1 whitespace-nowrap overflow-hidden text-ellipsis'>
             {restaurant.name}
           </Text>
 

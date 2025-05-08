@@ -5,7 +5,6 @@ import {
   Image,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   Animated,
@@ -253,24 +252,38 @@ export default function Home() {
           </View>
         </View>
 
-        <View className='mt-32 gap-2'>
+        <View className='mt-32 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>
             Order again
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {restaurantHistory.map((restaurant, index) => (
-              <RestaurantBox key={index} restaurant={restaurant} />
-            ))}
+            <View className='flex-row space-x-4'>
+              {" "}
+              {restaurantHistory.map((restaurant, index) => (
+                <RestaurantBox key={index} restaurant={restaurant} />
+              ))}
+            </View>
           </ScrollView>
         </View>
 
-        <View className='mt-6 gap-2'>
+        <View className='mt-4 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className='flex-row space-x-4'>
+              {" "}
+              {rcmRestaurant.map((restaurant, index) => (
+                <RestaurantBox key={index} restaurant={restaurant} />
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+        <View className='mt-4 gap-2 mr-4'>
+          <Text className='text-slate-900 text-lg font-medium'>All</Text>
+          <View className='grid grid-cols-2 gap-x-4 gap-y-4'>
             {rcmRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />
             ))}
-          </ScrollView>
+          </View>
         </View>
       </Animated.ScrollView>
       {isImageSearch && <ImageSearch setShowModal={setIsImageSearch} />}

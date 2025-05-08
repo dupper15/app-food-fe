@@ -71,47 +71,55 @@ export default function Personal() {
 
   return (
     <View className='flex-1 bg-white'>
-      <View className='bg-white px-6 py-3 shadow-sm'>
+      <View className='bg-white px-6 py-3 border-b border-gray-200'>
         <Text className='text-2xl font-semibold text-gray-800'>Profile</Text>
       </View>
 
       <View className='flex-1 gap-4 py-8 px-6'>
-        {user && (
-          <View className='flex-row items-center'>
-            {user.avatar ? (
-              <Image
-                source={{
-                  uri: user.avatar,
-                }}
-                className='w-16 h-16 rounded-full mr-4'
-              />
-            ) : (
-              <Image
-                source={{
-                  uri: " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
-                }}
-                className='w-16 h-16 rounded-full mr-4'
-              />
-            )}
-            <View>
-              <Text className='text-lg font-semibold text-gray-800'>
-                {user.name}
-              </Text>
-              <Text className='text-gray-500'>{user.email}</Text>
+        <View className='bg-gray-50 rounded-xl p-4'>
+          {user && (
+            <View className='flex-row items-center'>
+              {user.avatar ? (
+                <Image
+                  source={{
+                    uri: user.avatar,
+                  }}
+                  className='w-16 h-16 rounded-full mr-4'
+                />
+              ) : (
+                <Image
+                  source={{
+                    uri: " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
+                  }}
+                  className='w-16 h-16 rounded-full mr-4'
+                />
+              )}
+              <View>
+                <Text className='text-lg font-semibold text-gray-800'>
+                  {user.name}
+                </Text>
+                <Text className='text-gray-500'>{user.email}</Text>
+              </View>
             </View>
-          </View>
-        )}
+          )}
+        </View>
 
-        {menuItems.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            className='flex-row items-center py-4 px-4 bg-white rounded-xl shadow-sm'
-            onPress={item.onPress}
-            activeOpacity={0.7}>
-            <MaterialIcons name={item.icon} size={24} color={item.iconColor} />
-            <Text className='ml-4 text-base text-gray-800'>{item.label}</Text>
-          </TouchableOpacity>
-        ))}
+        <View className='mt-4 border-t border-gray-200 bg-gray-50 rounded-xl'>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              className='flex-row items-center py-4 px-4  rounded-xl'
+              onPress={item.onPress}
+              activeOpacity={0.7}>
+              <MaterialIcons
+                name={item.icon}
+                size={24}
+                color={item.iconColor}
+              />
+              <Text className='ml-4 text-base text-gray-800'>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </View>
   );
