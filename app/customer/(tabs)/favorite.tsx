@@ -99,7 +99,7 @@ export default function Favorite() {
           {restaurants.map((restaurant) => (
             <View
               key={restaurant._id}
-              className='bg-white rounded-xl p-4 mb-5 shadow-md border border-gray-100'>
+              className='bg-white rounded-xl p-4 mb-5  border border-gray-300'>
               <View className='flex-row'>
                 <Image
                   source={{ uri: restaurant.owner_id.avatar }}
@@ -115,7 +115,7 @@ export default function Favorite() {
                 </View>
                 <TouchableHighlight
                   onPress={() => handleRemoveFavorite(restaurant._id)}
-                  className='absolute top-2 right-2'>
+                  className='absolute top-0 right-1'>
                   <Icon name={"heart"} size={28} color={"red"} />
                 </TouchableHighlight>
               </View>
