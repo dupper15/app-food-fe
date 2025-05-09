@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { router } from "expo-router";
 import { CompleteHistoryItem } from "@/services/historyService";
 import { transPrice } from "@/utils/transPrice";
+import ReorderButton from "./reorderButton";
+import CancelOrderButton from "./cancelOrderButton";
 
 interface OrderComponentProps {
   item: CompleteHistoryItem;
@@ -11,15 +13,17 @@ interface OrderComponentProps {
   onCancel?: (orderId: string) => void;
   onRate?: (orderId: string) => void;
   onReorder?: (orderId: string) => void;
+  status?: string;
+  actionButton?: React.ReactNode;
 }
 
 const OrderComponent = ({
   item,
   mode,
   onTrackRoute,
-  onCancel,
   onRate,
-  onReorder,
+  status,
+  actionButton,
 }: OrderComponentProps) => {
   const handleOrderPress = () => {
     if (mode === "ongoing") {
@@ -32,11 +36,17 @@ const OrderComponent = ({
   // Helper function to get status color
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
-    if (statusLower === "cancelled" || statusLower === "canceled")
-      return "#FF3B30"; // Red
-    if (statusLower === "completed") return "#34C759"; // Green
-    return "#007AFF"; // Blue for ongoing/processing
+    if (statusLower === "cancel") return "#FF3B30"; // Red
+    if (statusLower === "complete") return "#34C759"; // Green
+    if (statusLower === "pending") return "#FF9500"; // Orange
+    if (statusLower === "received") return "#5AC8FA"; // Light Blue
+    if (statusLower === "preparing") return "#007AFF"; // Blue
+    if (statusLower === "ready") return "#4CD964"; // Bright Green
+    return "#007AFF"; // Default Blue for unknown statuses
   };
+
+  // Get the display status - use passed status prop if available, otherwise use order status
+  const displayStatus = status || item.order.status;
 
   return (
     <TouchableOpacity style={styles.orderCard} onPress={handleOrderPress}>
@@ -48,9 +58,10 @@ const OrderComponent = ({
           <Text
             style={[
               styles.statusText,
-              { color: getStatusColor(item.order.status) },
-            ]}>
-            {item.order.status}
+              { color: getStatusColor(displayStatus) },
+            ]}
+          >
+            {displayStatus}
           </Text>
         </View>
       </View>
@@ -63,7 +74,7 @@ const OrderComponent = ({
               <Image
                 source={{ uri: orderItem.dish.image }}
                 style={styles.dishImage}
-                resizeMode='cover'
+                resizeMode="cover"
               />
             ) : (
               <View style={styles.placeholderImage} />
@@ -97,31 +108,34 @@ const OrderComponent = ({
           <>
             <TouchableOpacity
               style={styles.rateButton}
-              onPress={() => onTrackRoute && onTrackRoute(item.order._id)}>
+              onPress={() => onTrackRoute && onTrackRoute(item.order._id)}
+            >
               <Text style={styles.rateButtonText}>Track Route</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.reorderButton}
-              onPress={() => onCancel && onCancel(item.order._id)}>
-              <Text style={styles.reorderButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            {actionButton ? (
+              actionButton
+            ) : (
+              <CancelOrderButton
+                orderId={item.order._id}
+                buttonStyle={styles.reorderButton}
+                textStyle={styles.reorderButtonText}
+                returnToHistory={true}
+              />
+            )}
           </>
         ) : (
           // History mode buttons
           <>
-            {item.order.status.toLowerCase() === "completed" && (
+            {displayStatus.toLowerCase() === "completed" && (
               <TouchableOpacity
                 style={styles.rateButton}
-                onPress={() => onRate && onRate(item.order._id)}>
+                onPress={() => onRate && onRate(item.order._id)}
+              >
                 <Text style={styles.rateButtonText}>Rate</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={styles.reorderButton}
-              onPress={() => onReorder && onReorder(item.order._id)}>
-              <Text style={styles.reorderButtonText}>Re-Order</Text>
-            </TouchableOpacity>
+            <ReorderButton orderId={item.order._id} returnToHistory={true} />
           </>
         )}
       </View>

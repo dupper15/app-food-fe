@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableHighlight,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -24,6 +25,7 @@ import {
   removeFavoriteRestaurant,
 } from "@/services/api/userApi";
 import { useSelector } from "react-redux";
+import { getOrInitializeConversation } from "@/services/api/chatApi";
 
 const { width } = Dimensions.get("window");
 
@@ -43,6 +45,8 @@ const RestaurantPage = () => {
   const userId = useSelector((state) => state.user.userId);
   const router = useRouter();
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
+  const [isStartingChat, setIsStartingChat] = useState(false);
+
   useEffect(() => {
     if (data) {
       setRestaurant(JSON.parse(data));
@@ -137,21 +141,76 @@ const RestaurantPage = () => {
       console.error("Error fetching favorite restaurant IDs:", error);
     },
   });
+
+  const chatInitMutation = useMutation({
+    mutationFn: ({ user1, user2 }: { user1: string; user2: string }) =>
+      getOrInitializeConversation(user1, user2),
+    onSuccess: (data) => {
+      console.log("Chat initialization successful:", data);
+      setIsStartingChat(false);
+      if (data && data.conversationId) {
+        router.push({
+          pathname: "/customer/chat/[id]",
+          params: { id: data.conversationId },
+        });
+      } else {
+        console.error("Missing conversation ID in response:", data);
+        alert("Could not start chat. Please try again.");
+      }
+    },
+    onError: (error) => {
+      console.error("Error initializing chat:", error);
+      setIsStartingChat(false);
+      alert("Failed to start chat. Please try again.");
+    },
+  });
+
+  const handleChatWithRestaurant = () => {
+    console.log("Chat button clicked");
+
+    if (!userId) {
+      console.log("User not logged in, redirecting to login");
+      router.push("/auth/login");
+      return;
+    }
+
+    if (!restaurant?._id) {
+      console.error("Restaurant ID is missing");
+      alert("Cannot start chat: restaurant information is missing");
+      return;
+    }
+
+    console.log(
+      `Starting chat between user ${userId} and restaurant ${restaurant._id}`
+    );
+    setIsStartingChat(true);
+
+    // Add a small delay to ensure state update is visible
+    setTimeout(() => {
+      chatInitMutation.mutate({
+        user1: userId,
+        user2: restaurant._id,
+      });
+    }, 100);
+  };
+
   return (
-    <ScrollView className='bg-gray-100 flex-1'>
-      <View className='absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10'>
+    <ScrollView className="bg-gray-100 flex-1">
+      <View className="absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10">
         <TouchableOpacity
           onPress={() => router.back()}
-          className='bg-white rounded-full p-2 shadow-md'>
-          <Icon name='arrow-back' size={24} color='black' />
+          className="bg-white rounded-full p-2 shadow-md"
+        >
+          <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
-          className='bg-customYellow p-1 rounded-lg'
-          style={{ zIndex: 30 }}>
-          <Icon name='cart-outline' size={24} color={"black"} />
+          className="bg-customYellow p-1 rounded-lg"
+          style={{ zIndex: 30 }}
+        >
+          <Icon name="cart-outline" size={24} color={"black"} />
         </TouchableOpacity>
       </View>
-      <View className='relative'>
+      <View className="relative">
         {restaurant?.banners && restaurant.banners.length > 0 ? (
           <>
             <Carousel
@@ -165,12 +224,12 @@ const RestaurantPage = () => {
               renderItem={({ item }) => (
                 <Image
                   source={{ uri: item }}
-                  className='w-full h-52 rounded-lg'
-                  resizeMode='cover'
+                  className="w-full h-52 rounded-lg"
+                  resizeMode="cover"
                 />
               )}
             />
-            <View className='absolute bottom-4 left-1/2 -translate-x-1/2 flex-row'>
+            <View className="absolute bottom-4 left-1/2 -translate-x-1/2 flex-row">
               {restaurant.banners.map((_, index) => (
                 <View
                   key={index}
@@ -184,17 +243,17 @@ const RestaurantPage = () => {
             </View>
           </>
         ) : (
-          <Text className='text-center text-gray-500'>Loading banners...</Text>
+          <Text className="text-center text-gray-500">Loading banners...</Text>
         )}
       </View>
 
-      <View className='p-4'>
-        <View className='flex-row items-center justify-between space-x-2 mb-2'>
-          <Text className='text-3xl font-bold text-gray-900 mb-2'>
+      <View className="p-4">
+        <View className="flex-row items-center justify-between space-x-2 mb-2">
+          <Text className="text-3xl font-bold text-gray-900 mb-2">
             {restaurant?.name}
           </Text>
 
-          <View className='flex-row items-center gap-4'>
+          <View className="flex-row items-center gap-4">
             <TouchableHighlight onPress={handleAddToFavorite}>
               <Icon
                 name={isFavorite ? "favorite" : "favorite-border"}
@@ -202,22 +261,38 @@ const RestaurantPage = () => {
                 color={isFavorite ? "#FF6347" : "gray"}
               />
             </TouchableHighlight>
-            <Icon name='chat-bubble-outline' size={24} color='blue' />
+            <TouchableHighlight
+              style={{
+                padding: 10, // Add explicit padding to increase touchable area
+                borderRadius: 20,
+              }}
+              underlayColor="#f0f0f0"
+              onPress={() => {
+                console.log("Chat button pressed");
+                handleChatWithRestaurant();
+              }}
+            >
+              {isStartingChat ? (
+                <ActivityIndicator size="small" color="blue" />
+              ) : (
+                <Icon name="chat-bubble-outline" size={24} color="blue" />
+              )}
+            </TouchableHighlight>
           </View>
         </View>
 
-        <View className='flex-row items-center space-x-2 mb-2'>
-          <Icon name='location-on' size={22} color='#FF6347' />
-          <Text className='text-lg text-gray-700'>{restaurant?.address}</Text>
+        <View className="flex-row items-center space-x-2 mb-2">
+          <Icon name="location-on" size={22} color="#FF6347" />
+          <Text className="text-lg text-gray-700">{restaurant?.address}</Text>
         </View>
 
-        <Text className='text-base text-gray-600 leading-6'>
+        <Text className="text-base text-gray-600 leading-6">
           {restaurant?.description}
         </Text>
 
-        <View className='flex-row items-center mt-4 space-x-2'>
-          <Icon name='star' size={24} color={"#FFC107"} />
-          <Text className='text-lg font-medium text-gray-800'>
+        <View className="flex-row items-center mt-4 space-x-2">
+          <Icon name="star" size={24} color={"#FFC107"} />
+          <Text className="text-lg font-medium text-gray-800">
             {restaurant?.rating} 4.5 / 5
           </Text>
         </View>
@@ -225,25 +300,28 @@ const RestaurantPage = () => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className='flex-row px-4 py-2 '>
+        className="flex-row px-4 py-2 "
+      >
         {categories.map((category, index) => (
           <TouchableHighlight
             key={index}
             onPress={() => {
               setCurrentCategory(category);
             }}
-            underlayColor='#FACC15'
+            underlayColor="#FACC15"
             className={`rounded-lg px-4 py-2 transition-all border mx-1 border-customYellow duration-300 ${
               category._id == currentCategory._id
                 ? "bg-customYellow"
                 : "bg-white"
-            }`}>
+            }`}
+          >
             <Text
               className={`text-sm font-semibold ${
                 category._id == currentCategory._id
                   ? "text-white"
                   : "text-customYellow"
-              }`}>
+              }`}
+            >
               {category.name}
             </Text>
           </TouchableHighlight>
@@ -251,13 +329,13 @@ const RestaurantPage = () => {
       </ScrollView>
       <View>
         {dishes.length > 0 ? (
-          <View className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4'>
+          <View className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
             {dishes.map((dish) => (
               <DishBox key={dish.id} dish={dish} />
             ))}
           </View>
         ) : (
-          <Text className='text-center text-gray-500'>No dishes found</Text>
+          <Text className="text-center text-gray-500">No dishes found</Text>
         )}
       </View>
     </ScrollView>

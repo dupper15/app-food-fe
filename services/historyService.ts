@@ -1,5 +1,4 @@
 import { fetchUserHistory } from "./api/historyApi";
-import { fetchOrderById } from "./api/orderApi";
 import { fetchOrderItems } from "./api/orderItemApi";
 import { fetchDishById } from "./api/dishApi";
 import { fetchToppings } from "./api/toppingApi";
@@ -60,18 +59,21 @@ export const fetchCompleteHistory = async (
   userId: string
 ): Promise<CompleteHistoryItem[]> => {
   try {
-    // Step 1: Fetch user's history
-    const historyItems = await fetchUserHistory(userId);
+    // Step 1: Fetch user's orders
+    const orders = await fetchUserHistory(userId);
 
-    // Step 2: For each history item, fetch the order details
-    const completeHistoryPromises = historyItems.map(async (historyItem) => {
+    // Step 2: For each order, fetch related data and transform to CompleteHistoryItem
+    const completeHistoryPromises = orders.map(async (order) => {
       try {
-        // Fetch order details
-        const order = await fetchOrderById(historyItem.order_id);
-
+        // Fetch restaurant details
         const restaurant = await getRestaurantDetail(order.restaurant_id);
+
         // Fetch order items - handle both string and array cases
-        const orderItems = await fetchOrderItems(order.array_item);
+        const orderItemIds = Array.isArray(order.array_item)
+          ? order.array_item
+          : [order.array_item];
+
+        const orderItems = await fetchOrderItems(orderItemIds);
 
         // For each order item, fetch dish and toppings
         const orderItemsWithDetails = await Promise.all(
@@ -133,11 +135,14 @@ export const fetchCompleteHistory = async (
         // Combine all data
         return {
           historyItem: {
-            _id: historyItem._id,
-            order_id: historyItem.order_id,
-            cost: ensureNumber(historyItem.cost),
-            sum_dishes: ensureNumber(historyItem.sum_dishes),
-            createdAt: historyItem.createdAt,
+            _id: order._id, // Use order id as history id
+            order_id: order._id,
+            cost: ensureNumber(order.total_price),
+            sum_dishes: orderItemsWithDetails.reduce(
+              (sum, item) => sum + item.quantity,
+              0
+            ),
+            createdAt: order.createdAt,
           },
           order: {
             _id: order._id,
@@ -159,26 +164,23 @@ export const fetchCompleteHistory = async (
           })),
         };
       } catch (error) {
-        console.error(
-          `Error processing history item ${historyItem._id}:`,
-          error
-        );
+        console.error(`Error processing order ${order._id}:`, error);
         // Return a partial history item with available data
         return {
           historyItem: {
-            _id: historyItem._id,
-            order_id: historyItem.order_id,
-            cost: ensureNumber(historyItem.cost),
-            sum_dishes: ensureNumber(historyItem.sum_dishes),
-            createdAt: historyItem.createdAt,
+            _id: order._id,
+            order_id: order._id,
+            cost: ensureNumber(order.total_price),
+            sum_dishes: 0,
+            createdAt: order.createdAt,
           },
           order: {
-            _id: historyItem.order_id,
-            status: "unknown",
-            time_receive: 0,
-            total_price: ensureNumber(historyItem.cost),
-            restaurant_id: "",
-            createdAt: historyItem.createdAt,
+            _id: order._id,
+            status: order.status,
+            time_receive: ensureNumber(order.time_receive),
+            total_price: ensureNumber(order.total_price),
+            restaurant_id: order.restaurant_id,
+            createdAt: order.createdAt,
           },
           orderItems: [],
           restaurant: {
@@ -190,8 +192,9 @@ export const fetchCompleteHistory = async (
         };
       }
     });
-    console.log("Complete history promises:", completeHistoryPromises);
-    return Promise.all(completeHistoryPromises);
+
+    const result = await Promise.all(completeHistoryPromises);
+    return result;
   } catch (error) {
     console.error("Error fetching complete history:", error);
     throw error;

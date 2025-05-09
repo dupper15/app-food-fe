@@ -19,6 +19,7 @@ import {
 } from "lucide-react-native";
 import { fetchCompleteHistory } from "@/services/historyService";
 import { useSelector } from "react-redux";
+import { transPrice } from "@/utils/transPrice";
 
 const OrderDetailScreen = () => {
   const router = useRouter();
@@ -40,9 +41,7 @@ const OrderDetailScreen = () => {
         setError(null);
 
         const historyItems = await fetchCompleteHistory(userId);
-        console.log("History Items:", historyItems);
 
-        // Add historyItem._id to the search criteria
         const order = historyItems.find(
           (item) =>
             item.order._id === orderId ||
@@ -71,7 +70,44 @@ const OrderDetailScreen = () => {
     }
   }, [orderId, userId]);
 
-  // Show loading state
+  const getStatusColor = (status: string) => {
+    const statusLower = status.toLowerCase();
+    if (statusLower === "cancel" || statusLower === "cancelled")
+      return "#FF3B30"; // Red
+    if (statusLower === "complete" || statusLower === "completed")
+      return "#34C759"; // Green
+    if (statusLower === "pending") return "#FF9500"; // Orange
+    if (statusLower === "received") return "#5AC8FA"; // Light Blue
+    if (statusLower === "preparing") return "#007AFF"; // Blue
+    if (statusLower === "ready") return "#4CD964"; // Bright Green
+    return "#007AFF"; // Default Blue for unknown statuses
+  };
+
+  const renderOrderActions = () => {
+    const canBeCancelled =
+      orderDetail?.order?.status.toLowerCase() !== "completed" &&
+      orderDetail?.order?.status.toLowerCase() !== "cancelled" &&
+      orderDetail?.order?.status.toLowerCase() !== "canceled";
+
+    if (canBeCancelled) {
+      return (
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.paymentButton}>
+            <Text style={styles.paymentButtonText}>Payment</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.reorderButton}>
+          <Text style={styles.reorderButtonText}>Payment</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
@@ -81,7 +117,6 @@ const OrderDetailScreen = () => {
     );
   }
 
-  // Show error state
   if (error || !orderDetail) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
@@ -96,7 +131,6 @@ const OrderDetailScreen = () => {
     );
   }
 
-  // Calculate totals
   const subtotal = orderDetail.orderItems.reduce(
     (sum: number, item: any) => sum + item.dish.price * item.quantity,
     0
@@ -122,7 +156,6 @@ const OrderDetailScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -137,13 +170,11 @@ const OrderDetailScreen = () => {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Order ID */}
         <View style={styles.idContainer}>
           <Text style={styles.idLabel}>ID: </Text>
           <Text style={styles.idValue}>#{orderDetail.order._id.slice(-5)}</Text>
         </View>
 
-        {/* Restaurant Info */}
         <View style={styles.restaurantContainer}>
           <Image
             source={{
@@ -157,14 +188,18 @@ const OrderDetailScreen = () => {
             <Text style={styles.restaurantName}>
               {orderDetail.restaurant.name}
             </Text>
-            <Text style={[styles.statusText, { color: "#007AFF" }]}>
+            <Text
+              style={[
+                styles.statusText,
+                { color: getStatusColor(orderDetail.order.status) },
+              ]}
+            >
               {orderDetail.order.status.charAt(0).toUpperCase() +
                 orderDetail.order.status.slice(1)}
             </Text>
           </View>
         </View>
 
-        {/* Location */}
         <View style={styles.locationContainer}>
           <View style={styles.locationRow}>
             <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
@@ -174,11 +209,9 @@ const OrderDetailScreen = () => {
           </View>
         </View>
 
-        {/* Order Details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Order Detail</Text>
 
-          {/* Order Items */}
           {orderDetail.orderItems.map((item: any, index: number) => (
             <View key={index} style={styles.orderItem}>
               <View style={styles.itemQuantity}>
@@ -197,25 +230,22 @@ const OrderDetailScreen = () => {
                 )}
               </View>
               <Text style={styles.itemPrice}>
-                {(item.dish.price * item.quantity).toLocaleString()}đ
+                {transPrice(item.dish.price * item.quantity)}
               </Text>
             </View>
           ))}
 
-          {/* Order Summary */}
           <View style={styles.summaryContainer}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Tổng tạm phí</Text>
-              <Text style={styles.summaryValue}>
-                {subtotal.toLocaleString()}đ
-              </Text>
+              <Text style={styles.summaryValue}>{transPrice(subtotal)}</Text>
             </View>
 
             {voucherDiscount > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Voucher</Text>
                 <Text style={styles.summaryValue}>
-                  {voucherDiscount.toLocaleString()}đ
+                  {transPrice(voucherDiscount)}
                 </Text>
               </View>
             )}
@@ -223,19 +253,14 @@ const OrderDetailScreen = () => {
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Tổng cộng</Text>
               <Text style={styles.totalValue}>
-                {orderDetail.order.total_price},000đ
+                {transPrice(orderDetail.order.total_price)}
               </Text>
             </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* Re-Order Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.reorderButton}>
-          <Text style={styles.reorderButtonText}>Payment</Text>
-        </TouchableOpacity>
-      </View>
+      {renderOrderActions()}
     </SafeAreaView>
   );
 };
@@ -434,6 +459,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   reorderButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  actionsContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#EEEEEE",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  cancelButton: {
+    flex: 1,
+    marginRight: 8,
+  },
+  paymentButton: {
+    flex: 2,
+    backgroundColor: "#FFCC00",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  paymentButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",

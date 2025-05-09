@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
 import {
   View,
   Text,
@@ -15,7 +21,7 @@ import {
   CompleteHistoryItem,
 } from "@/services/historyService";
 import { useSelector } from "react-redux";
-import { router } from "expo-router";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import OrderComponent from "@/app/components/orderItem";
 import RatingPopup from "@/app/components/rating";
 import ratingApi from "@/services/api/ratingApi";
@@ -23,14 +29,58 @@ import ratingApi from "@/services/api/ratingApi";
 // Tab options
 const TABS = ["Ongoing", "History"];
 
+// Create a context for history refresh
+export const HistoryRefreshContext = createContext<{
+  refreshHistory: () => Promise<any>; // Changed from Promise<void> to Promise<any>
+}>({
+  refreshHistory: async () => {},
+});
+
+// Custom hook to use history refresh
+export const useHistoryRefresh = () => useContext(HistoryRefreshContext);
+
 const OrderHistoryScreen = () => {
   const [ratingVisible, setRatingVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [existingRatingId, setExistingRatingId] = useState<string | null>(null);
+  const { refresh } = useLocalSearchParams();
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
+
+  // Fetch complete history data
+  const {
+    data: historyData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["userHistory", userId],
+    queryFn: () => fetchCompleteHistory(userId),
+    refetchOnWindowFocus: true,
+  });
+
+  // Force refetch when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  // Handle the refresh parameter
+  useEffect(() => {
+    if (refresh === "true") {
+      console.log("Refreshing history data due to refresh parameter");
+      refetch();
+    }
+  }, [refresh, refetch]);
+
+  // Function to refresh history data
+  const refreshHistory = useCallback(async () => {
+    console.log("Refreshing history data...");
+    return refetch();
+  }, [refetch]);
 
   // Handle rating order
   const handleRateOrder = (orderId: string) => {
@@ -62,21 +112,13 @@ const OrderHistoryScreen = () => {
           image: images,
         });
       }
-      // You might want to refresh the data after rating
+      // Refetch data after rating submission
+      await refetch();
+      setRatingVisible(false);
     } catch (error) {
       console.error("Error submitting rating:", error);
     }
   };
-
-  // Fetch complete history data
-  const {
-    data: historyData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["userHistory", userId],
-    queryFn: () => fetchCompleteHistory(userId),
-  });
 
   const ongoingOrders = React.useMemo(() => {
     if (!historyData) return [];
@@ -84,9 +126,13 @@ const OrderHistoryScreen = () => {
     // Create a Set to track unique order IDs
     const uniqueOrderIds = new Set();
 
+    // Statuses that are considered "ongoing" (case-insensitive comparison)
+    const ongoingStatuses = ["pending", "received", "preparing", "ready"];
+
     return historyData.filter((item) => {
-      // Only include orders with 'ongoing' status that we haven't seen before
-      if (item.order.status.toLowerCase() === "ongoing") {
+      const orderStatus = item.order.status.toLowerCase();
+      // Check if the order status is one of the ongoing statuses
+      if (ongoingStatuses.includes(orderStatus)) {
         // If we've already seen this order ID, skip it
         if (uniqueOrderIds.has(item.order._id)) {
           return false;
@@ -99,12 +145,20 @@ const OrderHistoryScreen = () => {
     });
   }, [historyData]);
 
-  const completedOrders =
-    historyData?.filter(
-      (item) =>
-        item.order.status.toLowerCase() === "completed" ||
-        item.order.status.toLowerCase() === "canceled"
-    ) || [];
+  const completedOrders = React.useMemo(() => {
+    if (!historyData) return [];
+
+    // Only include completed or canceled orders (case-insensitive comparison)
+    return historyData.filter((item) => {
+      const orderStatus = item.order.status.toLowerCase();
+      return orderStatus === "complete" || orderStatus === "cancel";
+    });
+  }, [historyData]);
+
+  // Helper function to capitalize first letter of status
+  const capitalizeStatus = (status: string): string => {
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
 
   // Handle tracking route for ongoing orders
   const handleTrackRoute = (orderId: string) => {
@@ -112,25 +166,13 @@ const OrderHistoryScreen = () => {
     router.navigate(`/customer/tracking/${orderId}` as any);
   };
 
-  // Handle canceling an ongoing order
-  const handleCancelOrder = (orderId: string) => {
-    console.log("Cancel order:", orderId);
-    // Implement cancel order logic
-  };
-
-  // Handle reordering a completed order
-  const handleReorderOrder = (orderId: string) => {
-    console.log("Reorder:", orderId);
-    // Implement reorder logic
-  };
-
   // Render ongoing order item
   const renderOngoingItem = ({ item }: { item: CompleteHistoryItem }) => (
     <OrderComponent
       item={item}
-      mode='ongoing'
+      mode="ongoing"
       onTrackRoute={handleTrackRoute}
-      onCancel={handleCancelOrder}
+      status={capitalizeStatus(item.order.status)}
     />
   );
 
@@ -138,9 +180,9 @@ const OrderHistoryScreen = () => {
   const renderHistoryItem = ({ item }: { item: CompleteHistoryItem }) => (
     <OrderComponent
       item={item}
-      mode='history'
+      mode="history"
       onRate={handleRateOrder}
-      onReorder={handleReorderOrder}
+      status={capitalizeStatus(item.order.status)}
     />
   );
 
@@ -148,7 +190,7 @@ const OrderHistoryScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size='large' color='#FFCC00' />
+        <ActivityIndicator size="large" color="#FFCC00" />
         <Text style={styles.loadingText}>Loading your orders...</Text>
       </SafeAreaView>
     );
@@ -159,7 +201,7 @@ const OrderHistoryScreen = () => {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
         <Text style={styles.errorText}>Failed to load orders</Text>
-        <TouchableOpacity style={styles.retryButton}>
+        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -167,64 +209,68 @@ const OrderHistoryScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle='dark-content' />
+    <HistoryRefreshContext.Provider value={{ refreshHistory }}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" />
 
-      {/* Tabs */}
-      <View style={styles.tabContainer}>
-        {TABS.map((tab, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.tab, activeTab === index && styles.activeTab]}
-            onPress={() => setActiveTab(index)}>
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === index && styles.activeTabText,
-              ]}>
-              {tab}
-            </Text>
-            {activeTab === index && <View style={styles.activeIndicator} />}
-          </TouchableOpacity>
-        ))}
-      </View>
+        {/* Tabs */}
+        <View style={styles.tabContainer}>
+          {TABS.map((tab, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.tab, activeTab === index && styles.activeTab]}
+              onPress={() => setActiveTab(index)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === index && styles.activeTabText,
+                ]}
+              >
+                {tab}
+              </Text>
+              {activeTab === index && <View style={styles.activeIndicator} />}
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {/* Order List - conditionally render based on active tab */}
-      {activeTab === 0 ? (
-        <FlatList
-          data={ongoingOrders}
-          renderItem={renderOngoingItem}
-          keyExtractor={(item) => item.historyItem._id}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No ongoing orders</Text>
-            </View>
-          }
+        {/* Order List - conditionally render based on active tab */}
+        {activeTab === 0 ? (
+          <FlatList
+            data={ongoingOrders}
+            renderItem={renderOngoingItem}
+            keyExtractor={(item) => item.historyItem._id}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No ongoing orders</Text>
+              </View>
+            }
+          />
+        ) : (
+          <FlatList
+            data={completedOrders}
+            renderItem={renderHistoryItem}
+            keyExtractor={(item) => item.historyItem._id}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No order history found</Text>
+              </View>
+            }
+          />
+        )}
+        <RatingPopup
+          visible={ratingVisible}
+          onClose={() => setRatingVisible(false)}
+          onSubmit={handleSubmitRating}
+          orderId={selectedOrderId}
+          userId={userId}
         />
-      ) : (
-        <FlatList
-          data={completedOrders}
-          renderItem={renderHistoryItem}
-          keyExtractor={(item) => item.historyItem._id}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No order history found</Text>
-            </View>
-          }
-        />
-      )}
-      <RatingPopup
-        visible={ratingVisible}
-        onClose={() => setRatingVisible(false)}
-        onSubmit={handleSubmitRating}
-        orderId={selectedOrderId}
-        userId={userId}
-      />
-    </SafeAreaView>
+      </SafeAreaView>
+    </HistoryRefreshContext.Provider>
   );
 };
 
