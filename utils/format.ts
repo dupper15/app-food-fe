@@ -38,3 +38,9 @@ export const formatCode = (id: string): string => {
   const shortId = id.slice(-6).toUpperCase();
   return `VC-${shortId}`;
 };
+
+export const formatCodeOrder = (id: string): string => {
+  if (!id) return "";
+  const shortId = id.slice(-6).toUpperCase();
+  return `#${shortId}`;
+};

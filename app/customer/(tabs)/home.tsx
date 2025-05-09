@@ -5,7 +5,6 @@ import {
   Image,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   Animated,
@@ -17,6 +16,7 @@ import Category from "@/app/components/category";
 import RestaurantBox from "@/app/components/restaurantBox";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import ImageSearch from "@/app/components/imageSearch";
 export default function Home() {
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
@@ -25,6 +25,7 @@ export default function Home() {
   const [restaurantHistory, setRestaurantHistory] = useState<RestaurantData[]>(
     []
   );
+  const [isImageSearch, setIsImageSearch] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [rcmRestaurant, setRcmRestaurant] = useState<RestaurantData[]>([]);
   const getRestaurantHistoryMutation = useMutation({
@@ -100,7 +101,7 @@ export default function Home() {
           paddingHorizontal: 16,
         }}>
         <View className='flex-row items-center w-full space-x-2'>
-          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 border border-gray-300'>
+          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 gap-2 border border-gray-300'>
             <TouchableOpacity
               className='flex-1 flex-row items-center px-4 py-2 rounded-full'
               onPress={() => router.push("/screen/search")}>
@@ -108,7 +109,9 @@ export default function Home() {
               <Text className='text-slate-400'>Search for meals...</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className='pl-3'>
+            <TouchableOpacity
+              onPress={() => setIsImageSearch(true)}
+              className='pl-3'>
               <Ionicons name='camera' size={24} color='#FFC515' />
             </TouchableOpacity>
           </View>
@@ -249,26 +252,41 @@ export default function Home() {
           </View>
         </View>
 
-        <View className='mt-32 gap-2'>
+        <View className='mt-32 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>
             Order again
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {restaurantHistory.map((restaurant, index) => (
-              <RestaurantBox key={index} restaurant={restaurant} />
-            ))}
+            <View className='flex-row space-x-4'>
+              {" "}
+              {restaurantHistory.map((restaurant, index) => (
+                <RestaurantBox key={index} restaurant={restaurant} />
+              ))}
+            </View>
           </ScrollView>
         </View>
 
-        <View className='mt-6 gap-2'>
+        <View className='mt-4 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className='flex-row space-x-4'>
+              {" "}
+              {rcmRestaurant.map((restaurant, index) => (
+                <RestaurantBox key={index} restaurant={restaurant} />
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+        <View className='mt-4 gap-2 mr-4'>
+          <Text className='text-slate-900 text-lg font-medium'>All</Text>
+          <View className='grid grid-cols-2 gap-x-4 gap-y-4'>
             {rcmRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />
             ))}
-          </ScrollView>
+          </View>
         </View>
       </Animated.ScrollView>
+      {isImageSearch && <ImageSearch setShowModal={setIsImageSearch} />}
     </View>
   );
 }

@@ -18,10 +18,6 @@ import {
 } from "@/services/api/userApi";
 const RestaurantSelection = () => {
   const { restaurantCriteria, header } = useLocalSearchParams();
-  useEffect(() => {
-    console.log("restaurantCriteria", restaurantCriteria);
-    console.log("header", header);
-  }, [restaurantCriteria, header]);
   const [restaurants, setRestaurants] = useState([0]);
   const [favoriteRestaurants, setFavoriteRestaurants] = useState([]);
   const userId = useSelector((state) => state.user.userId);
@@ -99,7 +95,7 @@ const RestaurantSelection = () => {
   };
   return (
     <View className='flex-1 bg-gray-100 '>
-      <View className='flex-row items-start  bg-white px-2 pt-4 pb-2 shadow-sm mb-4'>
+      <View className='flex-row items-start  bg-white px-2 pt-4 pb-2 mb-4'>
         <TouchableHighlight
           className='rounded-full p-2'
           onPress={() => {
@@ -114,20 +110,20 @@ const RestaurantSelection = () => {
           restaurants.map((restaurant) => (
             <View
               key={restaurant._id}
-              className='bg-white rounded-lg p-5 mb-6 shadow-sm border border-gray-200'>
+              className='bg-white rounded-lg p-5 mb-6 border border-gray-300 '>
               <View className='flex-row items-start justify-between'>
-                <View className='flex-row items-start'>
+                <View className='flex-row items-start w-full'>
                   {restaurant.owner_id?.avatar && (
                     <Image
                       source={{ uri: restaurant.owner_id.avatar }}
-                      className='w-20 h-20 rounded-lg border-2 border-gray-300'
+                      className='w-16 h-16 rounded-lg border border-gray-300'
                     />
                   )}
                   <View className='flex-1 ml-4'>
-                    <Text className='text-2xl font-semibold text-gray-800'>
+                    <Text className='text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden'>
                       {restaurant.name}
                     </Text>
-                    <Text className='text-sm text-gray-600 mt-2'>
+                    <Text className='text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden'>
                       {restaurant.description}
                     </Text>
                   </View>
@@ -148,7 +144,7 @@ const RestaurantSelection = () => {
                       ? "favorite"
                       : "favorite-border"
                   }
-                  size={36}
+                  size={30}
                   color={
                     favoriteRestaurants.includes(restaurant._id)
                       ? "red"
@@ -156,10 +152,11 @@ const RestaurantSelection = () => {
                   }
                 />
               </TouchableHighlight>
-              <View className='flex-row items-end justify-between mt-0'>
-                <Text className='text-xl ml-2 text-gray-900  '>3.5km</Text>
+              <View className='flex-row items-center justify-between mt-4'>
+                <Text className='text-xl ml-2 text-gray-900'>3.5km</Text>
+
                 <TouchableHighlight
-                  className='bg-customYellow rounded-lg px-8 py-4 w-max self-end transition-all duration-300'
+                  className='bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300'
                   onPress={() => {
                     handleDishNavigate(restaurant);
                   }}>

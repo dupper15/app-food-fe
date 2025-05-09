@@ -64,7 +64,7 @@ const CardItem = ({
                 <Text className='text-gray-600'>
                   {transPrice(
                     orderItem.dish_id.price * orderItem.quantity +
-                      orderItem.topping.reduce(
+                      (orderItem.topping ?? []).reduce(
                         (sum: number, topping: any) => sum + topping.price,
                         0
                       )

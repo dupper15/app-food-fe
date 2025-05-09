@@ -1,3 +1,4 @@
+import { HistoryData, HistoryDetailData } from "@/interfaces/HistoryInterface";
 import axiosInstance from "./axiosInstance";
 
 export interface OrderItem {
@@ -22,5 +23,26 @@ export const fetchUserHistory = async (
   const response = await axiosInstance.get(
     `/order/fetchall-order-by-customer/${userId}`
   );
+  return response.data;
+};
+
+export const fetchDetailHistoryByRestaurant = async (
+  id: string
+): Promise<HistoryDetailData> => {
+  const response = await axiosInstance.get(`/history/restaurant/detail/${id}`);
+  return response.data;
+};
+
+export const fetchAllHistorySuccess = async (
+  id: string
+): Promise<HistoryData[]> => {
+  const response = await axiosInstance.get(`/history/restaurant/success/${id}`);
+  return response.data;
+};
+
+export const fetchAllHistoryFailed = async (
+  id: string
+): Promise<HistoryData[]> => {
+  const response = await axiosInstance.get(`/history/restaurant/failed/${id}`);
   return response.data;
 };

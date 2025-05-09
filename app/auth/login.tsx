@@ -29,36 +29,43 @@ const LoginScreen: React.FC = () => {
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: async (data: any) => {
-      const { accessToken, refreshToken } = data;
+      const { accessToken, refreshToken, total_time_spent, isVerified } = data;
       const userId = getUserIdFromToken(accessToken);
-
+      console.log("isVerified", isVerified);
+      AsyncStorage.setItem("usageTime", total_time_spent.toString());
+      AsyncStorage.setItem("startTime", Date.now().toString());
       dispatch(setUser({ userId, refreshToken }));
       CustomToast("success", "Success", "Login success");
-      if (data.userType === "restaurantOwner") {
-        await AsyncStorage.setItem("owner_id", String(userId));
-        try {
-          const result = await fetchRestaurantByOwner(userId);
-          if (result?.data?._id) {
-            await AsyncStorage.setItem(
-              "restaurant_id",
-              String(result?.data?._id)
-            );
-            dispatch(
-              setRestaurant({
-                restaurantId: result.data._id,
-                name: result.data.name,
-              })
-            );
+      AsyncStorage.setItem("userId", String(userId));
+      if (isVerified) {
+        if (data.userType === "restaurantOwner") {
+          await AsyncStorage.setItem("owner_id", String(userId));
+          try {
+            const result = await fetchRestaurantByOwner(userId);
+            if (result?.data?._id) {
+              await AsyncStorage.setItem(
+                "restaurant_id",
+                String(result?.data?._id)
+              );
+              dispatch(
+                setRestaurant({
+                  restaurantId: result.data._id,
+                  name: result.data.name,
+                })
+              );
+            }
+            router.push("/restaurant/orderScreen/order");
+          } catch (error) {
+            console.error("Error fetching restaurant details:", error);
+            CustomToast("error", "Error", "Failed to fetch restaurant details");
           }
-          router.push("/restaurant/orderScreen/order");
-        } catch (error) {
-          console.error("Error fetching restaurant details:", error);
-          CustomToast("error", "Error", "Failed to fetch restaurant details");
         }
-      }
-      if (data.userType === "customer") {
-        AsyncStorage.setItem("customer_id", String(userId));
-        router.push("/customer/(tabs)/home");
+        if (data.userType === "customer") {
+          AsyncStorage.setItem("customer_id", String(userId));
+          router.push("/customer/(tabs)/home");
+        }
+      } else {
+        router.push("/auth/verifiedScreen");
       }
     },
     onError: (data: any) => {
@@ -74,85 +81,85 @@ const LoginScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1"
-    >
+      className='flex-1'>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
+        keyboardShouldPersistTaps='handled'>
         <ImageBackground
           source={require("@/assets/images/login.jpg")}
-          className="flex-1 object-cover"
-        >
-          <View className="flex-1 justify-end">
-            <View className="absolute inset-0 bg-black opacity-40" />
-            <View className="bg-white rounded-t-3xl p-8 pb-10 w-full items-center shadow-lg">
-              <Text className="text-4xl font-bold text-gray-800 mb-8">
+          className='flex-1 object-cover'>
+          <View className='flex-1 justify-end'>
+            <View className='absolute inset-0 bg-black opacity-40' />
+            <View className='bg-white rounded-t-3xl p-8 pb-10 w-full items-center shadow-lg'>
+              <Text className='text-4xl font-bold text-gray-800 mb-8'>
                 Welcome Back!
               </Text>
 
-              <View className="w-4/5 mb-5">
-                <Text className="text-lg mb-2 text-gray-700">Email</Text>
-                <View className="flex-row items-center border border-gray-300 rounded-lg p-4 bg-white">
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Email</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
                   <Ionicons
-                    name="person-outline"
+                    name='person-outline'
                     size={20}
-                    color="#a1a1aa"
-                    className="mr-3"
+                    color='#a1a1aa'
+                    className='mr-3'
                   />
                   <TextInput
                     onChangeText={setEmail}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#a1a1aa"
-                    className="flex-1 text-gray-900"
+                    placeholder='Enter your email'
+                    placeholderTextColor='#a1a1aa'
+                    className='flex-1 text-gray-900'
                   />
                 </View>
               </View>
 
-              <View className="w-4/5 mb-5">
-                <Text className="text-lg mb-2 text-gray-700">Password</Text>
-                <View className="flex-row items-center border border-gray-300 rounded-lg p-4 bg-white">
+              <View className='w-4/5 mb-5'>
+                <Text className='text-lg mb-2 text-gray-700'>Password</Text>
+                <View className='flex-row items-center border border-gray-300 rounded-lg p-4 bg-white'>
                   <Ionicons
-                    name="lock-closed-outline"
+                    name='lock-closed-outline'
                     size={20}
-                    color="#a1a1aa"
-                    className="mr-3"
+                    color='#a1a1aa'
+                    className='mr-3'
                   />
                   <TextInput
                     onChangeText={setPassword}
-                    placeholder="Enter your password"
-                    placeholderTextColor="#a1a1aa"
+                    placeholder='Enter your password'
+                    placeholderTextColor='#a1a1aa'
                     secureTextEntry
-                    className="flex-1 text-gray-900"
+                    className='flex-1 text-gray-900'
                   />
                 </View>
               </View>
 
-              <View className="w-4/5">
-                <TouchableOpacity onPress={() => {}} className="self-end mb-6">
-                  <Text className="text-blue-500">Forgot password?</Text>
+              <View className='w-4/5'>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push("/auth/forgetPassword");
+                  }}
+                  className='self-end mb-6'>
+                  <Text className='text-blue-500'>Forgot password?</Text>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity
                 onPress={handleLogin}
-                className="w-4/5 p-4 rounded-lg bg-customYellow shadow-sm active:opacity-80"
-              >
-                <Text className="text-white text-center font-medium">
+                className='w-4/5 p-4 rounded-lg bg-customYellow shadow-sm active:opacity-80'>
+                <Text className='text-white text-center font-medium'>
                   Login
                 </Text>
               </TouchableOpacity>
 
-              <Text className="text-gray-500 my-5">Or</Text>
+              <Text className='text-gray-500 my-5'>Or</Text>
 
-              <TouchableOpacity className="bg-red-600 p-4 rounded-lg w-4/5 shadow-sm active:opacity-80">
-                <Text className="text-white text-center font-medium">
+              <TouchableOpacity className='bg-red-600 p-4 rounded-lg w-4/5 shadow-sm active:opacity-80'>
+                <Text className='text-white text-center font-medium'>
                   Login with Google
                 </Text>
               </TouchableOpacity>
 
-              <Link href="/auth/register" className="mt-8">
-                <Text className="text-blue-500">
+              <Link href='/auth/register' className='mt-8'>
+                <Text className='text-blue-500'>
                   Don't have an account? Sign up
                 </Text>
               </Link>
