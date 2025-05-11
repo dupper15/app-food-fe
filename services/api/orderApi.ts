@@ -20,7 +20,8 @@ export const cancelOrder = async (
   orderId: string
 ): Promise<{ msg: string }> => {
   const response = await axiosInstance.put(`/order/cancel-order/${orderId}`);
-  
+  return response.data;
+};
 export const fetchPendingOrderByRestaurant = async (
   id: string
 ): Promise<OrderPendingRestaurant[]> => {

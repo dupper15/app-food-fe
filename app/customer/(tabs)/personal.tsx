@@ -1,4 +1,5 @@
 import { getCustomerInfo } from "@/services/api/userApi";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -10,7 +11,17 @@ export default function Personal() {
   const userId = useSelector((state) => state.user.userId);
   const [user, setUser] = useState(null);
   const router = useRouter();
-
+  const handleLogout = () => {
+    AsyncStorage.removeItem("userId");
+    AsyncStorage.removeItem("accessToken");
+    AsyncStorage.removeItem("refreshToken");
+    AsyncStorage.removeItem("owner_id");
+    AsyncStorage.removeItem("restaurant_id");
+    AsyncStorage.removeItem("startTime");
+    AsyncStorage.removeItem("usageTime");
+    AsyncStorage.removeItem("customer_id");
+    router.push("/auth/login");
+  };
   const menuItems = [
     {
       icon: "person", // Giữ nguyên icon cho Personal Info
@@ -29,7 +40,9 @@ export default function Personal() {
       icon: "report", // Dùng icon favorite cho Reflect
       label: "Reflect",
       iconColor: "#10b981", // green-500
-      onPress: () => {},
+      onPress: () => {
+        router.push("/screen/reflect");
+      },
     },
     {
       icon: "lock", // Dùng icon lock cho Change password
@@ -49,7 +62,9 @@ export default function Personal() {
       icon: "logout", // Giữ nguyên icon logout
       label: "Logout",
       iconColor: "#ef4444", // red-500
-      onPress: () => {},
+      onPress: () => {
+        handleLogout();
+      },
     },
   ];
 
