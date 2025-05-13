@@ -57,7 +57,7 @@ const DishBox = ({ dish }) => {
     <View className='relative'>
       <TouchableHighlight
         onPress={handleNavigate}
-        className='relative bg-white rounded-lg shadow-lg w-full'>
+        className='relative bg-white rounded-lg border border-slate-200 w-full'>
         <View>
           {Boolean(dish.best_seller) && (
             <Image
@@ -81,7 +81,7 @@ const DishBox = ({ dish }) => {
                 {transPrice(dish.price)}
               </Text>
               <TouchableOpacity className='bg-customYellow p-2 rounded-full w-10 h-10 flex items-center justify-center'>
-                {orderItem ? (
+                {orderItem && orderItem.quantity ? (
                   <Text className='text-white font-medium text-lg text-center'>
                     {orderItem.quantity}
                   </Text>
