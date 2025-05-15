@@ -29,7 +29,7 @@ const LoyalCustomerList: React.FC<LoyalCustomerListProps> = ({
 
         return (
           <View
-            key={customer._id}
+            key={`${customer._id}-${index}`}
             className="flex-row items-center py-3 border-b border-gray-100"
           >
             <View

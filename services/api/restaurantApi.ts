@@ -65,9 +65,7 @@ export const getRestaurantByCriteria = async (data: any) => {
     const response = await axiosInstance.get(`restaurants/nearby/${userId}`);
     return response.data;
   } else if (restaurantCriteriaString === "Recommended") {
-    const response = await axiosInstance.get(
-      `restaurants/recommended/${userId}`
-    );
+    const response = await axiosInstance.get(`recommend/${userId}`);
     return response.data;
   } else if (restaurantCriteriaString === "Multiple deals") {
     const response = await axiosInstance.get(`restaurants/multiple-deals`);
