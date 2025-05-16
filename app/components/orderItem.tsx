@@ -127,7 +127,7 @@ const OrderComponent = ({
         ) : (
           // History mode buttons
           <>
-            {displayStatus.toLowerCase() === "completed" && (
+            {displayStatus.toLowerCase() === "complete" && (
               <TouchableOpacity
                 style={styles.rateButton}
                 onPress={() => onRate && onRate(item.order._id)}

@@ -163,7 +163,7 @@ const OrderHistoryScreen = () => {
   // Handle tracking route for ongoing orders
   const handleTrackRoute = (orderId: string) => {
     console.log("Track route for order:", orderId);
-    router.navigate(`/customer/tracking/${orderId}` as any);
+    router.navigate(`/customer/history/ongoing/track-route/${orderId}` as any);
   };
 
   // Render ongoing order item
