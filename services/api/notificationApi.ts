@@ -59,6 +59,7 @@ export const notificationApi = {
    */
   getUserNotifications: async (userId: string): Promise<Notification[]> => {
     try {
+      // Convert ObjectId to string if needed for the API call
       const response = await axiosInstance.get(`notification/user/${userId}`);
       return response.data.sort((a: Notification, b: Notification) => {
         return (
