@@ -22,4 +22,6 @@ export type RestaurantData = {
   isDelete: boolean;
   status: string;
   rating: number;
+  latitude: number;
+  longitude: number;
 };

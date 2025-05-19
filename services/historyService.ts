@@ -157,6 +157,8 @@ export const fetchCompleteHistory = async (
             _id: restaurant._id,
             name: restaurant.name,
             address: restaurant.address,
+            latitude: restaurant.latitude,
+            longitude: restaurant.longitude,
           },
           vouchers: vouchers.map((voucher) => ({
             _id: voucher._id,

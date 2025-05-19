@@ -16,6 +16,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/store";
 import { getRestaurantDetail } from "@/services/api/restaurantApi";
+import socketService from "@/services/socket/socketService";
 
 interface Conversation {
   _id: string;
@@ -54,66 +55,101 @@ export default function Chat() {
   const [userNames, setUserNames] = useState<UserNames>({});
   const [messageContents, setMessageContents] = useState<MessageContents>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [socketConnected, setSocketConnected] = useState(false);
+
+  // Connect to socket
+  useEffect(() => {
+    let cleanupFunction: () => void = () => {};
+
+    const setupSocket = async () => {
+      if (!userId) return;
+
+      try {
+        await socketService.connect(userId);
+        setSocketConnected(true);
+
+        // Listen for conversation updates
+        const updateUnsubscribe = socketService.onConversationUpdated(
+          (data) => {
+            console.log("Conversation updated notification:", data);
+            // Refresh conversations when updated
+            fetchData();
+          }
+        );
+
+        cleanupFunction = () => {
+          updateUnsubscribe();
+        };
+      } catch (error) {
+        console.error("Socket connection error:", error);
+        setSocketConnected(false);
+      }
+    };
+
+    setupSocket();
+
+    return () => {
+      cleanupFunction();
+    };
+  }, [userId]);
 
   // Extract fetch logic to a separate function to reuse
   const fetchData = async () => {
-    if (userId) {
-      try {
-        setLoading(true);
-        const data = await getAllConversations(userId);
-        setConversations(data);
-        setFilteredConversations(data);
+    if (!userId) return;
 
-        // Collect all user IDs that need name resolution
-        const userIds = new Set<string>();
-        data.forEach((conv: Conversation) => {
-          userIds.add(conv.user1);
-          userIds.add(conv.user2);
-        });
+    try {
+      setLoading(true);
+      const data = await getAllConversations(userId);
+      setConversations(data);
+      setFilteredConversations(data);
 
-        // Fetch usernames for all users
-        const namesMap: UserNames = {};
-        await Promise.all(
-          Array.from(userIds).map(async (id) => {
-            try {
-              const name = await getRestaurantDetail(id).then(
-                (res) => res.name
-              );
-              namesMap[id] = name;
-            } catch (error) {
-              console.error(`Error fetching name for user ${id}:`, error);
-              namesMap[id] = "Unknown User";
+      // Collect all user IDs that need name resolution
+      const userIds = new Set<string>();
+      data.forEach((conv: Conversation) => {
+        userIds.add(conv.user1);
+        userIds.add(conv.user2);
+      });
+
+      // Fetch usernames for all users
+      const namesMap: UserNames = {};
+      await Promise.all(
+        Array.from(userIds).map(async (id) => {
+          try {
+            const name = await getRestaurantDetail(id).then((res) => res.name);
+            namesMap[id] = name;
+          } catch (error) {
+            console.error(`Error fetching name for user ${id}:`, error);
+            namesMap[id] = "Unknown User";
+          }
+        })
+      );
+
+      // Fetch all last message contents
+      const messageIds = data
+        .filter((conv: Conversation) => conv.last_message)
+        .map((conv: Conversation) => conv.last_message);
+
+      const messagesMap: MessageContents = {};
+      await Promise.all(
+        messageIds.map(async (msgId: string) => {
+          try {
+            if (msgId) {
+              const messageData = await getMessage(msgId);
+              messagesMap[msgId] = messageData.content || "No content";
             }
-          })
-        );
+          } catch (error) {
+            console.error(`Error fetching message ${msgId}:`, error);
+            messagesMap[msgId] = "Unable to load message";
+          }
+        })
+      );
 
-        // Fetch all last message contents
-        const messageIds = data
-          .filter((conv: Conversation) => conv.last_message)
-          .map((conv: Conversation) => conv.last_message);
-
-        const messagesMap: MessageContents = {};
-        await Promise.all(
-          messageIds.map(async (msgId: string) => {
-            try {
-              if (msgId) {
-                const messageData = await getMessage(msgId);
-                messagesMap[msgId] = messageData.content || "No content";
-              }
-            } catch (error) {
-              console.error(`Error fetching message ${msgId}:`, error);
-              messagesMap[msgId] = "Unable to load message";
-            }
-          })
-        );
-
-        setMessageContents(messagesMap);
-        setUserNames(namesMap);
-      } catch (error) {
-        console.error("Error fetching conversations:", error);
-      } finally {
-        setLoading(false);
-      }
+      setMessageContents(messagesMap);
+      setUserNames(namesMap);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,7 +158,7 @@ export default function Chat() {
     fetchData();
   }, [userId]);
 
-  // Refresh data when screen comes into focus (e.g., navigating back)
+  // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       fetchData();
@@ -177,44 +213,51 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle='light-content' backgroundColor='#1A1A1A' />
+      <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
       <Text style={styles.chatTitle}>chat</Text>
 
       <View style={styles.chatContainer}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}>
-            <Ionicons name='chevron-back' size={24} color='#000' />
+            onPress={() => router.back()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#000" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chat</Text>
-          <TouchableOpacity
-            className='mr-4'
-            onPress={() => router.push("/screen/chatBot")}>
-            <Ionicons name='logo-android' size={24} color='#000' />
-          </TouchableOpacity>
+          <View style={styles.rightHeader}>
+            {!socketConnected && (
+              <Text style={styles.offlineIndicator}>Offline</Text>
+            )}
+            <TouchableOpacity
+              className="mr-4"
+              onPress={() => router.push("/screen/chatBot")}
+            >
+              <Ionicons name="logo-android" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons
-            name='search'
+            name="search"
             size={20}
-            color='#999'
+            color="#999"
             style={styles.searchIcon}
           />
           <TextInput
             style={styles.searchInput}
-            placeholder='Search'
+            placeholder="Search"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor='#999'
+            placeholderTextColor="#999"
           />
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size='large' color='#FFC515' />
+            <ActivityIndicator size="large" color="#FFC515" />
             <Text style={styles.loadingText}>Loading conversations...</Text>
           </View>
         ) : (
@@ -230,7 +273,8 @@ export default function Chat() {
               return (
                 <TouchableOpacity
                   style={styles.chatItem}
-                  onPress={() => navigateToChatDetail(item._id)}>
+                  onPress={() => navigateToChatDetail(item._id)}
+                >
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>
                       {otherUserName.charAt(0).toUpperCase()}
@@ -369,5 +413,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "#666",
+  },
+  rightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  offlineIndicator: {
+    color: "#cc9900",
+    fontSize: 12,
+    marginRight: 8,
   },
 });

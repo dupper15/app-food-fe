@@ -8,16 +8,50 @@ import {
   Text,
   TouchableHighlight,
   View,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
-import { getRestaurantByCriteria } from "@/services/api/restaurantApi";
+import {
+  getRestaurantByCriteria,
+  getNearbyRestaurantsByLocation,
+} from "@/services/api/restaurantApi";
 import {
   addFavoriteRestaurant,
+  getCustomerInfo,
   getFavoriteRestaurantIds,
   removeFavoriteRestaurant,
 } from "@/services/api/userApi";
 import { RestaurantData } from "@/interfaces/RestaurantInterface";
+import * as Location from "expo-location";
+
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  // Earth's radius in kilometers
+  const R = 6371;
+
+  // Convert coordinates from degrees to radians
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+  // Haversine formula
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in kilometers
+
+  return distance;
+};
+
 const RestaurantSelection = () => {
   const { restaurantCriteria, header } = useLocalSearchParams();
   const [restaurants, setRestaurants] = useState<RestaurantData[]>([]);
@@ -27,28 +61,124 @@ const RestaurantSelection = () => {
   const userId = useSelector((state) => state.user.userId);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [userCoordinates, setUserCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const calculateRestaurantDistances = (restaurants: RestaurantData[]) => {
+    if (!userCoordinates) return restaurants;
+
+    return restaurants.map((restaurant) => {
+      // Check if restaurant has coordinates
+      if (restaurant.latitude && restaurant.longitude) {
+        const distance = calculateDistance(
+          userCoordinates.latitude,
+          userCoordinates.longitude,
+          restaurant.latitude,
+          restaurant.longitude
+        );
+
+        return {
+          ...restaurant,
+          distance: distance,
+        };
+      }
+      return restaurant;
+    });
+  };
+
+  const getNearbyRestaurantsMutation = useMutation({
+    mutationFn: getNearbyRestaurantsByLocation,
+    onSuccess: (data) => {
+      const restaurantsWithDistance = calculateRestaurantDistances(
+        data.result || data || []
+      );
+      setRestaurants(restaurantsWithDistance);
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      console.error("Error fetching nearby restaurants:", error);
+      setIsLoading(false);
+      Alert.alert(
+        "Location Error",
+        "Could not fetch nearby restaurants. Please try again."
+      );
+    },
+  });
 
   const getRestaurantMutation = useMutation({
     mutationFn: getRestaurantByCriteria,
     onSuccess: (data) => {
-      setRestaurants(data.result);
+      setRestaurants(data.result || data || []);
     },
     onError: (error) => {
       console.error("Error fetching restaurant data:", error);
     },
   });
 
+  const getUserInfoMutation = useMutation({
+    mutationFn: getCustomerInfo,
+    onSuccess: (data) => {
+      if (data.addressCoordinates && data.addressCoordinates.length > 0) {
+        const { latitude, longitude } = data.addressCoordinates[0];
+
+        setUserCoordinates({ latitude, longitude });
+        getNearbyRestaurantsMutation.mutate({
+          latitude,
+          longitude,
+          maxDistance: 20, //khoảng cách tối đa theo km
+        });
+      } else {
+        setIsLoading(false);
+        Alert.alert(
+          "Location Error",
+          "Could not retrieve your saved location. Please update your profile address."
+        );
+      }
+    },
+    onError: (error) => {
+      console.error("Error fetching user location from API:", error);
+      setIsLoading(false);
+      Alert.alert(
+        "Location Error",
+        "Could not retrieve your location information. Please try again."
+      );
+    },
+  });
+
+  const getUserLocation = () => {
+    if (userId) {
+      getUserInfoMutation.mutate(userId);
+    } else {
+      setIsLoading(false);
+      Alert.alert(
+        "Authentication Error",
+        "You need to be logged in to use this feature."
+      );
+    }
+  };
+
   useEffect(() => {
     if (restaurantCriteria && userId) {
-      const data = {
-        restaurantCriteria: restaurantCriteria,
-        userId: userId,
-      };
+      const restaurantCriteriaString = restaurantCriteria
+        .toString()
+        .slice(1, -1);
+
       setIsLoading(true);
-      getRestaurantMutation.mutate(data, {
-        onSettled: () => setIsLoading(false), // dừng loading dù thành công hay thất bại
-      });
+
+      if (restaurantCriteriaString === "Near me") {
+        getUserLocation();
+      } else {
+        const data = {
+          restaurantCriteria: restaurantCriteria,
+          userId: userId,
+        };
+        getRestaurantMutation.mutate(data, {
+          onSettled: () => setIsLoading(false),
+        });
+      }
     }
+
     if (userId) {
       getFavoriteResMutation.mutate(userId);
     }
@@ -62,6 +192,7 @@ const RestaurantSelection = () => {
       },
     });
   };
+
   const getFavoriteResMutation = useMutation({
     mutationFn: getFavoriteRestaurantIds,
     onSuccess: (data) => {
@@ -71,6 +202,7 @@ const RestaurantSelection = () => {
       console.error("Error fetching favorite restaurant IDs:", error);
     },
   });
+
   const addToFavoriteRestaurant = useMutation({
     mutationFn: addFavoriteRestaurant,
     onSuccess: () => {
@@ -80,6 +212,7 @@ const RestaurantSelection = () => {
       console.log(error);
     },
   });
+
   const removeFavoriteRestaurantMutation = useMutation({
     mutationFn: removeFavoriteRestaurant,
     onSuccess: () => {
@@ -90,6 +223,7 @@ const RestaurantSelection = () => {
       console.error("Error removing favorite restaurant:", error);
     },
   });
+
   const handleAddToFavorite = (restaurantId: any, isFavorite: any) => {
     const data = {
       userId: userId,
@@ -101,9 +235,10 @@ const RestaurantSelection = () => {
       addToFavoriteRestaurant.mutate(data);
     }
   };
+
   return (
     <View className="flex-1 bg-gray-100 ">
-      <View className="flex-row items-start  bg-white px-2 pt-4 pb-2 mb-4">
+      <View className="flex-row items-start bg-white px-2 pt-4 pb-2 mb-4">
         <TouchableHighlight
           className="rounded-full p-2"
           onPress={() => {
@@ -122,7 +257,7 @@ const RestaurantSelection = () => {
         </View>
       ) : (
         <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
-          {restaurants.length > 0 &&
+          {restaurants && restaurants.length > 0 ? (
             restaurants.map((restaurant) => (
               <View
                 key={restaurant._id}
@@ -171,7 +306,11 @@ const RestaurantSelection = () => {
                   />
                 </TouchableHighlight>
                 <View className="flex-row items-center justify-between mt-4">
-                  <Text className="text-xl ml-2 text-gray-900">3.5km</Text>
+                  <Text className="text-xl ml-2 text-gray-900">
+                    {restaurant.distance
+                      ? `${restaurant.distance.toFixed(1)}km`
+                      : "3.5km"}
+                  </Text>
 
                   <TouchableHighlight
                     className="bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300"
@@ -185,7 +324,14 @@ const RestaurantSelection = () => {
                   </TouchableHighlight>
                 </View>
               </View>
-            ))}
+            ))
+          ) : (
+            <View className="flex-1 justify-center items-center py-20">
+              <Text className="text-gray-500 text-lg">
+                No restaurants found nearby
+              </Text>
+            </View>
+          )}
         </ScrollView>
       )}
     </View>
