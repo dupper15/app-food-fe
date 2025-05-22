@@ -165,7 +165,7 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
                   {dish?.topping.map((topping) => (
                     <TouchableOpacity
                       key={topping._id}
-                      className='flex-row items-center mt-3 p-3 rounded-lg bg-white'
+                      className='flex-row items-center mt-3  rounded-lg bg-white'
                       onPress={() => toggleTopping(topping._id)}>
                       <View
                         className={`w-6 h-6 border-2 rounded-full items-center justify-center ${
@@ -186,12 +186,14 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
                 </View>
               )}
 
-              <Stepper
-                value={quantity}
-                minValue={1}
-                maxValue={99}
-                onValueChange={setQuantity}
-              />
+              <View className='mx-auto'>
+                <Stepper
+                  value={quantity}
+                  minValue={1}
+                  maxValue={99}
+                  onValueChange={setQuantity}
+                />
+              </View>
 
               <TouchableOpacity
                 onPress={() => {
@@ -199,7 +201,7 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
                   setEditedItem(null);
                   setShowModal(false);
                 }}
-                className='mt-6 bg-yellow-400 py-3.5 rounded-lg shadow-md shadow-black/20'>
+                className='mt-6 bg-yellow-400 py-3.5 rounded-lg shadow-sm shadow-black/20'>
                 <Text className='text-center text-white text-lg font-semibold'>
                   Edit - {transPrice(totalPrice)}
                 </Text>

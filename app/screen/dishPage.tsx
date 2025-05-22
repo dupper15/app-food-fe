@@ -166,7 +166,7 @@ const DishPage = () => {
 
         <TouchableOpacity
           onPress={orderItem ? editCart : addToCart}
-          className='mt-6 bg-customYellow py-3 rounded-lg shadow-lg'>
+          className='mt-6 bg-customYellow py-3 rounded-lg shadow-sm'>
           <Text className='text-white text-lg font-semibold text-center'>
             {orderItem
               ? `Edit - ${transPrice(totalPrice)}`

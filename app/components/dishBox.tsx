@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   Image,
   Text,
   TouchableHighlight,
@@ -12,7 +13,7 @@ import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import * as CartApi from "@/services/api/cartApi";
-
+const { width } = Dimensions.get("window");
 const DishBox = ({ dish }) => {
   const route = useRouter();
   const [orderItem, setOrderItem] = useState(null);
@@ -36,9 +37,6 @@ const DishBox = ({ dish }) => {
     onSuccess: (data) => {
       setOrderItem(data);
     },
-    onError: (error) => {
-      console.log(error);
-    },
   });
   const getOrderItem = () => {
     const data = {
@@ -54,7 +52,7 @@ const DishBox = ({ dish }) => {
   }, []);
 
   return (
-    <View className='relative'>
+    <View className='relative' style={{ width: width * 0.45 }}>
       <TouchableHighlight
         onPress={handleNavigate}
         className='relative bg-white rounded-lg border border-slate-200 w-full'>

@@ -15,19 +15,21 @@ const CardItem = ({
   setShowModal,
 }) => {
   return (
-    <View className='mb-6 bg-white p-4 rounded-lg shadow-sm'>
+    <View className='mb-2 bg-white p-4 rounded-lg '>
       <View className='flex-row items-center justify-between mb-4'>
         <View className='flex-row gap-2'>
-          <Checkbox
-            status={
-              item.order_items.every((orderItem: any) =>
-                selectedDish.includes(orderItem)
-              )
-                ? "checked"
-                : "unchecked"
-            }
-            onPress={() => toggleRestaurantCheckbox(restaurantIndex)}
-          />
+          <View className='rounded-full border border-gray-200'>
+            <Checkbox
+              status={
+                item.order_items.every((orderItem: any) =>
+                  selectedDish.includes(orderItem)
+                )
+                  ? "checked"
+                  : "unchecked"
+              }
+              onPress={() => toggleRestaurantCheckbox(restaurantIndex)}
+            />
+          </View>
           <Text className='text-xl font-semibold'>
             {item.restaurant_id.name}
           </Text>
@@ -46,12 +48,14 @@ const CardItem = ({
           }}
           key={itemIndex}>
           <View className='flex-row items-center mb-4 '>
-            <Checkbox
-              status={
-                selectedDish.includes(orderItem) ? "checked" : "unchecked"
-              }
-              onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
-            />
+            <View className='rounded-full border border-gray-200'>
+              <Checkbox
+                status={
+                  selectedDish.includes(orderItem) ? "checked" : "unchecked"
+                }
+                onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
+              />
+            </View>
             <Image
               source={{ uri: orderItem.dish_id.image }}
               className='w-16 h-16 rounded-lg ml-2'
@@ -60,7 +64,7 @@ const CardItem = ({
               <Text className='text-lg font-medium'>
                 {orderItem.dish_id.name}
               </Text>
-              <View className='flex-row gap-2'>
+              <View className='flex-col gap-2'>
                 <Text className='text-gray-600'>
                   {transPrice(
                     orderItem.dish_id.price * orderItem.quantity +
@@ -71,7 +75,7 @@ const CardItem = ({
                   )}
                 </Text>
                 {orderItem.topping && (
-                  <Text className='text-gray-500 max-w-[50%] truncate'>
+                  <Text className='text-gray-500 truncate'>
                     (
                     {orderItem.topping
                       .map((topping: any) => topping.name)

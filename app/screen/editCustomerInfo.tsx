@@ -80,15 +80,21 @@ const EditCustomerInfo = () => {
 
           <View className='items-center mt-6'>
             <View className='w-32 h-32 rounded-full overflow-hidden bg-gray-300'>
-              <Image
-                source={{
-                  uri:
-                    user.avatar ||
-                    " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
-                }}
-                className='w-full h-full'
-                resizeMode='cover'
-              />
+              {user.avatar ? (
+                <Image
+                  source={{
+                    uri: user.avatar,
+                  }}
+                  className='w-full h-full'
+                  resizeMode='cover'
+                />
+              ) : (
+                <Image
+                  source={require("../../assets/images/default_avatar.jpg")}
+                  className='w-full h-full'
+                  resizeMode='cover'
+                />
+              )}
             </View>
             <TouchableOpacity className='absolute -bottom-4 left-1/2 -translate-x-1/2 border border-white bg-yellow-400 p-2 rounded-full'>
               <Ionicons name='camera' size={20} color='white' />
@@ -181,7 +187,7 @@ const EditCustomerInfo = () => {
             {isEdit && (
               <View className='flex flex-row justify-center items-center gap-4 mt-4'>
                 <TouchableHighlight
-                  className='bg-white px-5 py-2 border border-customYellow rounded-md shadow-lg'
+                  className='bg-white px-5 py-2 border border-customYellow rounded-md shadow-sm'
                   underlayColor='#f1f5f9'
                   onPress={handleCancel}>
                   <Text className='text-gray-700 font-semibold'>Cancel</Text>

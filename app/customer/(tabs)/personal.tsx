@@ -103,9 +103,7 @@ export default function Personal() {
                 />
               ) : (
                 <Image
-                  source={{
-                    uri: " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
-                  }}
+                  source={require("../../../assets/images/default_avatar.jpg")}
                   className='w-16 h-16 rounded-full mr-4'
                 />
               )}
@@ -119,7 +117,7 @@ export default function Personal() {
           )}
         </View>
 
-        <View className='mt-4 border-t border-gray-200 bg-gray-50 rounded-xl'>
+        <View className='mt-4  bg-gray-50 rounded-xl'>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}

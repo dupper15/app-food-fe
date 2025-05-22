@@ -17,6 +17,8 @@ import RestaurantBox from "@/app/components/restaurantBox";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ImageSearch from "@/app/components/imageSearch";
+import CriteriaComponent from "@/app/components/criteriaComponent";
+
 export default function Home() {
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
@@ -91,17 +93,16 @@ export default function Home() {
     });
   };
   return (
-    <View className='flex-1 bg-gray-100'>
+    <View className='flex-1 bg-gray-100 pb-4'>
       <Animated.View
         style={{
-          background: "linear-gradient(to bottom, black, #333333)",
           height: blackViewHeight,
           zIndex: 10,
-          paddingTop: 16,
-          paddingHorizontal: 16,
+          paddingTop: 8,
+          paddingHorizontal: 8,
         }}>
-        <View className='flex-row items-center w-full space-x-2'>
-          <View className='flex-1 flex-row items-center bg-white rounded-lg pr-2 gap-2 border border-gray-300'>
+        <View className='flex-row items-center w-full gap-2'>
+          <View className='flex-1 flex-row items-center w-full bg-white rounded-lg pr-2 gap-2 border border-gray-300'>
             <TouchableOpacity
               className='flex-1 flex-row items-center px-4 py-2 rounded-full'
               onPress={() => router.push("/screen/search")}>
@@ -164,7 +165,7 @@ export default function Home() {
       <Animated.ScrollView
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
+          { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
         style={{
@@ -175,90 +176,16 @@ export default function Home() {
           paddingBottom: 32,
         }}>
         <Category handlePickCriteria={handlePickCriteria} />
-
-        <View className='flex-1 gap-4 pr-6 '>
-          <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity
-              onPress={() => handlePickCriteria("Near me", "Near me")}
-              className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
-              <Text className='text-black text-lg font-medium'>Near me</Text>
-              <Text className='text-black text-sm font-normal'>
-                Just in few minutes
-              </Text>
-              <Icon
-                name='location-outline'
-                size={40}
-                color={"black"}
-                className='absolute bottom-2 right-2'
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handlePickCriteria("Recommended", "Recommended")}
-              className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
-              <Text className='text-customYellow text-lg font-medium'>
-                Recommended
-              </Text>
-              <Text className='text-customYellow text-sm font-normal'>
-                You may also like
-              </Text>
-              <Icon
-                name='thumbs-up-outline'
-                size={40}
-                color={"#FFC515"}
-                className='absolute bottom-2 right-2'
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View className='flex-row justify-between items-center gap-4'>
-            <TouchableOpacity
-              onPress={() =>
-                handlePickCriteria("Multiple deals", "Multiple deals")
-              }
-              className='flex-1 bg-black rounded-lg p-4 relative pb-10'>
-              <Text className='text-customYellow text-lg font-medium'>
-                Multiple deals
-              </Text>
-              <Text className='text-customYellow text-sm font-normal'>
-                Save your money
-              </Text>
-              <Icon
-                name='pricetag-outline'
-                size={40}
-                color={"#FFC515"}
-                className='absolute bottom-2 right-2'
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                handlePickCriteria("Multiple buyers", "Multiple buyers")
-              }
-              className='flex-1 bg-customYellow rounded-lg p-4 relative pb-10'>
-              <Text className='text-black text-lg font-medium'>
-                Multiple buyers
-              </Text>
-              <Text className='text-black text-sm font-normal'>
-                Can be consulted
-              </Text>
-              <Icon
-                name='people-outline'
-                size={40}
-                color={"black"}
-                className='absolute bottom-2 right-2'
-              />
-            </TouchableOpacity>
-          </View>
+        <View className='flex-1 gap-4 pr-6 mt-2'>
+          <CriteriaComponent handlePickCriteria={handlePickCriteria} />
         </View>
 
-        <View className='mt-32 gap-2 mr-2'>
+        <View className='mt-4 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>
             Order again
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className='flex-row space-x-4'>
-              {" "}
+            <View className='flex-row gap-4'>
               {restaurantHistory.map((restaurant, index) => (
                 <RestaurantBox key={index} restaurant={restaurant} />
               ))}
@@ -269,17 +196,16 @@ export default function Home() {
         <View className='mt-4 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className='flex-row space-x-4'>
-              {" "}
+            <View className='flex-row gap-4'>
               {rcmRestaurant.map((restaurant, index) => (
                 <RestaurantBox key={index} restaurant={restaurant} />
               ))}
             </View>
           </ScrollView>
         </View>
-        <View className='mt-4 gap-2 mr-4'>
+        <View className='mt-4 gap-2 mr-2 '>
           <Text className='text-slate-900 text-lg font-medium'>All</Text>
-          <View className='grid grid-cols-2 gap-x-4 gap-y-4'>
+          <View className='flex-row flex-wrap justify-between gap-y-4 gap-x-4'>
             {rcmRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />
             ))}

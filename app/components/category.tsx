@@ -32,7 +32,7 @@ const Category: React.FC<Props> = ({ handlePickCriteria }) => {
   return (
     <ScrollView
       horizontal
-      className='flex-row gap-4 h-0'
+      className='flex-row gap-4'
       showsHorizontalScrollIndicator={false}>
       {category.length > 0 &&
         category.map((item) => (

@@ -181,7 +181,7 @@ const ForgetPasswordScreen = () => {
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                className='border border-gray-300 rounded-xl p-4 w-full bg-gray-50 mb-6'
+                className='border border-gray-300 rounded-lg p-4 w-full bg-gray-50 mb-6'
               />
             </>
           )}
@@ -194,7 +194,7 @@ const ForgetPasswordScreen = () => {
                 ? handleVerify
                 : handleSendCode
             }
-            className='bg-yellow-400 rounded-full px-10 py-3 shadow-md active:opacity-80'>
+            className='bg-yellow-400 rounded-lg px-10 py-3 shadow-sm active:opacity-80'>
             <Text className='text-white text-lg font-bold'>
               {isSetPassword
                 ? "Change Password"
