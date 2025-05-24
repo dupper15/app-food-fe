@@ -31,7 +31,7 @@ export async function registerForPushNotificationsAsync(): Promise<
     alert("Failed to get push token for push notification!");
     return;
   }
-
+  
   try {
     token = (await Notifications.getExpoPushTokenAsync()).data;
     console.log("Expo Push Token:", token);
@@ -39,6 +39,27 @@ export async function registerForPushNotificationsAsync(): Promise<
     console.error("Error getting Expo push token:", e);
     token = undefined;
   }
+=======
+  /**
+   * Fetch all notifications for a specific user
+   * @param userId ID of the user
+   * @returns Array of notification objects
+   */
+  getUserNotifications: async (userId: string): Promise<Notification[]> => {
+    try {
+      // Convert ObjectId to string if needed for the API call
+      const response = await axiosInstance.get(`notification/user/${userId}`);
+      return response.data.sort((a: Notification, b: Notification) => {
+        return (
+          new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
+        );
+      });
+    } catch (error) {
+      console.error("Error fetching user notifications:", error);
+      throw error;
+    }
+  },
+};
 
   return token;
 }

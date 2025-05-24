@@ -82,3 +82,26 @@ export const getRestaurantByCriteria = async (data: any) => {
     return response.data;
   }
 };
+
+export const getNearbyRestaurantsByLocation = async ({
+  latitude,
+  longitude,
+  maxDistance = 20,
+}: {
+  latitude: number;
+  longitude: number;
+  maxDistance?: number;
+}): Promise<any> => {
+  try {
+    const response = await axiosInstance.get(
+      `restaurants/near?lat=${latitude}&lng=${longitude}&maxDistance=${maxDistance}`
+    );
+
+    // Ensure we return in a consistent format that the UI expects
+    return { result: response.data };
+  } catch (error) {
+    console.error("Error fetching nearby restaurants:", error);
+    // Return empty array on error to prevent UI crashes
+    return { result: [] };
+  }
+};

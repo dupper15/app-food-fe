@@ -9,6 +9,8 @@ import {
   SafeAreaView,
   StatusBar,
   ActivityIndicator,
+  Linking,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -17,7 +19,7 @@ import {
   MoreVertical,
   Navigation,
 } from "lucide-react-native";
-import { fetchCompleteHistory } from "@/services/historyService";
+import { fetchOrderWithRestaurantDetails } from "@/services/api/orderApi";
 import { useSelector } from "react-redux";
 import { transPrice } from "@/utils/transPrice";
 
@@ -29,7 +31,7 @@ const OrderDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orderDetail, setOrderDetail] = useState<any>(null);
-  const [order, setOrder] = useState<any>(null);
+  const [restaurant, setRestaurant] = useState<any>(null);
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
@@ -40,20 +42,9 @@ const OrderDetailScreen = () => {
         setIsLoading(true);
         setError(null);
 
-        const historyItems = await fetchCompleteHistory(userId);
-
-        const order = historyItems.find(
-          (item) =>
-            item.order._id === orderId ||
-            item.historyItem.order_id === orderId ||
-            item.historyItem._id === orderId
-        );
-
-        if (!order) {
-          throw new Error("Order not found");
-        }
-
-        setOrderDetail(order);
+        const orderData = await fetchOrderWithRestaurantDetails(orderId);
+        setOrderDetail(orderData);
+        setRestaurant(orderData.restaurant);
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading order details:", err);
@@ -68,7 +59,7 @@ const OrderDetailScreen = () => {
       setError("Invalid order ID");
       setIsLoading(false);
     }
-  }, [orderId, userId]);
+  }, [orderId]);
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
@@ -81,6 +72,27 @@ const OrderDetailScreen = () => {
     if (statusLower === "preparing") return "#007AFF"; // Blue
     if (statusLower === "ready") return "#4CD964"; // Bright Green
     return "#007AFF"; // Default Blue for unknown statuses
+  };
+
+  const openMapsApp = () => {
+    if (!restaurant?.latitude || !restaurant?.longitude) {
+      return;
+    }
+
+    const scheme = Platform.select({
+      ios: "maps:",
+      android: "geo:",
+    });
+    const latLng = `${restaurant.latitude},${restaurant.longitude}`;
+    const label = restaurant.name;
+    const url = Platform.select({
+      ios: `${scheme}q=${label}&ll=${latLng}`,
+      android: `${scheme}0,0?q=${latLng}(${label})`,
+    });
+
+    if (url) {
+      Linking.openURL(url);
+    }
   };
 
   const renderOrderActions = () => {
@@ -131,26 +143,29 @@ const OrderDetailScreen = () => {
     );
   }
 
-  const subtotal = orderDetail.orderItems.reduce(
-    (sum: number, item: any) => sum + item.dish.price * item.quantity,
-    0
-  );
+  const subtotal =
+    orderDetail.orderItems?.reduce(
+      (sum: number, item: any) => sum + item.dish.price * item.quantity,
+      0
+    ) || 0;
 
-  const toppingTotal = orderDetail.orderItems.reduce(
-    (sum: number, item: any) =>
-      sum +
-      item.toppings.reduce(
-        (toppingSum: number, topping: any) => toppingSum + topping.price,
-        0
-      ) *
-        item.quantity,
-    0
-  );
+  const toppingTotal =
+    orderDetail.orderItems?.reduce(
+      (sum: number, item: any) =>
+        sum +
+        item.toppings.reduce(
+          (toppingSum: number, topping: any) => toppingSum + topping.price,
+          0
+        ) *
+          item.quantity,
+      0
+    ) || 0;
 
-  const voucherDiscount = orderDetail.vouchers.reduce(
-    (sum: number, voucher: any) => sum + voucher.value,
-    0
-  );
+  const voucherDiscount =
+    orderDetail.vouchers?.reduce(
+      (sum: number, voucher: any) => sum + voucher.value,
+      0
+    ) || 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -172,30 +187,39 @@ const OrderDetailScreen = () => {
       <ScrollView style={styles.content}>
         <View style={styles.idContainer}>
           <Text style={styles.idLabel}>ID: </Text>
-          <Text style={styles.idValue}>#{orderDetail.order._id.slice(-5)}</Text>
+          <Text style={styles.idValue}>
+            #{orderDetail.order?._id?.slice(-5) || orderDetail._id?.slice(-5)}
+          </Text>
         </View>
 
         <View style={styles.restaurantContainer}>
           <Image
             source={{
               uri:
-                orderDetail.orderItems[0]?.dish.image ||
+                orderDetail.orderItems?.[0]?.dish.image ||
+                restaurant?.image ||
                 "https://via.placeholder.com/50",
             }}
             style={styles.restaurantImage}
           />
           <View style={styles.restaurantInfo}>
             <Text style={styles.restaurantName}>
-              {orderDetail.restaurant.name}
+              {restaurant?.name || "Restaurant"}
             </Text>
             <Text
               style={[
                 styles.statusText,
-                { color: getStatusColor(orderDetail.order.status) },
+                {
+                  color: getStatusColor(
+                    orderDetail.order?.status || orderDetail.status
+                  ),
+                },
               ]}
             >
-              {orderDetail.order.status.charAt(0).toUpperCase() +
-                orderDetail.order.status.slice(1)}
+              {(orderDetail.order?.status || orderDetail.status)
+                ?.charAt(0)
+                .toUpperCase() +
+                (orderDetail.order?.status || orderDetail.status)?.slice(1)}
             </Text>
           </View>
         </View>
@@ -204,9 +228,22 @@ const OrderDetailScreen = () => {
           <View style={styles.locationRow}>
             <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
             <Text style={styles.locationText}>
-              {orderDetail.restaurant.address}
+              {restaurant?.address || "Address not available"}
             </Text>
           </View>
+          {restaurant?.latitude && restaurant?.longitude && (
+            <TouchableOpacity
+              style={styles.navigationButton}
+              onPress={openMapsApp}
+            >
+              <Navigation
+                size={18}
+                color="#FFFFFF"
+                style={styles.navigationIcon}
+              />
+              <Text style={styles.navigationText}>Navigate to Restaurant</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.sectionContainer}>
@@ -371,6 +408,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     flex: 1,
+  },
+  navigationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3498db",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  navigationIcon: {
+    marginRight: 6,
+  },
+  navigationText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "500",
   },
   sectionContainer: {
     marginBottom: 24,

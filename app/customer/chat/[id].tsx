@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,6 +18,7 @@ import {
   sendMessage as apiSendMessage,
 } from "@/services/api/chatApi";
 import { getRestaurantDetail } from "@/services/api/restaurantApi";
+import socketService from "@/services/socket/socketService";
 
 // Define the message type based on API response
 interface ApiMessage {
@@ -41,6 +43,71 @@ export default function ChatDetail() {
   const [recipientId, setRecipientId] = useState<string>("");
   const [restaurantName, setRestaurantName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Connect to socket when component mounts
+  useEffect(() => {
+    let cleanupFunction: () => void = () => {};
+
+    const connectSocket = async () => {
+      if (!userId) return;
+
+      try {
+        await socketService.connect(userId);
+        setSocketConnected(true);
+        console.log("Socket connected successfully");
+
+        // Join the conversation room
+        if (id) {
+          const joined = socketService.joinConversation(id);
+          console.log("Joined conversation:", joined);
+        }
+
+        // Set up message listener
+        const messageUnsubscribe = socketService.onReceiveMessage(
+          (newMessage) => {
+            console.log("New message received:", newMessage);
+
+            if (newMessage.conversationId === id) {
+              setMessages((prevMessages) => {
+                // Avoid duplicates by checking message ID
+                const exists = prevMessages.some(
+                  (msg) => msg._id === newMessage._id
+                );
+                if (exists) return prevMessages;
+                return [...prevMessages, newMessage];
+              });
+
+              // Scroll to bottom
+              setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }, 100);
+            }
+          }
+        );
+
+        cleanupFunction = () => {
+          if (id) {
+            socketService.leaveConversation(id);
+          }
+          messageUnsubscribe();
+        };
+      } catch (error) {
+        console.error("Socket connection failed:", error);
+        Alert.alert(
+          "Connection Error",
+          "Could not connect to chat service. Messages may be delayed."
+        );
+      }
+    };
+
+    connectSocket();
+
+    return () => {
+      cleanupFunction();
+    };
+  }, [userId, id]);
 
   // Fetch restaurant name
   useEffect(() => {
@@ -62,6 +129,8 @@ export default function ChatDetail() {
   // Fetch messages for this conversation
   useEffect(() => {
     const fetchData = async () => {
+      if (!id) return;
+
       try {
         setIsLoading(true);
         const data = await getConversationDetail(id);
@@ -77,17 +146,21 @@ export default function ChatDetail() {
               : firstMessage.sender_id;
 
           setRecipientId(otherUserId);
+
+          // Scroll to bottom after messages load
+          setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: false });
+          }, 300);
         }
       } catch (error) {
         console.error("Error fetching conversation details:", error);
+        Alert.alert("Error", "Failed to load conversation history");
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    fetchData();
   }, [id, userId]);
 
   // Function to send a message
@@ -97,7 +170,7 @@ export default function ChatDetail() {
     try {
       // Create a temporary message to show immediately
       const tempMessage: ApiMessage = {
-        _id: id,
+        _id: `temp-${Date.now()}`, // Temporary ID for UI
         sender_id: userId || "",
         receiver_id: recipientId,
         conversationId: id,
@@ -107,19 +180,40 @@ export default function ChatDetail() {
         __v: 0,
       };
 
-      // Add to UI immediately for better UX
-      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+      // Clear input field
+      const messageToBeSent = inputMessage;
       setInputMessage("");
 
-      // Send to API with the correct format
-      await apiSendMessage({
+      // Add to UI immediately for better UX
+      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+      // Scroll to bottom
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+
+      // Message data for API
+      const messageData = {
         sender_id: userId || "",
         receiver_id: recipientId,
-        content: inputMessage,
+        content: messageToBeSent,
         _id: id,
-      });
+      };
+
+      // Send via socket if connected
+      if (socketConnected) {
+        socketService.sendMessage({
+          conversationId: id,
+          message: tempMessage,
+        });
+      }
+
+      // Also send through API for persistence
+      const result = await apiSendMessage(messageData);
+      console.log("Message sent via API:", result);
     } catch (error) {
       console.error("Error sending message:", error);
+      Alert.alert("Error", "Failed to send message. Please try again.");
     }
   };
 
@@ -136,17 +230,18 @@ export default function ChatDetail() {
         </TouchableOpacity>
         <View style={styles.avatar} />
         <Text style={styles.headerTitle}>{restaurantName || "Loading..."}</Text>
+        {!socketConnected && (
+          <View style={styles.offlineIndicator}>
+            <Text style={styles.offlineText}>Offline</Text>
+          </View>
+        )}
       </View>
 
       {/* Messages */}
       <ScrollView
+        ref={scrollViewRef}
         style={styles.messagesList}
         contentContainerStyle={styles.messagesContainer}
-        ref={(ref) => {
-          if (ref) {
-            ref.scrollToEnd({ animated: true });
-          }
-        }}
       >
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -157,11 +252,13 @@ export default function ChatDetail() {
             <Text>No messages yet. Start the conversation!</Text>
           </View>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isUser = isCurrentUser(message.sender_id);
+            // Add a key that will be unique even with temp IDs
+            const key = `${message._id}-${index}`;
             return (
               <View
-                key={message._id}
+                key={key}
                 style={[
                   styles.messageBubble,
                   isUser ? styles.userMessage : styles.otherMessage,
@@ -310,5 +407,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  offlineIndicator: {
+    backgroundColor: "#ffcc0033",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  offlineText: {
+    color: "#cc9900",
+    fontSize: 12,
   },
 });
