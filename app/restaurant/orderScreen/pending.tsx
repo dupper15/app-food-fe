@@ -1,24 +1,15 @@
 import { CustomToast } from "@/app/components/toast";
 import { OrderPendingRestaurant } from "@/interfaces/OrderInterface";
+import { registerForPushNotificationsAsync } from "@/services/api/notificationApi";
 import {
   cancelOrderByRestaurnat,
-  fetchPendingOrderByRestaurant,
   updateStatusOrderByRestaurant,
 } from "@/services/api/orderApi";
 import { formatDate, formatPrice } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function Pending({
   setCount,
@@ -32,11 +23,35 @@ export default function Pending({
   setRefresh: (refresh: boolean) => void;
 }) {
   const [items, setItems] = useState<OrderPendingRestaurant[]>([]);
+  const [expoToken, setExpoToken] = useState<string | undefined>();
+  const [tokenLoading, setTokenLoading] = useState(true);
+  const [tokenError, setTokenError] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(data);
     setCount(data.length);
   }, [data]);
+
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        setTokenLoading(true);
+        const token = await registerForPushNotificationsAsync();
+        if (token) {
+          setExpoToken(token);
+          setTokenError(null);
+        } else {
+          setTokenError("Failed to get push token");
+        }
+      } catch (error) {
+        console.error("Token registration error:", error);
+        setTokenError("Error registering for push notifications");
+      } finally {
+        setTokenLoading(false);
+      }
+    };
+    getToken();
+  }, []);
 
   const cancelOrder = useMutation({
     mutationFn: (id: string) => cancelOrderByRestaurnat(id),
@@ -50,7 +65,8 @@ export default function Pending({
   });
 
   const confirmOrder = useMutation({
-    mutationFn: (id: string) => updateStatusOrderByRestaurant(id),
+    mutationFn: ({ id, token }: { id: string; token: string }) =>
+      updateStatusOrderByRestaurant(id, token),
     onSuccess: () => {
       CustomToast("success", "Success", "Order received successfully!");
       setRefresh(!refresh);
@@ -65,7 +81,17 @@ export default function Pending({
   });
 
   const handleAccept = (orderId: string) => {
-    confirmOrder.mutate(orderId);
+    if (tokenLoading) {
+      CustomToast("error", "Please wait", "Setting up notifications...");
+      return;
+    }
+
+    if (!expoToken) {
+      CustomToast("error", "Error", tokenError || "Push token not available!");
+      return;
+    }
+
+    confirmOrder.mutate({ id: orderId, token: expoToken });
   };
 
   const handleCancel = (orderId: string) => {
