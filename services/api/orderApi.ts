@@ -49,12 +49,9 @@ export const cancelOrderByRestaurnat = async (id: string): Promise<string> => {
 };
 
 export const updateStatusOrderByRestaurant = async (
-  id: string,
-  expoPushToken: string
+  id: string
 ): Promise<any> => {
-  const response = await axiosInstance.patch(`/order/update-status/${id}`, {
-    expoPushToken,
-  });
+  const response = await axiosInstance.patch(`/order/update-status/${id}`);
   return response.data;
 };
 

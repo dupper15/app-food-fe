@@ -7,8 +7,10 @@ import toastConfig from "@/services/toastConfig";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { UpdateUsageTime } from "./components/UpdateUsageTime";
+import { useNotificationListener } from "@/services/api/notificationApi";
 
 export default function RootLayout() {
+  useNotificationListener();
   const queryClient = new QueryClient();
 
   return (

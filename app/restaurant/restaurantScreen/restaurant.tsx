@@ -12,8 +12,9 @@ import { useMutation } from "@tanstack/react-query";
 import { getDetailOwner } from "@/services/api/owner";
 import { useCallback, useEffect, useState } from "react";
 import { CustomToast } from "@/app/components/toast";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Restaurant() {
   const ownerId = useSelector(
@@ -47,6 +48,18 @@ export default function Restaurant() {
     },
   });
 
+  const handleLogout = () => {
+    AsyncStorage.removeItem("userId");
+    AsyncStorage.removeItem("accessToken");
+    AsyncStorage.removeItem("refreshToken");
+    AsyncStorage.removeItem("owner_id");
+    AsyncStorage.removeItem("restaurant_id");
+    AsyncStorage.removeItem("startTime");
+    AsyncStorage.removeItem("usageTime");
+    AsyncStorage.removeItem("customer_id");
+    router.push("/auth/login");
+  };
+
   return (
     <View className="bg-white px-6 pt-6 flex-col h-full gap-8">
       {isLoading ? (
@@ -73,7 +86,10 @@ export default function Restaurant() {
       </View>
 
       {/* logout */}
-      <TouchableOpacity className="flex-row gap-2 items-center px-4 py-5 mb-20 bg-gray-100 rounded-xl">
+      <TouchableOpacity
+        onPress={handleLogout}
+        className="flex-row gap-2 items-center px-4 py-5 mb-20 bg-gray-100 rounded-xl"
+      >
         <View className="bg-white rounded-full p-2">
           <Ionicons name="log-out-outline" size={20} color="#FF5733" />
         </View>

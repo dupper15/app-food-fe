@@ -12,43 +12,65 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useFocusEffect } from "@react-navigation/native";
-import notificationApi, { Notification } from "@/services/api/notificationApi";
+
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import {
+  fetchAllNotifcationsByUser,
+  updateNotification,
+} from "@/services/api/notificationApi";
+import { NotificationInterface } from "@/interfaces/NotificationInterface";
+import { formatRelativeTime } from "@/utils/format";
 
 const NotificationsScreen = () => {
   const [processedSession, setProcessedSession] = useState(false);
   const userId = useSelector(
     (state: { user: { userId: string } }) => state.user.userId
   );
+  const [notifications, setNotifications] = useState<NotificationInterface[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
 
-  // Fetch notifications using the provided API
-  const {
-    data: notifications,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["userNotifications", userId],
-    queryFn: () => notificationApi.getUserNotifications(userId),
+  const { orderId } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (orderId) {
+      // Xử lý ví dụ như scroll đến thông báo liên quan tới orderId
+      console.log("Mở từ thông báo, orderId:", orderId);
+    }
+    if (userId) {
+      fetchNotifications.mutate(userId);
+    }
+  }, [orderId, userId]);
+
+  const fetchNotifications = useMutation({
+    mutationFn: fetchAllNotifcationsByUser,
+    onSuccess: (data: any[]) => {
+      setNotifications(data);
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      console.error("Fetch all failed history error", error);
+    },
   });
 
-  // Mutation to mark a notification as seen
+  // Mutation to mark a notif,ication as seen
   const markSeenMutation = useMutation({
-    mutationFn: (notificationId: string) =>
-      notificationApi.markAsSeen(notificationId),
+    mutationFn: (notificationId: string) => updateNotification(notificationId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["userNotifications", userId],
       });
+      if (userId) {
+        fetchNotifications.mutate(userId);
+      }
     },
   });
 
   useFocusEffect(
     useCallback(() => {
-      // Refresh notifications data when tab is selected
-      refetch();
-
       // Reset the processing flag when coming into focus
       setProcessedSession(false);
 
@@ -64,7 +86,7 @@ const NotificationsScreen = () => {
             // Mark that we've processed notifications for this session
             setProcessedSession(true);
             // Only mark the first unseen notification to avoid cascading updates
-            markSeenMutation.mutate(unseenNotifications[0]._id);
+            //markSeenMutation.mutate(unseenNotifications[0]._id);
           }
         }
       };
@@ -72,36 +94,18 @@ const NotificationsScreen = () => {
   );
 
   // Handle notification press - mark as seen if not already
-  const handleNotificationPress = (notification: Notification) => {
+  const handleNotificationPress = (notification: NotificationInterface) => {
     if (!notification.isSeen) {
       markSeenMutation.mutate(notification._id);
     }
   };
 
-  // Format date to relative time (e.g., "2 hours ago")
-  const formatRelativeTime = (dateString: string) => {
-    if (!dateString) return "Unknown time";
-
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return "Just now";
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-    } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} ${days === 1 ? "day" : "days"} ago`;
-    }
-  };
-
   // Render a notification item
-  const renderNotificationItem = ({ item }: { item: Notification }) => (
+  const renderNotificationItem = ({
+    item,
+  }: {
+    item: NotificationInterface;
+  }) => (
     <TouchableOpacity
       style={[
         styles.notificationItem,
@@ -149,25 +153,6 @@ const NotificationsScreen = () => {
       <SafeAreaView style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color="#FFCC00" />
         <Text style={styles.loadingText}>Loading notifications...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <Text style={styles.errorText}>Failed to load notifications</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() =>
-            queryClient.invalidateQueries({
-              queryKey: ["userNotifications", userId],
-            })
-          }
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
       </SafeAreaView>
     );
   }

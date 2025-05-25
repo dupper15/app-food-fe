@@ -39,7 +39,7 @@ export default function History() {
       setItemsFailed(data.reverse());
     },
     onError: (error) => {
-      console.error("Fetch history error", error);
+      console.error("Fetch all failed history error", error);
     },
   });
 

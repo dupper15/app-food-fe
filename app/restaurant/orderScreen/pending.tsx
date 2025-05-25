@@ -65,8 +65,7 @@ export default function Pending({
   });
 
   const confirmOrder = useMutation({
-    mutationFn: ({ id, token }: { id: string; token: string }) =>
-      updateStatusOrderByRestaurant(id, token),
+    mutationFn: (id: string) => updateStatusOrderByRestaurant(id),
     onSuccess: () => {
       CustomToast("success", "Success", "Order received successfully!");
       setRefresh(!refresh);
@@ -81,17 +80,7 @@ export default function Pending({
   });
 
   const handleAccept = (orderId: string) => {
-    if (tokenLoading) {
-      CustomToast("error", "Please wait", "Setting up notifications...");
-      return;
-    }
-
-    if (!expoToken) {
-      CustomToast("error", "Error", tokenError || "Push token not available!");
-      return;
-    }
-
-    confirmOrder.mutate({ id: orderId, token: expoToken });
+    confirmOrder.mutate(orderId);
   };
 
   const handleCancel = (orderId: string) => {
