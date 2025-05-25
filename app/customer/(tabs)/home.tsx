@@ -30,6 +30,7 @@ export default function Home() {
   const [isImageSearch, setIsImageSearch] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [rcmRestaurant, setRcmRestaurant] = useState<RestaurantData[]>([]);
+  const [allRestaurant, setAllRestaurant] = useState<RestaurantData[]>([]);
   const getRestaurantHistoryMutation = useMutation({
     mutationFn: ResApi.getRestaurantHistory,
     onSuccess: (data: any) => {
@@ -48,16 +49,29 @@ export default function Home() {
       console.log(error);
     },
   });
+  const getAllRestaurantMutaion = useMutation({
+    mutationFn: ResApi.getAllRestaurant,
+    onSuccess: (data: any) => {
+      setAllRestaurant(data);
+    },
+    onError: (error: any) => {
+      console.log(error);
+    },
+  });
   const getRestaurantHistory = async () => {
     getRestaurantHistoryMutation.mutate(userId);
   };
   const getRcmRestaurant = async () => {
     getRcmRestaurantMutaion.mutate(userId);
   };
+  const getAllRestaurant = async () => {
+    getAllRestaurantMutaion.mutate();
+  };
   useEffect(() => {
     if (userId) {
       getRestaurantHistory();
       getRcmRestaurant();
+      getAllRestaurant();
     }
   }, [userId]);
   const navigateCart = () => {
@@ -180,18 +194,20 @@ export default function Home() {
           <CriteriaComponent handlePickCriteria={handlePickCriteria} />
         </View>
 
-        <View className='mt-4 gap-2 mr-2'>
-          <Text className='text-slate-900 text-lg font-medium'>
-            Order again
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className='flex-row gap-4'>
-              {restaurantHistory.map((restaurant, index) => (
-                <RestaurantBox key={index} restaurant={restaurant} />
-              ))}
-            </View>
-          </ScrollView>
-        </View>
+        {restaurantHistory.length > 0 && (
+          <View className='mt-4 gap-2 mr-2'>
+            <Text className='text-slate-900 text-lg font-medium'>
+              Order again
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className='flex-row gap-4'>
+                {restaurantHistory.map((restaurant, index) => (
+                  <RestaurantBox key={index} restaurant={restaurant} />
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        )}
 
         <View className='mt-4 gap-2 mr-2'>
           <Text className='text-slate-900 text-lg font-medium'>For you</Text>
@@ -206,7 +222,7 @@ export default function Home() {
         <View className='mt-4 gap-2 mr-2 '>
           <Text className='text-slate-900 text-lg font-medium'>All</Text>
           <View className='flex-row flex-wrap justify-between gap-y-4 gap-x-4'>
-            {rcmRestaurant.map((restaurant, index) => (
+            {allRestaurant.map((restaurant, index) => (
               <RestaurantBox key={index} restaurant={restaurant} />
             ))}
           </View>

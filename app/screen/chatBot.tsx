@@ -111,7 +111,7 @@ const ChatBot = () => {
         )}
       </ScrollView>
 
-      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 space-x-2'>
+      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 gap-x-2'>
         <TouchableOpacity className='p-2'>
           <Ionicons name='camera' size={24} color='#666' />
         </TouchableOpacity>

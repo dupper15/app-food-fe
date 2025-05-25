@@ -26,6 +26,7 @@ import {
 } from "@/services/api/userApi";
 import { useSelector } from "react-redux";
 import { getOrInitializeConversation } from "@/services/api/chatApi";
+import RatingList from "../components/ratingList";
 
 const { width } = Dimensions.get("window");
 
@@ -259,7 +260,7 @@ const RestaurantPage = () => {
             </TouchableHighlight>
             <TouchableHighlight
               style={{
-                padding: 10, // Add explicit padding to increase touchable area
+                padding: 10,
                 borderRadius: 20,
               }}
               underlayColor='#f0f0f0'
@@ -330,6 +331,7 @@ const RestaurantPage = () => {
           <Text className='text-center text-gray-500'>No dishes found</Text>
         )}
       </View>
+      {restaurant?._id && <RatingList restaurantId={restaurant?._id} />}
     </ScrollView>
   );
 };

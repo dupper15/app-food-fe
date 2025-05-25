@@ -173,3 +173,48 @@ export const resetPassword = async (data) => {
   });
   return response.data;
 };
+export const addAddress = async (data) => {
+  const { userId, address } = data;
+  if (!userId || !address) {
+    throw new Error("User ID and address are required");
+  }
+  const response = await axiosInstance.post(`customers/${userId}/address`, {
+    address: address,
+  });
+  return response.data;
+};
+export const getAddresses = async (userId: string): Promise<any> => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const response = await axiosInstance.get(`customers/${userId}/address`);
+  return response.data;
+};
+export const editAddress = async (data: {
+  userId: string;
+  prevAddress: string;
+  newAddress: string;
+}) => {
+  const { userId, prevAddress, newAddress } = data;
+  if (!userId || !prevAddress || !newAddress) {
+    throw new Error("User ID, address ID, and new address are required");
+  }
+  const response = await axiosInstance.put(`customers/${userId}/address`, {
+    address: newAddress,
+    prevAddress,
+  });
+  return response.data;
+};
+export const deleteAddress = async (data: {
+  userId: string;
+  address: string;
+}) => {
+  const { userId, address } = data;
+  if (!userId || !address) {
+    throw new Error("User ID and address are required");
+  }
+  const response = await axiosInstance.delete(`customers/${userId}/address`, {
+    data: { address },
+  });
+  return response.data;
+};

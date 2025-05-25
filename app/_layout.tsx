@@ -8,10 +8,9 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import { UpdateUsageTime } from "./components/UpdateUsageTime";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const queryClient = new QueryClient();
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>

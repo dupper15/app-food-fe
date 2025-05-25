@@ -1,3 +1,4 @@
+import { RootState } from "@/app/store";
 import { getCustomerInfo } from "@/services/api/userApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
 
 export default function Personal() {
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: RootState) => state.user.userId);
   const [user, setUser] = useState(null);
   const router = useRouter();
   const handleLogout = () => {
@@ -37,6 +38,14 @@ export default function Personal() {
       },
     },
     {
+      icon: "location-on", // Dùng icon lock cho Change password
+      label: "Addresses",
+      iconColor: "#ef4444", // amber-500
+      onPress: () => {
+        router.push("/screen/addressPage");
+      },
+    },
+    {
       icon: "report", // Dùng icon favorite cho Reflect
       label: "Reflect",
       iconColor: "#10b981", // green-500
@@ -56,7 +65,9 @@ export default function Personal() {
       icon: "lock-outline", // Dùng icon lock-outline cho Privacy
       label: "Privacy",
       iconColor: "#f97316", // orange-500
-      onPress: () => {},
+      onPress: () => {
+        router.push("/screen/privacyPage");
+      },
     },
     {
       icon: "logout", // Giữ nguyên icon logout

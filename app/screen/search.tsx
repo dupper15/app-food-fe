@@ -77,14 +77,13 @@ const Search = () => {
 
   return (
     <View className='flex-1 bg-white p-4'>
-      {/* Thanh tìm kiếm và nút Close */}
-      <View className='flex-row items-center mb-4 space-x-2'>
-        <View className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 space-x-2'>
+      <View className='flex-row items-center mb-4 gap-2'>
+        <View className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 gap-2'>
           <Ionicons name='search' size={20} color='#9ca3af' />
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder='Tìm kiếm món ăn, nhà hàng...'
+            placeholder='Search dishes, restaurantts...'
             className='flex-1 text-base text-gray-800'
             placeholderTextColor='#9ca3af'
             returnKeyType='search'

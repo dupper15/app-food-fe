@@ -46,8 +46,11 @@ const Reflect = () => {
       console.error("Error fetching reflect data:", error);
     },
   });
+  const handleGetReflect = async (userId: string) => {
+    await getReflectMutation.mutate(userId);
+  };
   useEffect(() => {
-    getReflectMutation.mutate(userId);
+    handleGetReflect(userId);
   }, []);
   const router = useRouter();
   return (
@@ -120,10 +123,7 @@ const Reflect = () => {
       {isShow && (
         <View className='absolute top-0 left-0 right-0 bottom-0 bg-black/50 justify-center items-center z-50'>
           <View className='w-[90%]'>
-            <ReflectForm
-              setIsShow={setIsShow}
-              getReflectMutation={getReflectMutation}
-            />
+            <ReflectForm setIsShow={setIsShow} />
           </View>
         </View>
       )}

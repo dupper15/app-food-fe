@@ -3,7 +3,50 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { Stepper } from "react-native-ui-lib";
 import { transPrice } from "./../../utils/transPrice";
+interface Topping {
+  name: string;
+  price: number;
+  [key: string]: any;
+}
 
+interface Dish {
+  name: string;
+  image: string;
+  price: number;
+  [key: string]: any;
+}
+
+interface OrderItem {
+  dish_id: Dish;
+  quantity: number;
+  topping?: Topping[];
+  [key: string]: any;
+}
+
+interface Restaurant {
+  name: string;
+  [key: string]: any;
+}
+
+interface CartItem {
+  restaurant_id: Restaurant;
+  order_items: OrderItem[];
+}
+
+interface Props {
+  selectedDish: OrderItem[];
+  item: CartItem;
+  restaurantIndex: number;
+  toggleRestaurantCheckbox: (restaurantIndex: number) => void;
+  toggleCheckbox: (restaurantIndex: number, itemIndex: number) => void;
+  updateQuantity: (
+    restaurantIndex: number,
+    itemIndex: number,
+    value: number
+  ) => void;
+  setEditedItem: (item: OrderItem) => void;
+  setShowModal: (show: boolean) => void;
+}
 const CardItem = ({
   selectedDish,
   item,
@@ -13,7 +56,7 @@ const CardItem = ({
   updateQuantity,
   setEditedItem,
   setShowModal,
-}) => {
+}: Props) => {
   return (
     <View className='mb-2 bg-white p-4 rounded-lg '>
       <View className='flex-row items-center justify-between mb-4'>
