@@ -4,6 +4,7 @@ import {
   OrderPendingRestaurant,
 } from "@/interfaces/OrderInterface";
 import axiosInstance from "./axiosInstance";
+import * as Notifications from "expo-notifications";
 
 export const fetchOrderById = async (orderId: string): Promise<Order> => {
   const response = await axiosInstance.get(
@@ -48,9 +49,12 @@ export const cancelOrderByRestaurnat = async (id: string): Promise<string> => {
 };
 
 export const updateStatusOrderByRestaurant = async (
-  id: string
+  id: string,
+  expoPushToken: string
 ): Promise<any> => {
-  const response = await axiosInstance.patch(`/order/update-status/${id}`);
+  const response = await axiosInstance.patch(`/order/update-status/${id}`, {
+    expoPushToken,
+  });
   return response.data;
 };
 
