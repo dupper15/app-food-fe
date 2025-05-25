@@ -20,17 +20,17 @@ import {
 import { CustomToast } from "../components/toast";
 
 const ForgetPasswordScreen = () => {
-  const [isSent, setIsSent] = useState(false);
-  const [code, setCode] = useState(["", "", "", ""]);
-  const inputs = useRef([]);
+  const [isSent, setIsSent] = useState<boolean>(false);
+  const [code, setCode] = useState<string[]>(["", "", "", ""]);
+  const inputs = useRef<(TextInput | null)[]>([]);
   const router = useRouter();
-  const [id, setId] = useState("");
-  const [isSetPassword, setIsSetPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const handleChange = (text, index) => {
-    const newCode = [...code];
+  const [id, setId] = useState<string>("");
+  const [isSetPassword, setIsSetPassword] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const handleChange = (text: string, index: number) => {
+    const newCode: string[] = [...code];
     if (/^\d$/.test(text)) {
       newCode[index] = text;
       setCode(newCode);
@@ -49,11 +49,11 @@ const ForgetPasswordScreen = () => {
       console.log(error);
     },
   });
-  const handleResend = () => {
+  const handleResend = (): void => {
     const data = { phone: phoneNumber };
     sendVerifyCodeMutation.mutate(data);
   };
-  const handleSendCode = () => {
+  const handleSendCode = (): void => {
     const data = { phone: phoneNumber };
     sendVerifyCodeMutation.mutate(data);
     setIsSent(true);
@@ -68,7 +68,7 @@ const ForgetPasswordScreen = () => {
       console.log(error);
     },
   });
-  const handleVerify = () => {
+  const handleVerify = (): void => {
     const data = { code: code.join(""), id: id };
     checkCodeMutation.mutate(data);
   };
@@ -82,7 +82,7 @@ const ForgetPasswordScreen = () => {
       console.log(error);
     },
   });
-  const handleChangePassword = () => {
+  const handleChangePassword = (): void => {
     const data = {
       id,
       code: code.join(""),
@@ -91,7 +91,10 @@ const ForgetPasswordScreen = () => {
     };
     resetPasswordMutation.mutate(data);
   };
-
+  const isLoading =
+    sendVerifyCodeMutation.isPending ||
+    checkCodeMutation.isPending ||
+    resetPasswordMutation.isPending;
   return (
     <KeyboardAvoidingView
       className='flex-1 bg-white px-6'
@@ -138,11 +141,12 @@ const ForgetPasswordScreen = () => {
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => {
-                    handleResend();
-                  }}>
+                  onPress={handleResend}
+                  disabled={sendVerifyCodeMutation.isPending}>
                   <Text className='text-gray-500 underline mb-6'>
-                    Resend code
+                    {sendVerifyCodeMutation.isPending
+                      ? "Resending..."
+                      : "Resend code"}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -181,7 +185,7 @@ const ForgetPasswordScreen = () => {
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                className='border border-gray-300 rounded-xl p-4 w-full bg-gray-50 mb-6'
+                className='border border-gray-300 rounded-lg p-4 w-full bg-gray-50 mb-6'
               />
             </>
           )}
@@ -194,12 +198,21 @@ const ForgetPasswordScreen = () => {
                 ? handleVerify
                 : handleSendCode
             }
-            className='bg-yellow-400 rounded-full px-10 py-3 shadow-md active:opacity-80'>
+            disabled={isLoading}
+            className={`bg-yellow-400 rounded-lg px-10 py-3 shadow-sm active:opacity-80 ${
+              isLoading ? "opacity-50" : ""
+            }`}>
             <Text className='text-white text-lg font-bold'>
               {isSetPassword
-                ? "Change Password"
+                ? resetPasswordMutation.isPending
+                  ? "Changing..."
+                  : "Change Password"
                 : isSent
-                ? "Verify"
+                ? checkCodeMutation.isPending
+                  ? "Verifying..."
+                  : "Verify"
+                : sendVerifyCodeMutation.isPending
+                ? "Sending..."
                 : "Send Code"}
             </Text>
           </TouchableOpacity>

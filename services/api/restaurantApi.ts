@@ -33,6 +33,10 @@ export const getRcmRestaurant = async (
   const response = await axiosInstance.get(`restaurants/for-you/${userId}`);
   return response.data;
 };
+export const getAllRestaurant = async (): Promise<RestaurantData> => {
+  const response = await axiosInstance.get("restaurants");
+  return response.data;
+};
 export const getDishesOfRestaurant = async (data: any) => {
   const { restaurantId, categoryId } = data;
   if (categoryId && categoryId !== "") {
@@ -74,11 +78,9 @@ export const getRestaurantByCriteria = async (data: any) => {
     const response = await axiosInstance.get(`restaurants/multiple-buyers`);
     return response.data;
   } else {
-    console.log("o day", restaurantCriteriaString);
     const response = await axiosInstance.get(
       `categories/fetch-restaurant-have-category/${restaurantCriteriaString}`
     );
-    console.log("day ne", response.data);
     return response.data;
   }
 };

@@ -2,6 +2,12 @@ import { fetchAllCategory } from "@/services/api/categoryApi";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
 
 type CategoryItem = {
   _id: string;
@@ -16,42 +22,82 @@ type Props = {
 
 const Category: React.FC<Props> = ({ handlePickCriteria }) => {
   const [category, setCategory] = useState<CategoryItem[]>([]);
+
   const getCategoryMutation = useMutation({
     mutationFn: fetchAllCategory,
     onSuccess: (data) => {
-      console.log("test", data.data);
       setCategory(data.data);
     },
     onError: (error) => {
       console.error("Error fetching categories:", error);
     },
   });
+
   useEffect(() => {
     getCategoryMutation.mutate();
   }, []);
+
+  const isLoading = getCategoryMutation.isPending;
+
   return (
     <ScrollView
       horizontal
-      className='flex-row gap-4 h-0'
-      showsHorizontalScrollIndicator={false}>
-      {category.length > 0 &&
-        category.map((item) => (
-          <TouchableOpacity
-            key={item._id}
-            onPress={() => handlePickCriteria(item._id, item.name)}
-            className='flex-1 gap-2 h-max mx-2'>
-            <View className='rounded-full p-2 w-14 h-14 bg-customYellow'>
-              <Image
-                source={{ uri: item.image }}
-                className='w-full h-full'
-                resizeMode='cover'
-              />
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingHorizontal: 8,
+        flexDirection: "row",
+        gap: 16,
+      }}>
+      {isLoading
+        ? Array.from({ length: 5 }).map((_, index) => (
+            <View
+              key={index}
+              style={{ alignItems: "center", marginHorizontal: 8 }}>
+              <Placeholder Animation={Fade}>
+                <PlaceholderMedia
+                  style={{ width: 56, height: 56, borderRadius: 28 }}
+                />
+                <PlaceholderLine
+                  width={56}
+                  height={16}
+                  style={{ marginTop: 8, borderRadius: 8 }}
+                />
+              </Placeholder>
             </View>
-            <Text className='text-center text-slate-900 font-normal w-14 break-words'>
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+          ))
+        : category.map((item) => (
+            <TouchableOpacity
+              key={item._id}
+              onPress={() => handlePickCriteria(item._id, item.name)}
+              style={{ alignItems: "center", marginHorizontal: 8 }}>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  padding: 8,
+                  backgroundColor: "#FCD34D",
+                }}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={{ width: "100%", height: "100%", borderRadius: 28 }}
+                  resizeMode='cover'
+                />
+              </View>
+              <Text
+                style={{
+                  marginTop: 6,
+                  width: 56,
+                  textAlign: "center",
+                  color: "#1E293B",
+                  fontWeight: "400",
+                  flexWrap: "wrap",
+                }}
+                numberOfLines={2}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
     </ScrollView>
   );
 };

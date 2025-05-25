@@ -81,6 +81,17 @@ export const ratingApi = {
       throw error;
     }
   },
+  getAllRatingByRestaurantId: async (restaurantId: string) => {
+    try {
+      const response = await axiosInstance.get(
+        `rating/restaurant/${restaurantId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching ratings by restaurant ID:", error);
+      throw error;
+    }
+  },
 };
 
 export default ratingApi;

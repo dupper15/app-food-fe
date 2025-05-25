@@ -1,3 +1,4 @@
+import { RootState } from "@/app/store";
 import { getCustomerInfo } from "@/services/api/userApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
 
 export default function Personal() {
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: RootState) => state.user.userId);
   const [user, setUser] = useState(null);
   const router = useRouter();
   const handleLogout = () => {
@@ -37,6 +38,14 @@ export default function Personal() {
       },
     },
     {
+      icon: "location-on", // Dùng icon lock cho Change password
+      label: "Addresses",
+      iconColor: "#ef4444", // amber-500
+      onPress: () => {
+        router.push("/screen/addressPage");
+      },
+    },
+    {
       icon: "report", // Dùng icon favorite cho Reflect
       label: "Reflect",
       iconColor: "#10b981", // green-500
@@ -56,7 +65,9 @@ export default function Personal() {
       icon: "lock-outline", // Dùng icon lock-outline cho Privacy
       label: "Privacy",
       iconColor: "#f97316", // orange-500
-      onPress: () => {},
+      onPress: () => {
+        router.push("/screen/privacyPage");
+      },
     },
     {
       icon: "logout", // Giữ nguyên icon logout
@@ -103,9 +114,7 @@ export default function Personal() {
                 />
               ) : (
                 <Image
-                  source={{
-                    uri: " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
-                  }}
+                  source={require("../../../assets/images/default_avatar.jpg")}
                   className='w-16 h-16 rounded-full mr-4'
                 />
               )}
@@ -119,7 +128,7 @@ export default function Personal() {
           )}
         </View>
 
-        <View className='mt-4 border-t border-gray-200 bg-gray-50 rounded-xl'>
+        <View className='mt-4  bg-gray-50 rounded-xl'>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}

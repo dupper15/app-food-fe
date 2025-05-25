@@ -1,4 +1,4 @@
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import React, { useState } from "react";
 import {
   Text,
@@ -15,21 +15,21 @@ import RegisterModal from "../components/registerModal";
 import { CustomToast } from "../components/toast";
 
 const RegisterScreen: React.FC = () => {
-  const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = (): void => {
     if (password == confirmPassword) {
       setShowModal(true);
     } else {
       CustomToast("error", "Error", "Password does not match");
     }
   };
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showModal, setShowModal] = useState(false);
 
   return (
     <KeyboardAvoidingView

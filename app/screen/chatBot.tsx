@@ -68,7 +68,7 @@ const ChatBot = () => {
   });
   return (
     <SafeAreaView className='flex-1 bg-gray-100'>
-      <View className='flex-row items-center p-4 bg-white shadow space-x-4'>
+      <View className='flex-row items-center mb-2 px-4 py-2 bg-white border-b border-gray-200 gap-4'>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name='chevron-back' size={24} color='#000' />
         </TouchableOpacity>
@@ -83,7 +83,7 @@ const ChatBot = () => {
       </View>
 
       <ScrollView
-        className='flex-1 px-4'
+        className='flex-1 px-4 py-2'
         ref={scrollViewRef}
         contentContainerStyle={{ paddingVertical: 16 }}>
         {isLoading ? (
@@ -111,7 +111,7 @@ const ChatBot = () => {
         )}
       </ScrollView>
 
-      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 space-x-2'>
+      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 gap-x-2'>
         <TouchableOpacity className='p-2'>
           <Ionicons name='camera' size={24} color='#666' />
         </TouchableOpacity>

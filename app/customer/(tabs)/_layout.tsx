@@ -7,6 +7,10 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: "#FFC515",
+        tabBarStyle: {
+          height: 45,
+          paddingBottom: 0,
+        },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = "home";
 
@@ -24,13 +28,12 @@ export default function TabsLayout() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-      })}
-    >
-      <Tabs.Screen name="home" />
-      <Tabs.Screen name="favorite" />
-      <Tabs.Screen name="history" />
-      <Tabs.Screen name="notification" />
-      <Tabs.Screen name="personal" />
+      })}>
+      <Tabs.Screen name='home' />
+      <Tabs.Screen name='favorite' />
+      <Tabs.Screen name='history' />
+      <Tabs.Screen name='notification' />
+      <Tabs.Screen name='personal' />
     </Tabs>
   );
 }
