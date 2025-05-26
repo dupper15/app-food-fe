@@ -135,7 +135,13 @@ const OrderComponent = ({
                 <Text style={styles.rateButtonText}>Rate</Text>
               </TouchableOpacity>
             )}
-            <ReorderButton orderId={item.order._id} returnToHistory={true} />
+            <ReorderButton
+              orderId={item.order._id}
+              orderItems={item.orderItems}
+              style={styles.reorderButton}
+              textStyle={styles.reorderButtonText}
+              returnToHistory={true}
+            />
           </>
         )}
       </View>

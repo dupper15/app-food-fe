@@ -237,6 +237,7 @@ const OrderDetailScreen = () => {
       <View style={styles.footer}>
         <ReorderButton
           orderId={orderDetail.order._id}
+          orderItems={orderDetail.orderItems}
           style={styles.fullWidthReorderButton}
           textStyle={styles.reorderButtonText}
           returnToHistory={true}
