@@ -74,7 +74,7 @@ const LoginScreen: React.FC = () => {
             } else if (status === "Disable") {
               router.push("/screen/disablePage");
             } else {
-              router.push("/customer/(tabs)/home");
+              router.push("/restaurant/orderScreen/order");
             }
           } catch (error) {
             CustomToast("error", "Error", "Failed to fetch restaurant details");
@@ -82,7 +82,11 @@ const LoginScreen: React.FC = () => {
         }
         if (data.userType === "customer") {
           AsyncStorage.setItem("customer_id", String(userId));
-          router.push("/customer/(tabs)/home");
+          if (status === "Disable") {
+            router.push("/screen/disablePage");
+          } else {
+            router.push("/customer/(tabs)/home");
+          }
         }
       } else {
         router.push("/auth/verifiedScreen");
