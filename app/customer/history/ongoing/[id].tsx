@@ -22,6 +22,7 @@ import {
 import { fetchOrderWithRestaurantDetails } from "@/services/api/orderApi";
 import { useSelector } from "react-redux";
 import { transPrice } from "@/utils/transPrice";
+import { fetchCompleteHistory } from "@/services/historyService";
 
 const OrderDetailScreen = () => {
   const router = useRouter();
@@ -42,9 +43,18 @@ const OrderDetailScreen = () => {
         setIsLoading(true);
         setError(null);
 
-        const orderData = await fetchOrderWithRestaurantDetails(orderId);
-        setOrderDetail(orderData);
-        setRestaurant(orderData.restaurant);
+        const historyItems = await fetchCompleteHistory(userId);
+        const order = historyItems.find(
+          (item) =>
+            item.order._id === orderId ||
+            item.historyItem.order_id === orderId ||
+            item.historyItem._id === orderId
+        );
+
+        if (!order) {
+          throw new Error("Order not found");
+        }
+        setOrderDetail(order);
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading order details:", err);
@@ -59,7 +69,7 @@ const OrderDetailScreen = () => {
       setError("Invalid order ID");
       setIsLoading(false);
     }
-  }, [orderId]);
+  }, [orderId, userId]);
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();

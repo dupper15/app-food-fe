@@ -64,18 +64,29 @@ export default function ChatDetail() {
           console.log("Joined conversation:", joined);
         }
 
-        // Set up message listener
+        // Set up message listener with improved duplicate detection
         const messageUnsubscribe = socketService.onReceiveMessage(
           (newMessage) => {
             console.log("New message received:", newMessage);
 
             if (newMessage.conversationId === id) {
               setMessages((prevMessages) => {
-                // Avoid duplicates by checking message ID
-                const exists = prevMessages.some(
-                  (msg) => msg._id === newMessage._id
+                // More robust duplicate checking
+                const isDuplicate = prevMessages.some(
+                  (msg) =>
+                    // Check if the message has the same ID (for server messages)
+                    msg._id === newMessage._id ||
+                    // Check if this is a server version of a temp message
+                    (msg._id.startsWith("temp-") &&
+                      msg.content === newMessage.content &&
+                      msg.sender_id === newMessage.sender_id &&
+                      Math.abs(
+                        new Date(msg.createdAt).getTime() -
+                          new Date(newMessage.createdAt).getTime()
+                      ) < 5000)
                 );
-                if (exists) return prevMessages;
+
+                if (isDuplicate) return prevMessages;
                 return [...prevMessages, newMessage];
               });
 
@@ -168,9 +179,8 @@ export default function ChatDetail() {
     if (inputMessage.trim() === "" || !recipientId) return;
 
     try {
-      // Create a temporary message to show immediately
       const tempMessage: ApiMessage = {
-        _id: `temp-${Date.now()}`, // Temporary ID for UI
+        _id: `temp-${Date.now()}`,
         sender_id: userId || "",
         receiver_id: recipientId,
         conversationId: id,
