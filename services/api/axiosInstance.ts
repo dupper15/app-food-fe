@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const getBaseUrl = () => {
@@ -7,7 +6,7 @@ const getBaseUrl = () => {
   //   ? "http://10.0.2.2:3000"
   //   : "http://localhost:3000";
   return "https://app-food-be.onrender.com/";
-  // return "http://localhost:3000/";
+  //return "http://localhost:3000/";
 };
 
 const axiosInstance = axios.create({
