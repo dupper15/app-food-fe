@@ -4,24 +4,27 @@ import DishBox from "./dishBox";
 import { ScrollView } from "react-native-gesture-handler";
 
 const CartItem = ({ item }) => (
-  <View className='bg-gray-100 p-3 rounded-lg flex-row items-center space-x-3'>
-    {/* Hình món ăn */}
+  <View className=' bg-white p-3 rounded-lg flex-row items-start gap-x-3 border border-gray-200'>
     <Image
       source={{ uri: item.dish_id.image }}
       style={{ width: 60, height: 60, borderRadius: 8 }}
     />
 
-    {/* Thông tin món ăn */}
     <View className='flex-1'>
-      <Text className='font-semibold text-base'>{item.dish_id.name}</Text>
-      <Text className='text-gray-700'>{item.dish_id.price}₫</Text>
+      <View className='flex-row justify-between items-center flex-wrap'>
+        <Text className='font-semibold text-base flex-shrink pr-2'>
+          {item.dish_id.name}
+        </Text>
+        <Text className='text-green-600 font-semibold'>
+          {item.dish_id.price.toLocaleString()}₫
+        </Text>
+      </View>
 
-      {/* Danh sách topping (nếu có) */}
       {Array.isArray(item.topping) && item.topping.length > 0 && (
-        <View className='mt-1 space-y-1'>
+        <View className='mt-2 gap-y-1'>
           {item.topping.map((topping, index) => (
             <Text key={index} className='text-sm text-gray-600'>
-              + {topping.name} - {topping.price}₫
+              + {topping.name} - {topping.price.toLocaleString()}₫
             </Text>
           ))}
         </View>
@@ -31,9 +34,9 @@ const CartItem = ({ item }) => (
 );
 
 const OrderCard = ({ item }) => (
-  <View className='bg-slate-100 rounded-xl p-4 space-y-3 border border-gray-200'>
+  <View className='bg-slate-100 rounded-xl p-4 gap-y-3 border border-gray-200'>
     {/* Header: Avatar + Tên quán */}
-    <View className='flex-row items-center space-x-3'>
+    <View className='flex-row items-center gap-x-3'>
       <Image
         source={{ uri: item.restaurant_id.owner_id.avatar }}
         style={{ width: 50, height: 50, borderRadius: 25 }}
@@ -55,7 +58,7 @@ const OrderCard = ({ item }) => (
     {item.array_item.map((dishItem, index) => (
       <View
         key={dishItem._id}
-        className='border-t border-gray-200 bg-white px-2 pt-3 mt-3 flex-row space-x-3'>
+        className='border-t border-gray-200 bg-white px-2 pt-3 mt-3 flex-row gap-x-3'>
         <Image
           source={{ uri: dishItem.dish_id.image }}
           style={{ width: 80, height: 80, borderRadius: 10 }}
@@ -78,9 +81,9 @@ const OrderCard = ({ item }) => (
 );
 
 const OngoingOrderCard = ({ item }) => (
-  <View className='bg-slate-100 rounded-xl p-4 space-y-3 border border-gray-200'>
+  <View className='bg-slate-100 rounded-xl p-4 gap-y-3 border border-gray-200'>
     {/* Header: Avatar + Tên quán */}
-    <View className='flex-row items-center space-x-3'>
+    <View className='flex-row items-center gap-x-3'>
       <Image
         source={{ uri: item.restaurant_id.owner_id.avatar }}
         style={{ width: 50, height: 50, borderRadius: 25 }}
@@ -102,7 +105,7 @@ const OngoingOrderCard = ({ item }) => (
     {item.array_item.map((dishItem, index) => (
       <View
         key={dishItem._id}
-        className='border-t border-gray-200 bg-white px-2 pt-3 mt-3 flex-row space-x-3'>
+        className='border-t border-gray-200 bg-white px-2 pt-3 mt-3 flex-row gap-x-3'>
         <Image
           source={{ uri: dishItem.dish_id.image }}
           style={{ width: 80, height: 80, borderRadius: 10 }}
@@ -128,18 +131,19 @@ const FunctionContent = ({ content, functionName, result }) => {
   switch (functionName) {
     case "recommend_dish_by_time":
       return (
-        <View className='flex-1 gap-4'>
+        <View className='gap-4'>
           <Text className='text-gray-800'>{content}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className='flex-row gap-4'>
-              {result &&
-                Array.isArray(result) &&
-                result.length > 0 &&
-                result.map((item, index) => (
-                  <View key={index} className='w-40'>
-                    <DishBox dish={item} />
-                  </View>
-                ))}
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className='max-h-56'>
+            <View className='flex-row gap-4 py-2'>
+              {result?.map((item, index) => (
+                <View key={index} className='w-fit h-fit'>
+                  <DishBox dish={item} />
+                </View>
+              ))}
             </View>
           </ScrollView>
         </View>
@@ -174,10 +178,13 @@ const FunctionContent = ({ content, functionName, result }) => {
 
     case "get_user_cart":
       return (
-        <View className='space-y-3'>
+        <View className='gap-y-3 w-fit w-max-[75%] h-fit'>
+          <Text className='text-gray-800'>{content}</Text>
           {Array.isArray(result) &&
             result.map((item, index) => (
-              <View className='space-y-3'>
+              <View
+                key={index}
+                className='gap-y-3 w-fit p-2 h-fit bg-slate-100'>
                 <Text className='font-bold text-lg'>
                   {item.restaurant_id.name}
                 </Text>
@@ -190,7 +197,7 @@ const FunctionContent = ({ content, functionName, result }) => {
 
     case "get_topping_of_restaurant":
       return (
-        <View className='mb-3 px-4 py-2 rounded-lg max-w-[75%] bg-white self-start space-y-2'>
+        <View className='mb-3 px-4 py-2 rounded-lg max-w-[75%] bg-white self-start gap-y-2'>
           <Text className='text-gray-800'>{content}</Text>
           {Array.isArray(result) &&
             result.map((item, index) => (
@@ -204,7 +211,7 @@ const FunctionContent = ({ content, functionName, result }) => {
 
     case "get_order_history":
       return (
-        <View className='space-y-3'>
+        <View className='gap-y-3'>
           <Text className='text-gray-800'>{content}</Text>
           {Array.isArray(result) &&
             result.map((item, index) => <OrderCard key={index} item={item} />)}
@@ -213,7 +220,7 @@ const FunctionContent = ({ content, functionName, result }) => {
 
     case "view_ongoing_orders":
       return (
-        <View className='space-y-3'>
+        <View className='gap-y-3'>
           <Text className='text-gray-800'>{content}</Text>
           {Array.isArray(result) &&
             result.map((item, index) => (

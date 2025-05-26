@@ -1,4 +1,4 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import "./global.css";
 import { SafeAreaView } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import toastConfig from "@/services/toastConfig";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { UpdateUsageTime } from "./components/UpdateUsageTime";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useNotificationListener } from "@/services/api/notificationApi";
 
 export default function RootLayout() {
@@ -14,19 +15,21 @@ export default function RootLayout() {
   const queryClient = new QueryClient();
 
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <SafeAreaView className="flex-1">
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(restaurant)" />
-            <Stack.Screen name="(customer)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
-        </SafeAreaView>
-        <UpdateUsageTime />
-        <Toast config={toastConfig} />
-      </QueryClientProvider>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <SafeAreaView className="flex-1">
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(restaurant)" />
+              <Stack.Screen name="(customer)" />
+              <Stack.Screen name="(auth)" />
+            </Stack>
+          </SafeAreaView>
+          <UpdateUsageTime />
+          <Toast config={toastConfig} />
+        </QueryClientProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }

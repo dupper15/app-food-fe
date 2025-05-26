@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/features/counter/userSlice";
@@ -22,21 +23,33 @@ import { fetchRestaurantByOwner } from "@/services/api/restaurantApi";
 import { setRestaurant } from "@/features/counter/restaurantSlice";
 import { registerForPushNotificationsAsync } from "@/services/api/notificationApi";
 
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  total_time_spent: number;
+  isVerified: boolean;
+  userType: "restaurantOwner" | "customer" | string;
+  status: "Pending" | "Incomplete" | "Disable" | "Enable";
+}
 const LoginScreen: React.FC = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const dispatch = useDispatch();
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: async (data: any) => {
-      const { accessToken, refreshToken, total_time_spent, isVerified } = data;
-      const userId = getUserIdFromToken(accessToken);
-      console.log("isVerified", isVerified);
-      AsyncStorage.setItem("usageTime", total_time_spent.toString());
-      AsyncStorage.setItem("startTime", Date.now().toString());
+    onSuccess: async (data: LoginResponse) => {
+      const {
+        accessToken,
+        refreshToken,
+        total_time_spent,
+        isVerified,
+        status,
+      } = data;
+      const userId: string = getUserIdFromToken(accessToken)!;
+      await AsyncStorage.setItem("usageTime", total_time_spent.toString());
+      await AsyncStorage.setItem("startTime", Date.now().toString());
       dispatch(setUser({ userId, refreshToken }));
-      CustomToast("success", "Success", "Login success");
       AsyncStorage.setItem("userId", String(userId));
       if (isVerified) {
         if (data.userType === "restaurantOwner") {
@@ -55,9 +68,16 @@ const LoginScreen: React.FC = () => {
                 })
               );
             }
-            router.push("/restaurant/orderScreen/order");
+            if (status === "Pending") {
+              router.push("/screen/pendingPage");
+            } else if (status === "Incomplete") {
+              router.push("/auth/createRestaurant");
+            } else if (status === "Disable") {
+              router.push("/screen/disablePage");
+            } else {
+              router.push("/customer/(tabs)/home");
+            }
           } catch (error) {
-            console.error("Error fetching restaurant details:", error);
             CustomToast("error", "Error", "Failed to fetch restaurant details");
           }
         }
@@ -70,7 +90,6 @@ const LoginScreen: React.FC = () => {
       }
     },
     onError: (data: any) => {
-      console.log(data);
       CustomToast("error", "Error", "Login failed");
     },
   });
@@ -150,10 +169,16 @@ const LoginScreen: React.FC = () => {
 
               <TouchableOpacity
                 onPress={handleLogin}
-                className="w-4/5 p-4 rounded-lg bg-customYellow shadow-sm active:opacity-80"
+                disabled={mutation.isPending}
+                className={`w-4/5 p-4 rounded-lg bg-customYellow shadow-sm flex-row justify-center items-center gap-2 ${
+                  mutation.isPending ? "opacity-50" : "active:opacity-80"
+                }`}
               >
+                {mutation.isPending && (
+                  <ActivityIndicator size="small" color="#fff" />
+                )}
                 <Text className="text-white text-center font-medium">
-                  Login
+                  {mutation.isPending ? "Logging in..." : "Login"}
                 </Text>
               </TouchableOpacity>
 

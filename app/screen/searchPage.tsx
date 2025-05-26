@@ -25,15 +25,14 @@ const SearchPage = () => {
   }, [search]);
   return (
     <View className='flex-1 bg-white p-4'>
-      {/* Header Search Box */}
-      <View className='flex-row items-center justify-between mb-4 space-x-2'>
+      <View className='flex-row items-center justify-between mb-4 gap-2'>
         <TouchableOpacity
           onPress={() => router.back()}
-          className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 space-x-2'>
+          className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 gap-2 '>
           <Ionicons name='search' size={20} color='#9ca3af' />
           <TextInput
             value={search}
-            className='flex-1 text-base text-gray-800'
+            className='flex-1 text-base  text-gray-800'
             placeholderTextColor='#9ca3af'
             returnKeyType='search'
           />
@@ -44,21 +43,16 @@ const SearchPage = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Result Title */}
       <Text className='text-lg font-semibold text-gray-700 mb-2'>
         Answer for "{search}"
       </Text>
 
-      {/* Restaurant Scroll List */}
       {restaurants.length > 0 ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className='space-x-3'>
+        <View className='flex-row flex-wrap justify-between'>
           {restaurants.map((restaurant, index) => (
             <RestaurantBox key={index} restaurant={restaurant} />
           ))}
-        </ScrollView>
+        </View>
       ) : (
         <Text className='text-center text-gray-500'>No restaurant found</Text>
       )}
