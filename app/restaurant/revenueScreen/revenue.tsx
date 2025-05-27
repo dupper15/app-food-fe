@@ -5,8 +5,8 @@ import {
   fetchWeeklyRevenueByRestaurant,
 } from "@/services/api/orderApi";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
-import { ScrollView } from "react-native";
+import { useCallback, useState } from "react";
+import { ScrollView, View } from "react-native";
 import { useSelector } from "react-redux";
 import MonthlyRevenueCard from "./monthlyRevenue";
 import MonthlyOrderCard from "./monthlyOrder";
@@ -16,7 +16,6 @@ import WeeklyRevenueChart from "./weeklyRevenueChart";
 import { WeeklyRevenueItem } from "@/interfaces/RevenueInterface";
 import { useFocusEffect } from "expo-router";
 import ratingApi from "@/services/api/ratingApi";
-import { View } from "react-native-ui-lib";
 import AverageRating from "./averageRating";
 
 export default function DashboardScreen() {
@@ -130,9 +129,13 @@ export default function DashboardScreen() {
         mockMonthlyRevenue={mockMonthlyRevenue}
         rateMonth={rateMonth}
       />
-      <View className="flex-1 flex-row gap-3 w-full">
-        <MonthlyOrderCard totalOrders={totalOrders} />
-        <AverageRating rating={averageRating} />
+      <View className="flex-row gap-4 mb-4">
+        <View className="flex-1">
+          <MonthlyOrderCard totalOrders={totalOrders} />
+        </View>
+        <View className="flex-1">
+          <AverageRating rating={averageRating} />
+        </View>
       </View>
       <OrderRateChart
         orderStatusData={orderStatusData}

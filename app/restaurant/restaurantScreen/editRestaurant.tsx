@@ -25,7 +25,7 @@ import { updateRestaurant } from "@/features/counter/restaurantSlice";
 import { setUser } from "@/features/counter/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type ReactNativeFile = {
+export type ReactNativeFile = {
   uri: string;
   name: string;
   type: string;
