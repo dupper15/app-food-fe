@@ -7,7 +7,14 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
-
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 export default function Personal() {
   const userId = useSelector((state: RootState) => state.user.userId);
   const [user, setUser] = useState(null);
@@ -21,7 +28,7 @@ export default function Personal() {
     AsyncStorage.removeItem("startTime");
     AsyncStorage.removeItem("usageTime");
     AsyncStorage.removeItem("customer_id");
-    router.push("/auth/login");
+    router.push("/authen/login");
   };
   const menuItems = [
     {
@@ -94,6 +101,13 @@ export default function Personal() {
       getUserInfoMutation.mutate(userId);
     }
   }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        getUserInfoMutation.mutate(userId);
+      }
+    }, [userId])
+  );
 
   return (
     <View className='flex-1 bg-white'>
@@ -103,28 +117,40 @@ export default function Personal() {
 
       <View className='flex-1 gap-4 py-8 px-6'>
         <View className='bg-gray-50 rounded-xl p-4'>
-          {user && (
-            <View className='flex-row items-center'>
-              {user.avatar ? (
-                <Image
-                  source={{
-                    uri: user.avatar,
-                  }}
-                  className='w-16 h-16 rounded-full mr-4'
-                />
-              ) : (
-                <Image
-                  source={require("../../../assets/images/default_avatar.jpg")}
-                  className='w-16 h-16 rounded-full mr-4'
-                />
-              )}
-              <View>
-                <Text className='text-lg font-semibold text-gray-800'>
-                  {user.name}
-                </Text>
-                <Text className='text-gray-500'>{user.email}</Text>
+          {getUserInfoMutation.isPending ? (
+            <Placeholder Animation={Fade}>
+              <View className='flex-row items-center'>
+                <PlaceholderMedia size={64} isRound={true} />
+                <View className='ml-4 flex-1'>
+                  <PlaceholderLine width={80} />
+                  <PlaceholderLine width={50} />
+                </View>
               </View>
-            </View>
+            </Placeholder>
+          ) : (
+            user && (
+              <View className='flex-row items-center'>
+                {user.avatar ? (
+                  <Image
+                    source={{
+                      uri: user.avatar,
+                    }}
+                    className='w-16 h-16 rounded-full mr-4'
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/images/default_avatar.jpg")}
+                    className='w-16 h-16 rounded-full mr-4'
+                  />
+                )}
+                <View>
+                  <Text className='text-lg font-semibold text-gray-800'>
+                    {user.name}
+                  </Text>
+                  <Text className='text-gray-500'>{user.email}</Text>
+                </View>
+              </View>
+            )
           )}
         </View>
 

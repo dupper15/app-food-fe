@@ -6,10 +6,13 @@ import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "@/services/api/axiosInstance";
 import { textSearch } from "@/services/api/searchApi";
 import { useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native";
+import * as ImageManipulator from "expo-image-manipulator";
 
 type ReactNativeFile = {
   uri: string;
   name: string;
+
   type: string;
 };
 
@@ -21,7 +24,13 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
   const [imageUrl, setImageUrl] = useState<string>("");
   const [searchText, setSearchText] = useState("");
   const router = useRouter();
-
+  const compressImage = async (uri: string) => {
+    const manipulated = await ImageManipulator.manipulateAsync(uri, [], {
+      compress: 0.7,
+      format: ImageManipulator.SaveFormat.JPEG,
+    });
+    return manipulated.uri;
+  };
   const searchMutation = useMutation({
     mutationFn: textSearch,
     onSuccess: (data) => {
@@ -54,7 +63,7 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
     return response.data;
   };
 
-  const { mutate: uploadImageMutate } = useMutation({
+  const uploadImageMutation = useMutation({
     mutationFn: uploadImage,
     onSuccess: (data) => {
       const searchString = data.toString().trim().slice(0, -1);
@@ -88,7 +97,7 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
   const handleImagePicked = (uri: string) => {
     setImageUrl(uri);
     const file = createFileFromUri(uri);
-    uploadImageMutate(file);
+    uploadImageMutation.mutate(file);
   };
 
   const openCamera = async () => {
@@ -106,7 +115,8 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      handleImagePicked(uri);
+      const compressedUri = await compressImage(uri);
+      handleImagePicked(compressedUri);
     }
   };
 
@@ -126,14 +136,17 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      handleImagePicked(uri);
+      const compressedUri = await compressImage(uri);
+      handleImagePicked(compressedUri);
     }
   };
+
+  const isLoading = uploadImageMutation.isPending || searchMutation.isPending;
 
   return (
     <Modal animationType='slide' visible>
       <View className='flex-1 bg-black bg-opacity-50 justify-center items-center'>
-        <View className='bg-white w-3/4 p-6 rounded-lg shadow-lg'>
+        <View className='bg-white w-3/4 p-6 rounded-lg shadow-lg opacity-100'>
           <Text className='text-slate-900 font-medium text-xl text-center mb-4'>
             Upload Image
           </Text>
@@ -142,7 +155,8 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
             <TouchableHighlight
               onPress={openCamera}
               className='bg-customYellow p-3 rounded-lg'
-              underlayColor='#FFD700'>
+              underlayColor='#FFD700'
+              disabled={isLoading}>
               <Text className='text-white text-center font-medium'>
                 Open Camera
               </Text>
@@ -151,7 +165,8 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
             <TouchableHighlight
               onPress={openGallery}
               className='bg-customYellow p-3 rounded-lg'
-              underlayColor='#FFD700'>
+              underlayColor='#FFD700'
+              disabled={isLoading}>
               <Text className='text-white text-center font-medium'>
                 Choose from Gallery
               </Text>
@@ -160,11 +175,18 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
             <TouchableHighlight
               onPress={() => setShowModal(false)}
               className='bg-red-500 p-3 rounded-lg'
-              underlayColor='#FF6347'>
+              underlayColor='#FF6347'
+              disabled={isLoading}>
               <Text className='text-white text-center font-medium'>Cancel</Text>
             </TouchableHighlight>
           </View>
         </View>
+
+        {isLoading && (
+          <View className='absolute inset-0 bg-black bg-opacity-30 justify-center items-center rounded-lg'>
+            <ActivityIndicator size='large' color='#FFD700' />
+          </View>
+        )}
       </View>
     </Modal>
   );

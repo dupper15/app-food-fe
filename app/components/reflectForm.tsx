@@ -13,6 +13,7 @@ import { CustomToast } from "./toast";
 import UploadImageModal from "./uploadImageModal";
 import { sendReflect } from "@/services/api/reflectApi";
 import { RootState } from "../store";
+import { ActivityIndicator } from "react-native";
 
 type ReactNativeFile = {
   uri: string;
@@ -22,8 +23,10 @@ type ReactNativeFile = {
 
 const ReflectForm = ({
   setIsShow,
+  handleGetReflect,
 }: {
   setIsShow: (value: boolean) => void;
+  handleGetReflect: (userId: string) => Promise<void>;
 }) => {
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState("");
@@ -39,6 +42,9 @@ const ReflectForm = ({
       CustomToast("success", "Gửi phản hồi thành công", "");
       setImages([]);
       setContent("");
+      if (userId) {
+        handleGetReflect(userId);
+      }
       setIsShow(false);
     },
     onError: (error) => {
@@ -119,6 +125,7 @@ const ReflectForm = ({
         ))}
         <TouchableHighlight
           onPress={handleAddImage}
+          disabled={uploadMutation.isPending}
           className='w-20 h-20 bg-gray-300 rounded-md justify-center items-center'
           underlayColor='#cbd5e1'>
           <Text className='text-3xl text-white'>+</Text>
@@ -128,15 +135,21 @@ const ReflectForm = ({
       <View className='flex-row justify-between gap-4'>
         <TouchableHighlight
           onPress={() => setIsShow(false)}
+          disabled={uploadMutation.isPending}
           className='flex-1 bg-gray-200 py-3 rounded-lg'
           underlayColor='#94a3b8'>
           <Text className='text-center text-black font-medium'>Cancel</Text>
         </TouchableHighlight>
         <TouchableHighlight
           onPress={handleSubmit}
+          disabled={uploadMutation.isPending}
           className='flex-1 bg-customYellow py-3 rounded-lg'
-          underlayColor='#2563eb'>
-          <Text className='text-center text-white font-medium'>Send</Text>
+          underlayColor='#eab308'>
+          {uploadMutation.isPending ? (
+            <ActivityIndicator size='small' color='#fff' />
+          ) : (
+            <Text className='text-center text-white font-medium'>Send</Text>
+          )}
         </TouchableHighlight>
       </View>
 

@@ -16,6 +16,13 @@ import {
   TextInput,
 } from "react-native";
 import { useSelector } from "react-redux";
+import { ActivityIndicator } from "react-native";
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
 
 const AddressPage = () => {
   const router = useRouter();
@@ -30,7 +37,7 @@ const AddressPage = () => {
   const [address, setAddress] = useState<string[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedText, setEditedText] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newAddress, setNewAddress] = useState("");
 
@@ -53,8 +60,10 @@ const AddressPage = () => {
       getAddressesMutation.mutate(userId);
       setEditingIndex(null);
       setEditedText("");
+      setIsLoading(false);
     },
     onError: (error) => {
+      setIsLoading(false);
       console.error("Error editing address:", error);
     },
   });
@@ -66,6 +75,7 @@ const AddressPage = () => {
       setNewAddress("");
     },
     onError: (error) => {
+      setIsLoading(false);
       console.error("Error adding address:", error);
     },
   });
@@ -79,11 +89,13 @@ const AddressPage = () => {
       }
     },
     onError: (error) => {
+      setIsLoading(false);
       console.error("Error deleting address:", error);
     },
   });
   const handleSave = (index: number) => {
     if (editedText.trim() !== "") {
+      setIsLoading(true);
       editAddressMutation.mutate({
         userId,
         prevAddress: address[index],
@@ -95,6 +107,7 @@ const AddressPage = () => {
   };
 
   const handleDelete = (index: number) => {
+    setIsLoading(true);
     const data = { userId, address: address[index] };
     deleteAddressMutation.mutate(data);
   };
@@ -105,6 +118,7 @@ const AddressPage = () => {
 
   const handleSaveNewAddress = () => {
     if (newAddress.trim() !== "") {
+      setIsLoading(true);
       addAddressMutation.mutate({ userId, address: newAddress });
       setNewAddress("");
       setIsAdding(false);
@@ -146,57 +160,89 @@ const AddressPage = () => {
               />
             </View>
             <View className='flex-row items-center gap-4 ml-2'>
-              <TouchableOpacity onPress={handleSaveNewAddress}>
+              <TouchableOpacity
+                disabled={isLoading}
+                onPress={handleSaveNewAddress}>
                 <Ionicons name='checkmark-outline' size={22} color='#22c55e' />
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleCancelAdd}>
+              <TouchableOpacity disabled={isLoading} onPress={handleCancelAdd}>
                 <Ionicons name='close-outline' size={22} color='#f87171' />
               </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {address.length === 0 ? (
-          <View className='flex-1 justify-center items-center mt-10'>
-            <Text className='text-gray-500 text-lg'>No addresses found</Text>
-          </View>
+        {!getAddressesMutation.isPending ? (
+          address.length === 0 ? (
+            <View className='flex-1 justify-center items-center mt-10'>
+              <Text className='text-gray-500 text-lg'>No addresses found</Text>
+            </View>
+          ) : (
+            address.map((addr, index) => (
+              <View
+                key={index}
+                className='bg-white px-4 py-6 rounded-2xl mb-4 flex-row items-center justify-between gap-2'>
+                <View className='flex-row items-start gap-2 flex-1'>
+                  <Entypo name='location-pin' size={24} color='red' />
+                  {editingIndex === index ? (
+                    <TextInput
+                      value={editedText}
+                      onChangeText={setEditedText}
+                      className='flex-1 text-gray-800 border-b border-gray-300'
+                      autoFocus
+                    />
+                  ) : (
+                    <Text className='text-gray-800 flex-1'>{addr}</Text>
+                  )}
+                </View>
+                <View className='flex-row items-center gap-4 ml-2'>
+                  {editingIndex === index ? (
+                    <TouchableOpacity
+                      disabled={isLoading}
+                      onPress={() => handleSave(index)}>
+                      <Ionicons
+                        name='checkmark-outline'
+                        size={22}
+                        color='#22c55e'
+                      />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      disabled={isLoading}
+                      onPress={() => handleEdit(index)}>
+                      <Feather name='edit-3' size={20} color='#2dd4bf' />
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    disabled={isLoading}
+                    onPress={() => handleDelete(index)}>
+                    <Ionicons name='trash-outline' size={22} color='#facc15' />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))
+          )
         ) : (
-          address.map((addr, index) => (
-            <View
+          Array.from({ length: 3 }).map((_, index) => (
+            <Placeholder
               key={index}
+              Animation={Fade}
               className='bg-white px-4 py-6 rounded-2xl mb-4 flex-row items-center justify-between gap-2'>
               <View className='flex-row items-start gap-2 flex-1'>
-                <Entypo name='location-pin' size={24} color='red' />
-                {editingIndex === index ? (
-                  <TextInput
-                    value={editedText}
-                    onChangeText={setEditedText}
-                    className='flex-1 text-gray-800 border-b border-gray-300'
-                    autoFocus
-                  />
-                ) : (
-                  <Text className='text-gray-800 flex-1'>{addr}</Text>
-                )}
+                <PlaceholderMedia
+                  style={{ width: 24, height: 24, borderRadius: 12 }}
+                />
+                <PlaceholderLine width={80} />
               </View>
               <View className='flex-row items-center gap-4 ml-2'>
-                {editingIndex === index ? (
-                  <TouchableOpacity onPress={() => handleSave(index)}>
-                    <Ionicons
-                      name='checkmark-outline'
-                      size={22}
-                      color='#22c55e'
-                    />
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity onPress={() => handleEdit(index)}>
-                    <Feather name='edit-3' size={20} color='#2dd4bf' />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity onPress={() => handleDelete(index)}>
-                  <Ionicons name='trash-outline' size={22} color='#facc15' />
-                </TouchableOpacity>
+                <PlaceholderMedia
+                  style={{ width: 20, height: 20, borderRadius: 10 }}
+                />
+                <PlaceholderMedia
+                  style={{ width: 20, height: 20, borderRadius: 10 }}
+                />
               </View>
-            </View>
+            </Placeholder>
           ))
         )}
       </ScrollView>
@@ -205,10 +251,16 @@ const AddressPage = () => {
         <TouchableOpacity
           className='bg-yellow-400 py-4 rounded-xl items-center'
           onPress={handleAddNewAddress}
-          disabled={isAdding}>
-          <Text className='text-white font-semibold text-xl'>
-            Add New Address
-          </Text>
+          disabled={isLoading || isAdding}>
+          {isLoading ? (
+            <View className='items-center py-4'>
+              <ActivityIndicator size='large' color='#facc15' />
+            </View>
+          ) : (
+            <Text className='text-white font-semibold text-xl'>
+              Add New Address
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

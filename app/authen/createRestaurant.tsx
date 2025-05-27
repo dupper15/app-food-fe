@@ -53,7 +53,7 @@ const CreateRestaurantScreen: React.FC = () => {
     onSuccess: (data) => {
       console.log("success", data);
       CustomToast("success", "Success", "Upload success");
-      router.push("/auth/login");
+      router.push("/authen/login");
     },
     onError: (data) => {
       console.log("error", data);

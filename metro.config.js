@@ -8,6 +8,9 @@ config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,
   "react-native": require.resolve("react-native"),
 };
+config.resolver.unstable_enablePackageExports = false;
+config.resolver.unstable_enableSymlinks = false;
+
 // Add support for Hermes
 config.transformer.unstable_allowRequireContext = true;
 

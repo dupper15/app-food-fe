@@ -1,5 +1,12 @@
 import { useRouter } from "expo-router";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -102,11 +109,16 @@ const ChangePasswordPage = () => {
 
         <TouchableOpacity
           onPress={handleChangePassword}
+          disabled={changePasswordMutation.isPending}
           activeOpacity={0.8}
           className='w-full bg-yellow-400 rounded-xl py-3 mt-4 shadow-sm'>
-          <Text className='text-center font-semibold text-black text-base'>
-            Change Password
-          </Text>
+          {changePasswordMutation.isPending ? (
+            <ActivityIndicator color='#000' />
+          ) : (
+            <Text className='text-center font-semibold text-black text-base'>
+              Change Password
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

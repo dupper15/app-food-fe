@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import RegisterModal from "../components/registerModal";
 import { CustomToast } from "../components/toast";
+import LoginGoogleButton from "../components/loginGoogleButton";
 
 const RegisterScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -157,14 +158,8 @@ const RegisterScreen: React.FC = () => {
               </TouchableOpacity>
 
               <Text className='text-gray-500 my-5'>Or</Text>
-
-              <TouchableOpacity className='bg-red-600 p-4 rounded-lg w-4/5 shadow-sm active:opacity-80'>
-                <Text className='text-white text-center font-medium'>
-                  Login with Google
-                </Text>
-              </TouchableOpacity>
-
-              <Link href='/auth/login' className='mt-8'>
+              <LoginGoogleButton />
+              <Link href='/authen/login' className='mt-8'>
                 <Text className='text-blue-500'>
                   Already have an account? Log in
                 </Text>

@@ -76,7 +76,7 @@ const ForgetPasswordScreen = () => {
     mutationFn: resetPassword,
     onSuccess: (data) => {
       CustomToast("success", "Successfull", "Password changed successfully");
-      router.push("/auth/login");
+      router.push("/authen/login");
     },
     onError: (error) => {
       console.log(error);

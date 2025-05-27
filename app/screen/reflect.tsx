@@ -14,8 +14,14 @@ import ReflectForm from "../components/reflectForm";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { getReflectByUserId } from "@/services/api/reflectApi";
-import { CustomToast } from "../components/toast";
 import { useSelector } from "react-redux";
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
+import { RootState } from "../store";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -24,7 +30,7 @@ if (Platform.OS === "android") {
 const Reflect = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [isShow, setIsShow] = useState(false);
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: RootState) => state.user.userId);
   const handleToggle = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -76,54 +82,81 @@ const Reflect = () => {
         showsVerticalScrollIndicator={false}
         className='w-full px-4 py-4 space-y-4'>
         <View className='flex-1 gap-4'>
-          {reflect.map((item, index) => (
-            <View key={item._id} className='bg-white rounded-xl p-4'>
-              <TouchableOpacity
-                onPress={() => handleToggle(index)}
-                className='flex-row justify-between items-center py-2 px-4 bg-white rounded-md mb-2'>
-                <Text className='text-base font-medium text-slate-800'>
-                  {item.content}
-                </Text>
-                <Ionicons
-                  name={isExpanded[index] ? "chevron-up" : "chevron-down"} // toggle icon
-                  size={20}
-                  color='#475569'
-                />
-              </TouchableOpacity>
+          {getReflectMutation.isPending
+            ? Array.from({ length: 5 }).map((_, index) => (
+                <View
+                  key={index}
+                  className='bg-white gap-2 flex rounded-xl p-4'>
+                  <Placeholder
+                    Animation={Fade}
+                    className='bg-white rounded-xl p-4 mb-4'>
+                    <PlaceholderLine width={80} />
+                    <PlaceholderMedia
+                      style={{
+                        width: 96,
+                        height: 96,
+                        borderRadius: 8,
+                        marginBottom: 8,
+                      }}
+                    />
+                  </Placeholder>
+                </View>
+              ))
+            : reflect.map((item, index) => (
+                <View key={item._id} className='bg-white rounded-xl p-4'>
+                  <TouchableOpacity
+                    onPress={() => handleToggle(index)}
+                    className='flex-row justify-between items-center py-2 px-4 bg-white rounded-md mb-2'>
+                    <Text className='text-base font-medium text-slate-800'>
+                      {item.content}
+                    </Text>
+                    <Ionicons
+                      name={isExpanded[index] ? "chevron-up" : "chevron-down"} // toggle icon
+                      size={20}
+                      color='#475569'
+                    />
+                  </TouchableOpacity>
 
-              {item.images && item.images.length > 0 && (
-                <View className='flex-row flex-wrap mt-2 gap-2'>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View className='flex-row gap-2'>
-                      {item.images.map((image, imgIndex) => (
-                        <Image
-                          key={imgIndex}
-                          source={{ uri: image }}
-                          className='w-24 h-24 rounded-lg'
-                        />
+                  {item.images && item.images.length > 0 && (
+                    <View className='flex-row flex-wrap mt-2 gap-2'>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}>
+                        <View className='flex-row gap-2'>
+                          {item.images.map((image, imgIndex) => (
+                            <Image
+                              key={imgIndex}
+                              source={{ uri: image }}
+                              className='w-24 h-24 rounded-lg'
+                            />
+                          ))}
+                        </View>
+                      </ScrollView>
+                    </View>
+                  )}
+
+                  {expandedIndex === index && (
+                    <View className='mt-3 pl-4 space-y-2 border-l-2 border-slate-300'>
+                      {item.replies_array.map((reply) => (
+                        <Text
+                          key={reply._id}
+                          className='text-sm text-slate-600'>
+                          • {reply.content}
+                        </Text>
                       ))}
                     </View>
-                  </ScrollView>
+                  )}
                 </View>
-              )}
-
-              {expandedIndex === index && (
-                <View className='mt-3 pl-4 space-y-2 border-l-2 border-slate-300'>
-                  {item.replies_array.map((reply) => (
-                    <Text key={reply._id} className='text-sm text-slate-600'>
-                      • {reply.content}
-                    </Text>
-                  ))}
-                </View>
-              )}
-            </View>
-          ))}
+              ))}
         </View>
       </ScrollView>
       {isShow && (
         <View className='absolute top-0 left-0 right-0 bottom-0 bg-black/50 justify-center items-center z-50'>
           <View className='w-[90%]'>
-            <ReflectForm setIsShow={setIsShow} />
+            <ReflectForm
+              setIsShow={setIsShow}
+              handleGetReflect={handleGetReflect}
+            />
           </View>
         </View>
       )}
