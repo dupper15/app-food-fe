@@ -7,9 +7,9 @@ interface AverageRatingProps {
 }
 
 const AverageRating: React.FC<AverageRatingProps> = ({ rating }) => {
-  const fullStars = Math.floor(rating); // Số sao đầy đủ
-  const halfStars = rating % 1 !== 0 ? 1 : 0; // Kiểm tra nếu có sao nửa
-  const emptyStars = 5 - fullStars - halfStars; // Số sao rỗng
+  // const fullStars = Math.floor(rating); // Số sao đầy đủ
+  // const halfStars = rating % 1 !== 0 ? 1 : 0; // Kiểm tra nếu có sao nửa
+  // const emptyStars = 5 - fullStars - halfStars; // Số sao rỗng
 
   return (
     <View className="bg-white rounded-xl p-4 mb-4 shadow-sm flex-row justify-between">

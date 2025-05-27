@@ -21,7 +21,6 @@ import { CustomToast } from "../components/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchRestaurantByOwner } from "@/services/api/restaurantApi";
 import { setRestaurant } from "@/features/counter/restaurantSlice";
-import { registerForPushNotificationsAsync } from "@/services/api/notificationApi";
 import LoginGoogleButton from "../components/loginGoogleButton";
 
 interface LoginResponse {
@@ -77,6 +76,7 @@ const Login: React.FC = () => {
               router.push("/screen/disablePage");
             } else {
               router.push("/restaurant/orderScreen/order");
+              router.push("/restaurant/orderScreen/order");
             }
           } catch (error) {
             CustomToast("error", "Error", "Failed to fetch restaurant details");
@@ -84,6 +84,11 @@ const Login: React.FC = () => {
         }
         if (data.userType === "customer") {
           AsyncStorage.setItem("customer_id", String(userId));
+          if (status === "Disable") {
+            router.push("/screen/disablePage");
+          } else {
+            router.push("/customer/(tabs)/home");
+          }
           if (status === "Disable") {
             router.push("/screen/disablePage");
           } else {
@@ -99,9 +104,8 @@ const Login: React.FC = () => {
     },
   });
 
-  const handleLogin = async () => {
-    const expoPushToken = await registerForPushNotificationsAsync();
-    mutation.mutate({ email, password, expo_push_token: expoPushToken });
+  const handleLogin = (): void => {
+    mutation.mutate({ email, password });
   };
 
   return (
