@@ -11,6 +11,7 @@ import {
   StatusBar,
   TextInput,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
@@ -53,6 +54,7 @@ export default function Chat() {
     Conversation[]
   >([]);
   const [userNames, setUserNames] = useState<UserNames>({});
+  const [userAvatars, setUserAvatars] = useState<{ [key: string]: string }>({});
   const [messageContents, setMessageContents] = useState<MessageContents>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [socketConnected, setSocketConnected] = useState(false);
@@ -100,25 +102,40 @@ export default function Chat() {
     try {
       setLoading(true);
       const data = await getAllConversations(userId);
-      setConversations(data);
-      setFilteredConversations(data);
+
+      // Sort conversations by updatedAt timestamp (newest first)
+      const sortedData = [...data].sort((a, b) => {
+        return (
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+      });
+
+      setConversations(sortedData);
+      setFilteredConversations(sortedData);
 
       // Collect all user IDs that need name resolution
       const userIds = new Set<string>();
-      data.forEach((conv: Conversation) => {
+      sortedData.forEach((conv: Conversation) => {
         userIds.add(conv.user1);
         userIds.add(conv.user2);
       });
 
-      // Fetch usernames for all users
+      // Fetch usernames and avatars for all users
       const namesMap: UserNames = {};
+      const avatarsMap: { [key: string]: string } = {};
+
       await Promise.all(
         Array.from(userIds).map(async (id) => {
           try {
-            const name = await getRestaurantDetail(id).then((res) => res.name);
-            namesMap[id] = name;
+            const restaurantData = await getRestaurantDetail(id);
+            namesMap[id] = restaurantData.name || "Unknown User";
+
+            // Store avatar URL if available
+            if (restaurantData.logo || restaurantData.image) {
+              avatarsMap[id] = restaurantData.logo || restaurantData.image;
+            }
           } catch (error) {
-            console.error(`Error fetching name for user ${id}:`, error);
+            console.error(`Error fetching details for user ${id}:`, error);
             namesMap[id] = "Unknown User";
           }
         })
@@ -146,6 +163,7 @@ export default function Chat() {
 
       setMessageContents(messagesMap);
       setUserNames(namesMap);
+      setUserAvatars(avatarsMap);
     } catch (error) {
       console.error("Error fetching conversations:", error);
     } finally {
@@ -265,21 +283,31 @@ export default function Chat() {
             data={filteredConversations}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => {
+              const otherUserId = getOtherUserId(item);
               const otherUserName = getOtherUserName(item);
               const lastMessageContent = getLastMessageContent(
                 item.last_message
               );
+              const avatarUrl = userAvatars[otherUserId];
 
               return (
                 <TouchableOpacity
                   style={styles.chatItem}
                   onPress={() => navigateToChatDetail(item._id)}
                 >
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                      {otherUserName.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
+                  {avatarUrl ? (
+                    <Image
+                      source={{ uri: avatarUrl }}
+                      style={styles.avatar}
+                      onError={() => console.log("Error loading avatar image")}
+                    />
+                  ) : (
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {otherUserName.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.chatContent}>
                     <Text style={styles.chatName}>{otherUserName}</Text>
                     <Text style={styles.chatMessage}>
@@ -372,6 +400,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
   },
   avatarText: {
     fontSize: 20,
