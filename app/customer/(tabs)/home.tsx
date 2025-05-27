@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ImageSearch from "@/app/components/imageSearch";
 import CriteriaComponent from "@/app/components/criteriaComponent";
+import RestaurantPlaceholderBox from "@/app/components/skeleton/restaurantPlaceholderBox";
 
 export default function Home() {
   const userId = useSelector(
@@ -201,9 +202,13 @@ export default function Home() {
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className='flex-row gap-4'>
-                {restaurantHistory.map((restaurant, index) => (
-                  <RestaurantBox key={index} restaurant={restaurant} />
-                ))}
+                {getRestaurantHistoryMutation.isPending
+                  ? Array.from({ length: 5 }).map((_, index) => (
+                      <RestaurantPlaceholderBox key={index} />
+                    ))
+                  : restaurantHistory.map((restaurant, index) => (
+                      <RestaurantBox key={index} restaurant={restaurant} />
+                    ))}
               </View>
             </ScrollView>
           </View>
@@ -213,18 +218,26 @@ export default function Home() {
           <Text className='text-slate-900 text-lg font-medium'>For you</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className='flex-row gap-4'>
-              {rcmRestaurant.map((restaurant, index) => (
-                <RestaurantBox key={index} restaurant={restaurant} />
-              ))}
+              {getRcmRestaurantMutaion.isPending
+                ? Array.from({ length: 5 }).map((_, index) => (
+                    <RestaurantPlaceholderBox key={index} />
+                  ))
+                : rcmRestaurant.map((restaurant, index) => (
+                    <RestaurantBox key={index} restaurant={restaurant} />
+                  ))}
             </View>
           </ScrollView>
         </View>
         <View className='mt-4 gap-2 mr-2 '>
           <Text className='text-slate-900 text-lg font-medium'>All</Text>
           <View className='flex-row flex-wrap justify-between gap-y-4 gap-x-4'>
-            {allRestaurant.map((restaurant, index) => (
-              <RestaurantBox key={index} restaurant={restaurant} />
-            ))}
+            {getAllRestaurantMutaion.isPending
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <RestaurantPlaceholderBox key={index} />
+                ))
+              : allRestaurant.map((restaurant, index) => (
+                  <RestaurantBox key={index} restaurant={restaurant} />
+                ))}
           </View>
         </View>
       </Animated.ScrollView>

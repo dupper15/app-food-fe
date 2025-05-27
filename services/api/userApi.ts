@@ -88,9 +88,11 @@ export const getCustomerInfo = async (userId: any) => {
   return response.data;
 };
 export const editCustomerInfo = async (data: any) => {
-  const { userId, editUser } = data;
-  const response = await axiosInstance.put(`customers/${userId}`, {
-    editUser,
+  const { userId, formData } = data;
+  const response = await axiosInstance.put(`customers/${userId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
   return response.data;
 };

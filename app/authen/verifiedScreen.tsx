@@ -57,7 +57,7 @@ const VerifiedScreen = () => {
     mutationFn: checkCode,
     onSuccess: (data) => {
       CustomToast("success", "Successfull", "Verified code successfully");
-      router.push("/auth/login");
+      router.push("/authen/login");
     },
     onError: (error) => {
       console.log(error);

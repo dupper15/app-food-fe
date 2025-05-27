@@ -15,27 +15,23 @@ const SearchPage = () => {
   const router = useRouter();
 
   const [restaurants, setRestaurants] = useState([]);
+
   useEffect(() => {
     if (searchedRestaurants) {
       setRestaurants(JSON.parse(searchedRestaurants));
     }
   }, [searchedRestaurants]);
-  useEffect(() => {
-    console.log("Searched restaurants:", search);
-  }, [search]);
+
   return (
-    <View className='flex-1 bg-white p-4'>
-      <View className='flex-row items-center justify-between mb-4 gap-2'>
+    <View className='flex-1 bg-slate-100 px-4 pt-4'>
+      <View className='flex-row items-center gap-2 mb-4'>
         <TouchableOpacity
           onPress={() => router.back()}
-          className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 gap-2 '>
+          className='flex-1 flex-row items-center bg-white border border-slate-300 rounded-full px-4 py-2'>
           <Ionicons name='search' size={20} color='#9ca3af' />
-          <TextInput
-            value={search}
-            className='flex-1 text-base  text-gray-800'
-            placeholderTextColor='#9ca3af'
-            returnKeyType='search'
-          />
+          <Text className='ml-2 text-base text-gray-800 text-left flex-1'>
+            {search}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/customer/(tabs)/home")}>
@@ -43,19 +39,26 @@ const SearchPage = () => {
         </TouchableOpacity>
       </View>
 
-      <Text className='text-lg font-semibold text-gray-700 mb-2'>
-        Answer for "{search}"
+      <Text className='text-lg font-semibold text-slate-700 mb-2'>
+        Results for "{search}"
       </Text>
 
-      {restaurants.length > 0 ? (
-        <View className='flex-row flex-wrap justify-between'>
-          {restaurants.map((restaurant, index) => (
-            <RestaurantBox key={index} restaurant={restaurant} />
-          ))}
-        </View>
-      ) : (
-        <Text className='text-center text-gray-500'>No restaurant found</Text>
-      )}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {restaurants.length > 0 ? (
+          <View className='flex-row flex-wrap justify-between gap-y-4'>
+            {restaurants.map((restaurant, index) => (
+              <RestaurantBox key={index} restaurant={restaurant} />
+            ))}
+          </View>
+        ) : (
+          <View className='flex-1 justify-center items-center mt-20'>
+            <Ionicons name='restaurant-outline' size={48} color='#9ca3af' />
+            <Text className='mt-2 text-base text-slate-500'>
+              No restaurant found
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 };

@@ -27,6 +27,8 @@ import {
 import { useSelector } from "react-redux";
 import { getOrInitializeConversation } from "@/services/api/chatApi";
 import RatingList from "../components/ratingList";
+import DishBoxSkeleton from "../components/skeleton/dishBoxSkeleton";
+import CategoryButtonSkeleton from "../components/skeleton/categoryButtonSkeleton";
 
 const { width } = Dimensions.get("window");
 
@@ -297,31 +299,41 @@ const RestaurantPage = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         className='flex-row px-4 py-2 '>
-        {categories.map((category, index) => (
-          <TouchableHighlight
-            key={index}
-            onPress={() => {
-              setCurrentCategory(category);
-            }}
-            underlayColor='#FACC15'
-            className={`rounded-lg px-4 py-2 transition-all border mx-1 border-customYellow duration-300 ${
-              category._id == currentCategory._id
-                ? "bg-customYellow"
-                : "bg-white"
-            }`}>
-            <Text
-              className={`text-sm font-semibold ${
+        {getCategoryMutation.isPending ? (
+          <CategoryButtonSkeleton />
+        ) : (
+          categories.map((category, index) => (
+            <TouchableHighlight
+              key={index}
+              onPress={() => {
+                setCurrentCategory(category);
+              }}
+              underlayColor='#FACC15'
+              className={`rounded-lg px-4 py-2 transition-all border mx-1 border-customYellow duration-300 ${
                 category._id == currentCategory._id
-                  ? "text-white"
-                  : "text-customYellow"
+                  ? "bg-customYellow"
+                  : "bg-white"
               }`}>
-              {category.name}
-            </Text>
-          </TouchableHighlight>
-        ))}
+              <Text
+                className={`text-sm font-semibold ${
+                  category._id == currentCategory._id
+                    ? "text-white"
+                    : "text-customYellow"
+                }`}>
+                {category.name}
+              </Text>
+            </TouchableHighlight>
+          ))
+        )}
       </ScrollView>
       <View>
-        {dishes.length > 0 ? (
+        {dishesMutation.isPending ? (
+          <View className='flex-row flex-wrap p-4 justify-between gap-y-4'>
+            {Array.from({ length: 6 }, (_, index) => (
+              <DishBoxSkeleton key={index} />
+            ))}
+          </View>
+        ) : dishes.length > 0 ? (
           <View className='flex-row flex-wrap p-4 justify-between gap-y-4'>
             {dishes.map((dish, index) => (
               <DishBox key={index} dish={dish} />
