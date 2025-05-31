@@ -1,3 +1,4 @@
+import { RootState } from "@/app/store";
 import { getCustomerInfo } from "@/services/api/userApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
@@ -6,9 +7,16 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useSelector } from "react-redux";
-
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 export default function Personal() {
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: RootState) => state.user.userId);
   const [user, setUser] = useState(null);
   const router = useRouter();
   const handleLogout = () => {
@@ -20,7 +28,7 @@ export default function Personal() {
     AsyncStorage.removeItem("startTime");
     AsyncStorage.removeItem("usageTime");
     AsyncStorage.removeItem("customer_id");
-    router.push("/auth/login");
+    router.push("/authen/login");
   };
   const menuItems = [
     {
@@ -34,6 +42,14 @@ export default function Personal() {
             params: { data: JSON.stringify(user) },
           });
         }
+      },
+    },
+    {
+      icon: "location-on", // Dùng icon lock cho Change password
+      label: "Addresses",
+      iconColor: "#ef4444", // amber-500
+      onPress: () => {
+        router.push("/screen/addressPage");
       },
     },
     {
@@ -56,7 +72,9 @@ export default function Personal() {
       icon: "lock-outline", // Dùng icon lock-outline cho Privacy
       label: "Privacy",
       iconColor: "#f97316", // orange-500
-      onPress: () => {},
+      onPress: () => {
+        router.push("/screen/privacyPage");
+      },
     },
     {
       icon: "logout", // Giữ nguyên icon logout
@@ -83,6 +101,13 @@ export default function Personal() {
       getUserInfoMutation.mutate(userId);
     }
   }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        getUserInfoMutation.mutate(userId);
+      }
+    }, [userId])
+  );
 
   return (
     <View className='flex-1 bg-white'>
@@ -92,34 +117,44 @@ export default function Personal() {
 
       <View className='flex-1 gap-4 py-8 px-6'>
         <View className='bg-gray-50 rounded-xl p-4'>
-          {user && (
-            <View className='flex-row items-center'>
-              {user.avatar ? (
-                <Image
-                  source={{
-                    uri: user.avatar,
-                  }}
-                  className='w-16 h-16 rounded-full mr-4'
-                />
-              ) : (
-                <Image
-                  source={{
-                    uri: " https://th.bing.com/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?rs=1&pid=ImgDetMain",
-                  }}
-                  className='w-16 h-16 rounded-full mr-4'
-                />
-              )}
-              <View>
-                <Text className='text-lg font-semibold text-gray-800'>
-                  {user.name}
-                </Text>
-                <Text className='text-gray-500'>{user.email}</Text>
+          {getUserInfoMutation.isPending ? (
+            <Placeholder Animation={Fade}>
+              <View className='flex-row items-center'>
+                <PlaceholderMedia size={64} isRound={true} />
+                <View className='ml-4 flex-1'>
+                  <PlaceholderLine width={80} />
+                  <PlaceholderLine width={50} />
+                </View>
               </View>
-            </View>
+            </Placeholder>
+          ) : (
+            user && (
+              <View className='flex-row items-center'>
+                {user.avatar ? (
+                  <Image
+                    source={{
+                      uri: user.avatar,
+                    }}
+                    className='w-16 h-16 rounded-full mr-4'
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/images/default_avatar.jpg")}
+                    className='w-16 h-16 rounded-full mr-4'
+                  />
+                )}
+                <View>
+                  <Text className='text-lg font-semibold text-gray-800'>
+                    {user.name}
+                  </Text>
+                  <Text className='text-gray-500'>{user.email}</Text>
+                </View>
+              </View>
+            )
           )}
         </View>
 
-        <View className='mt-4 border-t border-gray-200 bg-gray-50 rounded-xl'>
+        <View className='mt-4  bg-gray-50 rounded-xl'>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}

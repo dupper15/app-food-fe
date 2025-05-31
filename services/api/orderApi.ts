@@ -4,6 +4,7 @@ import {
   OrderPendingRestaurant,
 } from "@/interfaces/OrderInterface";
 import axiosInstance from "./axiosInstance";
+import * as Notifications from "expo-notifications";
 
 export const fetchOrderById = async (orderId: string): Promise<Order> => {
   const response = await axiosInstance.get(

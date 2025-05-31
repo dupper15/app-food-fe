@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/features/counter/userSlice";
@@ -20,22 +21,35 @@ import { CustomToast } from "../components/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchRestaurantByOwner } from "@/services/api/restaurantApi";
 import { setRestaurant } from "@/features/counter/restaurantSlice";
+import LoginGoogleButton from "../components/loginGoogleButton";
 
-const LoginScreen: React.FC = () => {
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  total_time_spent: number;
+  isVerified: boolean;
+  userType: "restaurantOwner" | "customer" | string;
+  status: "Pending" | "Incomplete" | "Disable" | "Enable";
+}
+const Login: React.FC = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const dispatch = useDispatch();
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: async (data: any) => {
-      const { accessToken, refreshToken, total_time_spent, isVerified } = data;
-      const userId = getUserIdFromToken(accessToken);
-      console.log("isVerified", isVerified);
-      AsyncStorage.setItem("usageTime", total_time_spent.toString());
-      AsyncStorage.setItem("startTime", Date.now().toString());
+    onSuccess: async (data: LoginResponse) => {
+      const {
+        accessToken,
+        refreshToken,
+        total_time_spent,
+        isVerified,
+        status,
+      } = data;
+      const userId: string = getUserIdFromToken(accessToken)!;
+      await AsyncStorage.setItem("usageTime", total_time_spent.toString());
+      await AsyncStorage.setItem("startTime", Date.now().toString());
       dispatch(setUser({ userId, refreshToken }));
-      CustomToast("success", "Success", "Login success");
       AsyncStorage.setItem("userId", String(userId));
       if (isVerified) {
         if (data.userType === "restaurantOwner") {
@@ -54,27 +68,43 @@ const LoginScreen: React.FC = () => {
                 })
               );
             }
-            router.push("/restaurant/orderScreen/order");
+            if (status === "Pending") {
+              router.push("/screen/pendingPage");
+            } else if (status === "Incomplete") {
+              router.push("/authen/createRestaurant");
+            } else if (status === "Disable") {
+              router.push("/screen/disablePage");
+            } else {
+              router.push("/restaurant/orderScreen/order");
+              router.push("/restaurant/orderScreen/order");
+            }
           } catch (error) {
-            console.error("Error fetching restaurant details:", error);
             CustomToast("error", "Error", "Failed to fetch restaurant details");
           }
         }
         if (data.userType === "customer") {
           AsyncStorage.setItem("customer_id", String(userId));
-          router.push("/customer/(tabs)/home");
+          if (status === "Disable") {
+            router.push("/screen/disablePage");
+          } else {
+            router.push("/customer/(tabs)/home");
+          }
+          if (status === "Disable") {
+            router.push("/screen/disablePage");
+          } else {
+            router.push("/customer/(tabs)/home");
+          }
         }
       } else {
-        router.push("/auth/verifiedScreen");
+        router.push("/authen/verifiedScreen");
       }
     },
     onError: (data: any) => {
-      console.log(data);
       CustomToast("error", "Error", "Login failed");
     },
   });
 
-  const handleLogin = () => {
+  const handleLogin = (): void => {
     mutation.mutate({ email, password });
   };
 
@@ -135,7 +165,7 @@ const LoginScreen: React.FC = () => {
               <View className='w-4/5'>
                 <TouchableOpacity
                   onPress={() => {
-                    router.push("/auth/forgetPassword");
+                    router.push("/authen/forgetPassword");
                   }}
                   className='self-end mb-6'>
                   <Text className='text-blue-500'>Forgot password?</Text>
@@ -144,21 +174,21 @@ const LoginScreen: React.FC = () => {
 
               <TouchableOpacity
                 onPress={handleLogin}
-                className='w-4/5 p-4 rounded-lg bg-customYellow shadow-sm active:opacity-80'>
+                disabled={mutation.isPending}
+                className={`w-4/5 p-4 rounded-lg bg-customYellow shadow-sm flex-row justify-center items-center gap-2 ${
+                  mutation.isPending ? "opacity-50" : "active:opacity-80"
+                }`}>
+                {mutation.isPending && (
+                  <ActivityIndicator size='small' color='#fff' />
+                )}
                 <Text className='text-white text-center font-medium'>
-                  Login
+                  {mutation.isPending ? "Logging in..." : "Login"}
                 </Text>
               </TouchableOpacity>
 
               <Text className='text-gray-500 my-5'>Or</Text>
-
-              <TouchableOpacity className='bg-red-600 p-4 rounded-lg w-4/5 shadow-sm active:opacity-80'>
-                <Text className='text-white text-center font-medium'>
-                  Login with Google
-                </Text>
-              </TouchableOpacity>
-
-              <Link href='/auth/register' className='mt-8'>
+              <LoginGoogleButton />
+              <Link href='/authen/register' className='mt-8'>
                 <Text className='text-blue-500'>
                   Don't have an account? Sign up
                 </Text>
@@ -171,4 +201,4 @@ const LoginScreen: React.FC = () => {
   );
 };
 
-export default LoginScreen;
+export default Login;

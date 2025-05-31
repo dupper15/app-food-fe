@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "app-food-fe",
-    "slug": "app-food-fe",
+    "name": "app-food",
+    "slug": "app-food",
+    "projectId": "20932e09-1784-4225-9faa-86badb78b1d3",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,7 +10,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "This app uses notifications to send updates."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -46,6 +50,9 @@
         }
       ]
     ],
+    "notification": {
+      "vapidPublicKey": "BJe92ySQhEKB5ea1wIV9Errcc9RKpCk7-PKXinSUsVw_17XAsofytvU1YVpAJXUJMv5wP0xY6at1YnH6gp0YiwQ"
+    },
     "experiments": {
       "typedRoutes": true
     }

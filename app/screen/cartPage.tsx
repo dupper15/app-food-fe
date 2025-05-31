@@ -8,6 +8,13 @@ import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
 import { CustomToast } from "../components/toast";
 import EditOIModal from "../components/editOIModal";
+import {
+  Placeholder,
+  PlaceholderLine,
+  PlaceholderMedia,
+  ShineOverlay,
+} from "rn-placeholder";
+
 const CartPage = () => {
   const [selectedDish, setSelectedDish] = useState([]);
   const [editedItem, setEditedItem] = useState(null);
@@ -52,7 +59,7 @@ const CartPage = () => {
 
     setSelectedDish(allSelected ? [] : [...restaurantItems]);
   };
-  const [cart, setCart] = useState<any[]>([]); 
+  const [cart, setCart] = useState<any[]>([]);
   const getCartMutation = useMutation({
     mutationFn: CartApi.getCart,
     onSuccess: (data) => {
@@ -103,7 +110,50 @@ const CartPage = () => {
         <Text className='text-2xl font-medium text-gray-900'>My Cart</Text>
       </View>
 
-      {cart && cart.length > 0 ? (
+      {getCartMutation.isPending ? (
+        Array.from({ length: 5 }, (_, index) => (
+          <View className='mt-4 bg-white p-4 rounded-lg'>
+            <View className='flex-row items-center justify-between mb-4'>
+              <View className='flex-row gap-2 items-center'>
+                <PlaceholderMedia
+                  style={{ width: 24, height: 24, borderRadius: 12 }}
+                />
+                <PlaceholderLine width={40} />
+              </View>
+              <PlaceholderLine width={20} />
+            </View>
+
+            {[1, 2].map((_, i) => (
+              <View key={i} className='flex-row items-center mb-4'>
+                <PlaceholderMedia
+                  style={{ width: 24, height: 24, borderRadius: 12 }}
+                />
+                <PlaceholderMedia
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 8,
+                    marginLeft: 8,
+                  }}
+                />
+                <View className='ml-4 flex-1'>
+                  <PlaceholderLine width={60} />
+                  <PlaceholderLine width={40} />
+                  <PlaceholderLine width={30} />
+                </View>
+                <PlaceholderMedia
+                  style={{ width: 40, height: 20, borderRadius: 4 }}
+                />
+              </View>
+            ))}
+
+            <View className='flex-row justify-between mt-4'>
+              <PlaceholderLine width={30} />
+              <PlaceholderLine width={20} />
+            </View>
+          </View>
+        ))
+      ) : cart && cart.length > 0 ? (
         <ScrollView className='p-4'>
           {cart.map((item, restaurantIndex) => (
             <CardItem

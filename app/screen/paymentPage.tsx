@@ -120,22 +120,22 @@ const PaymentPage = () => {
   return (
     <View className='flex-1 bg-gray-100'>
       <ScrollView showsHorizontalScrollIndicator={false}>
-        <View className='flex-row items-center gap-4 bg-white shadow-md p-4 border-b border-gray-200'>
+        <View className='flex-row items-center gap-4 bg-white p-4 border-b border-gray-100'>
           <TouchableHighlight onPress={() => router.back()}>
             <Ionicons name='arrow-back' size={24} color='black' />
           </TouchableHighlight>{" "}
           <Text className='text-2xl font-semibold text-gray-900'>Payment</Text>
         </View>
 
-        <View className='p-4'>
-          <View className='p-4 bg-white rounded-lg shadow-sm'>
-            <Text className='text-2xl font-semibold text-gray-900 mb-2'>
+        <View className='px-4 py-2'>
+          <View className='p-4 bg-white rounded-lg'>
+            <Text className='text-xl font-semibold text-gray-900 mb-2'>
               Order Summary
             </Text>
             {items.map((item, index) => (
               <View
                 key={index}
-                className='flex-row gap-4 bg-gray-50 p-3 rounded-lg mb-3 shadow-sm'>
+                className='flex-row gap-4 bg-gray-100 p-3 rounded-lg mb-2 '>
                 <Image
                   source={{ uri: item.dish_id.image }}
                   className='w-24 h-24 rounded-lg'
@@ -159,28 +159,29 @@ const PaymentPage = () => {
               </View>
             ))}
             <View className='mt-3 flex flex-row justify-between border-t pt-3 border-gray-200'>
-              <Text className='text-xl font-medium text-gray-900'>
+              <Text className='text-lg font-medium text-gray-900'>
                 Estimated prep time:
               </Text>
               <Text className='text-lg text-gray-600'>{getTime()}</Text>
             </View>
           </View>
 
-          <View className='mt-4 bg-white p-4 rounded-lg shadow-sm'>
+          <View className='mt-2 bg-white p-4 rounded-lg'>
             <Text className='text-xl font-semibold text-gray-900'>
               Notes (Optional)
             </Text>
             <TextInput
               value={note}
               onChangeText={handleNoteChange}
-              className='h-20 p-4 bg-gray-100 rounded-lg mt-2 text-lg text-gray-700'
+              placeholderTextColor={"#A0AEC0"}
+              className='h-28 p-2 bg-gray-100 rounded-lg mt-2 text-base text-gray-700'
               placeholder='Add a note...'
               multiline
             />
           </View>
 
-          <View className='mt-4 flex-row items-center bg-white p-4 rounded-lg shadow-sm'>
-            <Text className='text-xl font-medium text-gray-900 flex-1'>
+          <View className='mt-2 flex-row items-center bg-white p-4 rounded-lg'>
+            <Text className='text-xl font-semibold text-gray-900 flex-1'>
               Voucher
             </Text>
 
@@ -206,12 +207,12 @@ const PaymentPage = () => {
             )}
           </View>
           {maxPoint > 0 && (
-            <View className='mt-4 bg-white px-4 py-1 rounded-lg shadow-sm flex items-start'>
+            <View className='mt-2 bg-white px-4 py-1 rounded-lg flex items-start'>
               <View className='flex-1 flex-row justify-between items-center w-full'>
-                <Text className='text-lg font-semibold text-gray-900 mt-4'>
+                <Text className='text-xl font-semibold text-gray-900 mt-4'>
                   Use Points (Optional)
                 </Text>
-                <Text className='text-lg font-semibold text-gray-900 mt-4'>
+                <Text className='text-lg font-medium text-gray-600 mt-4'>
                   {point} Points
                 </Text>
               </View>
@@ -234,8 +235,8 @@ const PaymentPage = () => {
               </View>
             </View>
           )}
-          <View className='mt-4 bg-white p-4 rounded-lg shadow-sm'>
-            <Text className='text-2xl font-semibold text-gray-900'>
+          <View className='mt-2 bg-white p-4 rounded-lg '>
+            <Text className='text-xl font-semibold text-gray-900'>
               Payment Summary
             </Text>
             <Text className='text-lg text-gray-700 mt-2'>

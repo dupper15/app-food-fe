@@ -192,7 +192,6 @@ const RestaurantSelection = () => {
       },
     });
   };
-
   const getFavoriteResMutation = useMutation({
     mutationFn: getFavoriteRestaurantIds,
     onSuccess: (data) => {
@@ -237,45 +236,43 @@ const RestaurantSelection = () => {
   };
 
   return (
-    <View className="flex-1 bg-gray-100 ">
-      <View className="flex-row items-start bg-white px-2 pt-4 pb-2 mb-4">
+    <View className='flex-1 bg-gray-100 '>
+      <View className='flex-row items-start bg-white px-2 pt-4 pb-2 mb-4'>
         <TouchableHighlight
-          className="rounded-full p-2"
+          className='rounded-full p-2'
           onPress={() => {
             router.back();
-          }}
-        >
-          <Icon name="arrow-back" size={24} color="gray" />
+          }}>
+          <Icon name='arrow-back' size={24} color='gray' />
         </TouchableHighlight>
-        <Text className="text-2xl font-semibold text-gray-800">{header}</Text>
+        <Text className='text-2xl font-semibold text-gray-800'>{header}</Text>
       </View>
 
       {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#facc15" />
-          <Text className="mt-2 text-gray-500">Loading restaurants...</Text>
+        <View className='flex-1 justify-center items-center'>
+          <ActivityIndicator size='large' color='#facc15' />
+          <Text className='mt-2 text-gray-500'>Loading restaurants...</Text>
         </View>
       ) : (
-        <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+        <ScrollView className='px-4' showsVerticalScrollIndicator={false}>
           {restaurants && restaurants.length > 0 ? (
             restaurants.map((restaurant) => (
               <View
                 key={restaurant._id}
-                className="bg-white rounded-lg p-5 mb-6 border border-gray-300 "
-              >
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-row items-start w-full">
+                className='bg-white rounded-lg p-5 mb-6 border border-gray-300 '>
+                <View className='flex-row items-start justify-between'>
+                  <View className='flex-row items-start w-full'>
                     {restaurant.owner_id?.avatar && (
                       <Image
                         source={{ uri: restaurant.owner_id.avatar }}
-                        className="w-16 h-16 rounded-lg border border-gray-300"
+                        className='w-16 h-16 rounded-lg border border-gray-300'
                       />
                     )}
-                    <View className="flex-1 ml-4">
-                      <Text className="text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden">
+                    <View className='flex-1 ml-4'>
+                      <Text className='text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden'>
                         {restaurant.name}
                       </Text>
-                      <Text className="text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden">
+                      <Text className='text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden'>
                         {restaurant.description}
                       </Text>
                     </View>
@@ -289,8 +286,7 @@ const RestaurantSelection = () => {
                       favoriteRestaurants.includes(restaurant._id)
                     )
                   }
-                  className="absolute top-3 right-3"
-                >
+                  className='absolute top-3 right-3'>
                   <Icon
                     name={
                       favoriteRestaurants.includes(restaurant._id)
@@ -305,20 +301,19 @@ const RestaurantSelection = () => {
                     }
                   />
                 </TouchableHighlight>
-                <View className="flex-row items-center justify-between mt-4">
-                  <Text className="text-xl ml-2 text-gray-900">
+                <View className='flex-row items-center justify-between mt-4'>
+                  <Text className='text-xl ml-2 text-gray-900'>
                     {restaurant.distance
                       ? `${restaurant.distance.toFixed(1)}km`
                       : "3.5km"}
                   </Text>
 
                   <TouchableHighlight
-                    className="bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300"
+                    className='bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300'
                     onPress={() => {
                       handleDishNavigate(restaurant);
-                    }}
-                  >
-                    <Text className="text-lg font-semibold text-white">
+                    }}>
+                    <Text className='text-lg font-semibold text-white'>
                       Order
                     </Text>
                   </TouchableHighlight>
@@ -326,9 +321,15 @@ const RestaurantSelection = () => {
               </View>
             ))
           ) : (
-            <View className="flex-1 justify-center items-center py-20">
-              <Text className="text-gray-500 text-lg">
-                No restaurants found nearby
+            <View className='flex-1 justify-center items-center py-20'>
+              <Text className='text-gray-500 text-lg'>
+                No{" "}
+                {restaurantCriteria
+                  .slice(1, -1)
+                  .toString()
+                  .trim()
+                  .toLowerCase()}{" "}
+                restaurants found
               </Text>
             </View>
           )}

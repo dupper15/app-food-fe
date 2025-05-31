@@ -11,19 +11,21 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { CustomToast } from "../components/toast";
+import { RootState } from "../store";
 
 const VerifiedScreen = () => {
-  const [isSent, setIsSent] = useState(false);
-  const [code, setCode] = useState(["", "", "", ""]);
-  const inputs = useRef([]);
+  const [isSent, setIsSent] = useState<boolean>(false);
+  const [code, setCode] = useState<string[]>(["", "", "", ""]);
+  const inputs = useRef<(TextInput | null)[]>([]);
   const router = useRouter();
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: RootState) => state.user.userId);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const handleChange = (text, index) => {
-    const newCode = [...code];
+  const handleChange = (text: string, index: number) => {
+    const newCode: string[] = [...code];
     if (/^\d$/.test(text)) {
       newCode[index] = text;
       setCode(newCode);
@@ -42,12 +44,12 @@ const VerifiedScreen = () => {
       console.log(error);
     },
   });
-  const handleSendCode = () => {
+  const handleSendCode = (): void => {
     setIsSent(true);
     const data = { phone: phoneNumber, id: userId };
     sendVerifyCodeMutation.mutate(data);
   };
-  const handleResend = () => {
+  const handleResend = (): void => {
     const data = { phone: phoneNumber, id: userId };
     sendVerifyCodeMutation.mutate(data);
   };
@@ -55,16 +57,18 @@ const VerifiedScreen = () => {
     mutationFn: checkCode,
     onSuccess: (data) => {
       CustomToast("success", "Successfull", "Verified code successfully");
-      router.push("/auth/login");
+      router.push("/authen/login");
     },
     onError: (error) => {
       console.log(error);
     },
   });
-  const handleVerify = () => {
+  const handleVerify = (): void => {
     const data = { code: code.join(""), id: userId };
     checkCodeMutation.mutate(data);
   };
+  const isLoading =
+    sendVerifyCodeMutation.isPending || checkCodeMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -104,15 +108,13 @@ const VerifiedScreen = () => {
                   onChangeText={(text) => handleChange(text, index)}
                   keyboardType='numeric'
                   maxLength={1}
+                  editable={!isLoading}
                   className='w-14 h-14 text-center border-2 border-gray-300 rounded-xl text-xl bg-gray-50'
                 />
               ))}
             </View>
 
-            <TouchableOpacity
-              onPress={() => {
-                handleResend();
-              }}>
+            <TouchableOpacity onPress={handleResend} disabled={isLoading}>
               <Text className='text-gray-500 underline mb-6'>Resend code</Text>
             </TouchableOpacity>
           </>
@@ -126,6 +128,7 @@ const VerifiedScreen = () => {
               onChangeText={setPhoneNumber}
               placeholder='Phone number'
               keyboardType='phone-pad'
+              editable={!isLoading}
               className='border border-gray-300 rounded-xl p-4 w-72 bg-gray-50 mb-6'
             />
           </>
@@ -133,10 +136,15 @@ const VerifiedScreen = () => {
 
         <TouchableOpacity
           onPress={isSent ? handleVerify : handleSendCode}
-          className='bg-yellow-400 rounded-full px-10 py-3 shadow-md active:opacity-80'>
-          <Text className='text-white text-lg font-bold'>
-            {isSent ? "Verify" : "Send code"}
-          </Text>
+          className='bg-yellow-400 rounded-lg px-10 py-3 mt-2 active:opacity-80 flex-row justify-center items-center'
+          disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color='white' />
+          ) : (
+            <Text className='text-white text-lg font-bold'>
+              {isSent ? "Verify" : "Send code"}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

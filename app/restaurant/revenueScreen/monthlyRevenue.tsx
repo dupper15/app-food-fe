@@ -1,6 +1,7 @@
 import { MonthlyRevenueCardProps } from "@/interfaces/RevenueInterface";
 import { formatPrice } from "@/utils/format";
 import React from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { View, Text } from "react-native";
 
 const MonthlyRevenueCard: React.FC<MonthlyRevenueCardProps> = ({
@@ -35,7 +36,7 @@ const MonthlyRevenueCard: React.FC<MonthlyRevenueCardProps> = ({
       </View>
 
       <View className="w-12 h-12 bg-yellow-200 rounded-full items-center justify-center">
-        <Text className="text-2xl">💰</Text>
+        <Icon name="money" size={24} color="#000" />
       </View>
     </View>
   );

@@ -17,7 +17,14 @@ import UploadImageModal from "../components/uploadImageModal";
 import { useSelector } from "react-redux";
 import { CustomToast } from "../components/toast";
 import { setAvatarRes } from "@/services/api/owner";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 // import MapView, { Marker } from "react-native-maps";
+type ReactNativeFile = {
+  uri: string;
+  name: string;
+  type: string;
+};
 const CreateRestaurantScreen: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<{
     latitude: number;
@@ -26,21 +33,27 @@ const CreateRestaurantScreen: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [image, setImage] = useState([]);
+  const [image, setImage] = useState<ReactNativeFile[]>([]);
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
-  const [avatar, setAvatar] = useState();
-  const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
-  );
+  const [avatar, setAvatar] = useState<ReactNativeFile>();
+  const [userId, setUserId] = useState<string | null>(null);
+
   useEffect(() => {
-    CustomToast("error", "Error", `User id: ${userId}`);
-  }, [userId]);
+    const fetchUserId = async () => {
+      const storedUserId = await AsyncStorage.getItem("userId");
+      setUserId(storedUserId);
+    };
+
+    fetchUserId();
+  }, []);
+  const router = useRouter();
   const submitMutation = useMutation({
     mutationFn: createRestaurant,
     onSuccess: (data) => {
       console.log("success", data);
       CustomToast("success", "Success", "Upload success");
+      router.push("/authen/login");
     },
     onError: (data) => {
       console.log("error", data);
@@ -59,20 +72,37 @@ const CreateRestaurantScreen: React.FC = () => {
     },
   });
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("owner_id", userId);
-    formData.append("name", name);
-    formData.append("description", description);
-    formData.append("address", address);
-    for (const file of image) {
-      formData.append("images", file, "image.jpg");
-    }
-    submitMutation.mutate(formData);
+    if (
+      name &&
+      address &&
+      image.length > 0 &&
+      description &&
+      avatar &&
+      userId
+    ) {
+      const formData = new FormData();
+      formData.append("owner_id", userId);
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("address", address);
+      for (const file of image) {
+        formData.append("images", {
+          uri: file.uri,
+          name: file.name,
+          type: file.type,
+        } as any);
+      }
+      submitMutation.mutate(formData);
 
-    const formDataAvatar = new FormData();
-    formDataAvatar.append("owner_id", userId);
-    formDataAvatar.append("images", avatar, "image.jpg");
-    avatarMutation.mutate(formDataAvatar);
+      const formDataAvatar = new FormData();
+      formDataAvatar.append("owner_id", userId);
+      formDataAvatar.append("images", {
+        uri: avatar.uri,
+        name: avatar.name,
+        type: avatar.type,
+      } as any);
+      avatarMutation.mutate(formDataAvatar);
+    }
   };
   const handlePress = async (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -80,91 +110,103 @@ const CreateRestaurantScreen: React.FC = () => {
     setAddress(fetAddress);
     setSelectedLocation({ latitude, longitude });
   };
-  const handleImagePicker = async (file: File) => {
-    if (!(file instanceof File)) {
-      console.error("Invalid file type", file);
-      return;
-    }
+  const handleImagePicker = async (
+    _file: { uri: string; name: string; type: string },
+    uri: string
+  ) => {
+    const file = createFileFromUri(uri);
+
     if (type == "avatar") {
       setAvatar(file);
     } else {
       setImage((prev) => [...prev, file]);
     }
   };
+  const createFileFromUri = (uri: string): ReactNativeFile => {
+    const fileExtension = uri.split(".").pop() || "jpg";
+    const mimeType = `image/${
+      fileExtension === "jpg" ? "jpeg" : fileExtension
+    }`;
+    const name = `restaurant_${Date.now()}.${fileExtension}`;
+
+    return {
+      uri,
+      name,
+      type: mimeType,
+    };
+  };
   return (
-    <ScrollView className="bg-slate-100 relative flex-1 flex-col w-full">
-      <View className="bg-white w-full h-max p-4">
-        <Text className="text-slate-900 font-medium text-xl text-center">
+    <ScrollView className='bg-slate-100 relative flex-1 flex-col w-full'>
+      <View className='bg-white w-full h-max p-4'>
+        <Text className='text-slate-900 font-medium text-xl text-center'>
           Restaurant information
         </Text>
       </View>
-      <View className="flex-1 flex-col items-center w-full p-8">
-        <View className="w-2/5 aspect-square relative">
-          <View className="w-full h-full bg-slate-200 rounded-lg overflow-hidden">
+      <View className='flex-1 flex-col items-center w-full p-8'>
+        <View className='w-2/5 aspect-square relative'>
+          <View className='w-full h-full bg-slate-200 rounded-lg overflow-hidden'>
             {avatar ? (
               <Image
-                source={{ uri: URL.createObjectURL(avatar) }}
-                className="w-full h-full"
-                resizeMode="cover"
+                source={{ uri: avatar.uri }}
+                className='w-full h-full'
+                resizeMode='cover'
               />
             ) : (
-              <Image className="w-full h-full" resizeMode="cover" />
-            )}{" "}
+              <Image className='w-full h-full' resizeMode='cover' />
+            )}
           </View>
           <TouchableHighlight
             onPress={() => {
               setShowModal(true);
               setType("avatar");
             }}
-            className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-customYellow p-2 rounded-full"
-            underlayColor="#FFD700"
-          >
-            <Ionicons name="camera" size={24} color="white" />
+            className='absolute -bottom-4 left-1/2 -translate-x-1/2 bg-customYellow p-2 rounded-full'
+            underlayColor='#FFD700'>
+            <Ionicons name='camera' size={24} color='white' />
           </TouchableHighlight>
         </View>
 
-        <View className="w-full flex gap-2">
-          <Text className="text-slate-900 font-medium text-lg mt-4">
+        <View className='w-full flex gap-2'>
+          <Text className='text-slate-900 font-medium text-lg mt-4'>
             Restaurant Name
           </Text>
           <TextInput
             onChangeText={setName}
-            className="w-full p-2 border border-slate-400 rounded-lg"
-            placeholder="Enter restaurant name"
-            placeholderTextColor="#94a3b8"
+            className='w-full p-2 border border-slate-400 rounded-lg'
+            placeholder='Enter restaurant name'
+            placeholderTextColor='#94a3b8'
           />
         </View>
 
-        <View className="w-full flex gap-2">
-          <Text className="text-slate-900 font-medium text-lg mt-4">
+        <View className='w-full flex gap-2'>
+          <Text className='text-slate-900 font-medium text-lg mt-4'>
             Describe
           </Text>
           <TextInput
             multiline
             onChangeText={setDescription}
             numberOfLines={4}
-            className="w-full p-2 border border-slate-400 h-40 rounded-lg"
-            placeholder="Enter description"
-            placeholderTextColor="#94a3b8"
+            className='w-full p-2 border border-slate-400 h-40 rounded-lg'
+            placeholder='Enter description'
+            placeholderTextColor='#94a3b8'
           />
         </View>
-        <View className="w-full flex gap-2">
-          <Text className="text-slate-900 font-medium text-lg mt-4">
+        <View className='w-full flex gap-2'>
+          <Text className='text-slate-900 font-medium text-lg mt-4'>
             Banner
           </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex flex-row gap-4 h-max w-full"
-          >
+            className='flex flex-row gap-4 gap-x-4 h-max w-full'>
             {image.map((item, index) => (
-              <View key={index} className="w-32 h-24 bg-slate-300">
+              <View key={index} className='w-48 h-40 rounded-md bg-slate-300'>
                 <Image
                   source={{
-                    uri: URL.createObjectURL(item),
+                    uri: item.uri,
                   }}
-                  resizeMode="cover"
-                  className="h-full w-full"
+                  resizeMode='cover'
+                  className='h-full w-full'
                 />
               </View>
             ))}
@@ -173,24 +215,23 @@ const CreateRestaurantScreen: React.FC = () => {
                 setShowModal(true);
                 setType("banner");
               }}
-              className="w-48 h-40 bg-slate-200 rounded-md"
-            >
-              <View className="w-full h-full flex justify-center items-center">
-                <Ionicons name="add" size={36} color="white" />{" "}
+              className='w-48 h-40 bg-slate-200 rounded-md'>
+              <View className='w-full h-full flex justify-center items-center'>
+                <Ionicons name='add' size={36} color='white' />
               </View>
             </TouchableHighlight>
           </ScrollView>
         </View>
 
         {/* Address & Map */}
-        <View className="w-full flex gap-2">
-          <Text className="text-slate-900 font-medium text-lg mt-4">
+        <View className='w-full flex gap-2'>
+          <Text className='text-slate-900 font-medium text-lg mt-4'>
             Address
           </Text>
           <TextInput
-            className="w-full p-2 border border-slate-400 rounded-lg"
-            placeholder="Enter address"
-            placeholderTextColor="#94a3b8"
+            className='w-full p-2 border border-slate-400 rounded-lg'
+            placeholder='Enter address'
+            placeholderTextColor='#94a3b8'
             value={address}
             onChangeText={setAddress}
           />
@@ -212,11 +253,10 @@ const CreateRestaurantScreen: React.FC = () => {
               </MapView> */}
         </View>
       </View>
-      <TouchableOpacity className="bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4">
+      <TouchableOpacity className='bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4'>
         <Text
           onPress={handleSubmit}
-          className="text-white font-medium text-lg text-center"
-        >
+          className='text-white font-medium text-lg text-center'>
           Submit
         </Text>
       </TouchableOpacity>

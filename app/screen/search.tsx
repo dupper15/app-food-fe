@@ -2,7 +2,7 @@ import { textSearch } from "@/services/api/searchApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Text,
   TextInput,
@@ -10,15 +10,27 @@ import {
   View,
   Keyboard,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 
 const Search = () => {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<TextInput>(null);
   const [history, setHistory] = useState([]);
   const userId = useSelector((state: any) => state.user.userId);
   const router = useRouter();
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      const length = query.length;
+      inputRef.current.setNativeProps({
+        selection: { start: length, end: length },
+      });
+    }
+  }, []);
+
   const searchMutation = useMutation({
     mutationFn: textSearch,
     onSuccess: (data) => {
@@ -33,9 +45,7 @@ const Search = () => {
     },
   });
   useEffect(() => {
-    console.log("vo roi");
     if (userId) {
-      console.log("User ID:", userId);
       getHistory();
     }
   }, [userId]);
@@ -75,17 +85,21 @@ const Search = () => {
     }
   };
 
-  return (
-    <View className='flex-1 bg-white p-4'>
-      {/* Thanh tìm kiếm và nút Close */}
-      <View className='flex-row items-center mb-4 space-x-2'>
-        <View className='flex-1 flex-row items-center bg-slate-100 border border-slate-300 rounded-full px-4 py-2 space-x-2'>
+  return searchMutation.isPending ? (
+    <View className='flex-1 justify-center items-center'>
+      <ActivityIndicator size='large' color='#1e40af' />
+    </View>
+  ) : (
+    <View className='flex-1 bg-slate-100 p-4'>
+      <View className='flex-row items-center mb-4 gap-2'>
+        <View className='flex-1 flex-row items-center bg-white border border-slate-300 rounded-full px-4 py-2 gap-2'>
           <Ionicons name='search' size={20} color='#9ca3af' />
           <TextInput
             value={query}
+            ref={inputRef}
             onChangeText={setQuery}
-            placeholder='Tìm kiếm món ăn, nhà hàng...'
-            className='flex-1 text-base text-gray-800'
+            placeholder='Search dishes, restaurants...'
+            className='flex-1 text-base mb-2 text-gray-800'
             placeholderTextColor='#9ca3af'
             returnKeyType='search'
             onSubmitEditing={handleSearch}
@@ -99,14 +113,14 @@ const Search = () => {
       {history.length > 0 && (
         <View className='flex-row justify-between items-center mb-2'>
           <Text className='text-lg font-semibold text-slate-800'>
-            Lịch sử tìm kiếm
+            Your history
           </Text>
           <TouchableOpacity
             onPress={async () => {
               await AsyncStorage.removeItem(`searched${userId}`);
               setHistory([]);
             }}>
-            <Text className='text-red-600 font-medium'>Xoá hết</Text>
+            <Text className='text-red-600 font-medium'>Delete all</Text>
           </TouchableOpacity>
         </View>
       )}

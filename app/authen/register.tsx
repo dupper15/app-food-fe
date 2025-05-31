@@ -1,4 +1,4 @@
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import React, { useState } from "react";
 import {
   Text,
@@ -13,23 +13,24 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import RegisterModal from "../components/registerModal";
 import { CustomToast } from "../components/toast";
+import LoginGoogleButton from "../components/loginGoogleButton";
 
 const RegisterScreen: React.FC = () => {
-  const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = (): void => {
     if (password == confirmPassword) {
       setShowModal(true);
     } else {
       CustomToast("error", "Error", "Password does not match");
     }
   };
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showModal, setShowModal] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -157,14 +158,8 @@ const RegisterScreen: React.FC = () => {
               </TouchableOpacity>
 
               <Text className='text-gray-500 my-5'>Or</Text>
-
-              <TouchableOpacity className='bg-red-600 p-4 rounded-lg w-4/5 shadow-sm active:opacity-80'>
-                <Text className='text-white text-center font-medium'>
-                  Login with Google
-                </Text>
-              </TouchableOpacity>
-
-              <Link href='/auth/login' className='mt-8'>
+              <LoginGoogleButton />
+              <Link href='/authen/login' className='mt-8'>
                 <Text className='text-blue-500'>
                   Already have an account? Log in
                 </Text>

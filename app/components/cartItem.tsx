@@ -3,7 +3,50 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Checkbox } from "react-native-paper";
 import { Stepper } from "react-native-ui-lib";
 import { transPrice } from "./../../utils/transPrice";
+interface Topping {
+  name: string;
+  price: number;
+  [key: string]: any;
+}
 
+interface Dish {
+  name: string;
+  image: string;
+  price: number;
+  [key: string]: any;
+}
+
+interface OrderItem {
+  dish_id: Dish;
+  quantity: number;
+  topping?: Topping[];
+  [key: string]: any;
+}
+
+interface Restaurant {
+  name: string;
+  [key: string]: any;
+}
+
+interface CartItem {
+  restaurant_id: Restaurant;
+  order_items: OrderItem[];
+}
+
+interface Props {
+  selectedDish: OrderItem[];
+  item: CartItem;
+  restaurantIndex: number;
+  toggleRestaurantCheckbox: (restaurantIndex: number) => void;
+  toggleCheckbox: (restaurantIndex: number, itemIndex: number) => void;
+  updateQuantity: (
+    restaurantIndex: number,
+    itemIndex: number,
+    value: number
+  ) => void;
+  setEditedItem: (item: OrderItem) => void;
+  setShowModal: (show: boolean) => void;
+}
 const CardItem = ({
   selectedDish,
   item,
@@ -13,21 +56,23 @@ const CardItem = ({
   updateQuantity,
   setEditedItem,
   setShowModal,
-}) => {
+}: Props) => {
   return (
-    <View className='mb-6 bg-white p-4 rounded-lg shadow-sm'>
+    <View className='mb-2 bg-white p-4 rounded-lg '>
       <View className='flex-row items-center justify-between mb-4'>
         <View className='flex-row gap-2'>
-          <Checkbox
-            status={
-              item.order_items.every((orderItem: any) =>
-                selectedDish.includes(orderItem)
-              )
-                ? "checked"
-                : "unchecked"
-            }
-            onPress={() => toggleRestaurantCheckbox(restaurantIndex)}
-          />
+          <View className='rounded-full border border-gray-200'>
+            <Checkbox
+              status={
+                item.order_items.every((orderItem: any) =>
+                  selectedDish.includes(orderItem)
+                )
+                  ? "checked"
+                  : "unchecked"
+              }
+              onPress={() => toggleRestaurantCheckbox(restaurantIndex)}
+            />
+          </View>
           <Text className='text-xl font-semibold'>
             {item.restaurant_id.name}
           </Text>
@@ -46,12 +91,14 @@ const CardItem = ({
           }}
           key={itemIndex}>
           <View className='flex-row items-center mb-4 '>
-            <Checkbox
-              status={
-                selectedDish.includes(orderItem) ? "checked" : "unchecked"
-              }
-              onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
-            />
+            <View className='rounded-full border border-gray-200'>
+              <Checkbox
+                status={
+                  selectedDish.includes(orderItem) ? "checked" : "unchecked"
+                }
+                onPress={() => toggleCheckbox(restaurantIndex, itemIndex)}
+              />
+            </View>
             <Image
               source={{ uri: orderItem.dish_id.image }}
               className='w-16 h-16 rounded-lg ml-2'
@@ -60,7 +107,7 @@ const CardItem = ({
               <Text className='text-lg font-medium'>
                 {orderItem.dish_id.name}
               </Text>
-              <View className='flex-row gap-2'>
+              <View className='flex-col gap-2'>
                 <Text className='text-gray-600'>
                   {transPrice(
                     orderItem.dish_id.price * orderItem.quantity +
@@ -71,7 +118,7 @@ const CardItem = ({
                   )}
                 </Text>
                 {orderItem.topping && (
-                  <Text className='text-gray-500 max-w-[50%] truncate'>
+                  <Text className='text-gray-500 truncate'>
                     (
                     {orderItem.topping
                       .map((topping: any) => topping.name)

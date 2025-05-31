@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View, ScrollView } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { transPrice } from "./../../utils/transPrice";
@@ -166,12 +173,25 @@ const DishPage = () => {
 
         <TouchableOpacity
           onPress={orderItem ? editCart : addToCart}
-          className='mt-6 bg-customYellow py-3 rounded-lg shadow-lg'>
-          <Text className='text-white text-lg font-semibold text-center'>
-            {orderItem
-              ? `Edit - ${transPrice(totalPrice)}`
-              : `Add to cart - ${transPrice(totalPrice)}`}
-          </Text>
+          className='mt-6 rounded-lg shadow-sm bg-customYellow py-3 px-6'
+          activeOpacity={0.8}
+          disabled={
+            !dish || addToCartMutation.isPending || editCartMutation.isPending
+          }>
+          {!dish ||
+          addToCartMutation.isPending ||
+          editCartMutation.isPending ? (
+            <View className='flex-row items-center justify-center'>
+              <ActivityIndicator size='small' color='#000' />
+              <Text className='ml-3 text-black font-medium'>Loading...</Text>
+            </View>
+          ) : (
+            <Text className='text-white text-lg font-semibold text-center'>
+              {orderItem
+                ? `Edit - ${transPrice(totalPrice)}`
+                : `Add to cart - ${transPrice(totalPrice)}`}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>

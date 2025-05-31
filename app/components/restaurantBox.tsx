@@ -24,12 +24,18 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
   };
   return (
     <TouchableHighlight
-      className='rounded-lg bg-white w-max h-max'
+      underlayColor='#F3F4F6'
+      className='rounded-lg bg-white'
       onPress={() => handleNavigate()}>
-      <View style={{ minHeight: 180, width: width * 0.45 }}>
+      <View
+        style={{
+          width: width * 0.45,
+          position: "relative",
+          height: width * 0.5,
+        }}>
         <Image
           source={{ uri: restaurant.owner_id?.avatar }}
-          className='w-full h-40 rounded-t-lg'
+          className='w-full  rounded-t-lg'
           resizeMode='cover'
           style={{ aspectRatio: 16 / 9 }}
         />
@@ -38,21 +44,15 @@ const RestaurantBox: React.FC<{ restaurant: Res.RestaurantData }> = ({
           <Text className='text-lg font-semibold text-gray-900 mb-1 whitespace-nowrap overflow-hidden text-ellipsis'>
             {restaurant.name}
           </Text>
-
-          <View className='flex-row justify-between items-center'>
-            <View className='flex-row items-center gap-1'>
-              <Icon name='star' size={24} color={"#FFC515"} />
-              <Text className='text-gray-700 text-base'>
-                {restaurant.rating}
-              </Text>
-            </View>
-
-            <TouchableHighlight
-              className='bg-customYellow p-2 rounded-full'
-              underlayColor={"#FFD700"}>
-              <Icon name='shopping-cart' size={24} color={"white"} />
-            </TouchableHighlight>
+        </View>
+        <View className='flex-row justify-between items-center absolute bottom-2 left-2'>
+          <View className='flex-row items-center gap-1'>
+            <Icon name='star' size={24} color={"#FFC515"} />
+            <Text className='text-gray-700 text-base'>{restaurant.rating}</Text>
           </View>
+        </View>
+        <View className='bg-customYellow p-2 rounded-full absolute right-2 bottom-2'>
+          <Icon name='shopping-cart' size={24} color={"white"} />
         </View>
       </View>
     </TouchableHighlight>

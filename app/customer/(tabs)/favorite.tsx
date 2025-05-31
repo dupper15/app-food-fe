@@ -16,7 +16,14 @@ import {
   removeFavoriteRestaurant,
 } from "@/services/api/userApi";
 import { useSelector } from "react-redux";
-
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 export default function Favorite() {
   const userId = useSelector((state) => state.user.userId);
   const [restaurants, setRestaurants] = useState([]);
@@ -30,6 +37,7 @@ export default function Favorite() {
     mutationFn: getFavoriteRestaurants,
     onSuccess: (data) => {
       setRestaurants(data);
+      console.log("Favorite restaurants fetched successfully:", data);
     },
     onError: (error) => {
       console.error("Error fetching favorite restaurants:", error);
@@ -64,7 +72,13 @@ export default function Favorite() {
       getFavoriteRestaurantMutation.mutate(userId);
     }
   }, [userId]);
-
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        getFavoriteRestaurantMutation.mutate(userId);
+      }
+    }, [userId])
+  );
   return (
     <View className='flex-1 bg-gray-100'>
       <View className='flex-row justify-between items-center px-4 pt-2 pb-4 bg-white'>
@@ -92,19 +106,47 @@ export default function Favorite() {
         </View>
       </View>
 
-      {restaurants.length > 0 ? (
+      {getFavoriteRestaurantMutation.isPending ? (
+        <ScrollView
+          className='px-4 py-4 pb-8'
+          showsVerticalScrollIndicator={false}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <View key={index} className='bg-white rounded-xl p-4 mb-2'>
+              <Placeholder Animation={Fade}>
+                <View className='flex-row'>
+                  <PlaceholderMedia size={64} isRound={true} />
+                  <View className='ml-4 flex-1'>
+                    <PlaceholderLine width={80} />
+                    <PlaceholderLine width={50} />
+                  </View>
+                </View>
+                <View className='flex-row justify-end mt-4'>
+                  <PlaceholderLine width={30} height={30} />
+                </View>
+              </Placeholder>
+            </View>
+          ))}
+        </ScrollView>
+      ) : restaurants.length > 0 ? (
         <ScrollView
           className='px-4 py-4 pb-8'
           showsVerticalScrollIndicator={false}>
           {restaurants.map((restaurant) => (
             <View
               key={restaurant._id}
-              className='bg-white rounded-xl p-4 mb-5  border border-gray-300'>
+              className='bg-white rounded-xl p-4 mb-2 '>
               <View className='flex-row'>
-                <Image
-                  source={{ uri: restaurant.owner_id.avatar }}
-                  className='w-20 h-20 rounded-lg border border-gray-300'
-                />
+                {restaurant.owner_id.avatar ? (
+                  <Image
+                    source={{ uri: restaurant.owner_id.avatar }}
+                    className='w-16 h-16 rounded-full'
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/images/default_avatar.jpg")}
+                    className='w-16 h-16 rounded-full'
+                  />
+                )}
                 <View className='ml-4 flex-1'>
                   <Text className='text-xl font-bold text-gray-900'>
                     {restaurant.name}
