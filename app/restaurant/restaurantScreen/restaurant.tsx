@@ -57,7 +57,7 @@ export default function Restaurant() {
     AsyncStorage.removeItem("startTime");
     AsyncStorage.removeItem("usageTime");
     AsyncStorage.removeItem("customer_id");
-    router.push("/auth/login");
+    router.push("/authen/login");
   };
 
   return (
