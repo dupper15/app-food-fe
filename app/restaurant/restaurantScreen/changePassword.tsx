@@ -69,7 +69,7 @@ export default function ChangePassword() {
         <View className="w-2" />
       </View>
       {/* Body */}
-      <View className="flex-1 w-full px-6 py-8 items-center space-y-5">
+      <View className="flex-1 w-full px-6 py-8 items-center space-y-5 gap-4">
         <Image
           source={{
             uri: "https://th.bing.com/th/id/R.02a07991f13f2ba8915f2f3165bb9a3c?rik=stZdjsYm7DbrWQ&pid=ImgRaw&r=0",
