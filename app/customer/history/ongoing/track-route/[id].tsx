@@ -5,8 +5,8 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-// Replace with react-native-maps and WebView for a more compatible approach
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { WebView } from "react-native-webview";
 import { router, useLocalSearchParams } from "expo-router";
@@ -15,11 +15,13 @@ import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import { getCustomerInfo } from "@/services/api/userApi";
 import { Ionicons } from "@expo/vector-icons";
+import RouteLocationSelectionModal from "@/components/RouteLocationSelectionModal";
 
 interface Location {
   latitude: number;
   longitude: number;
   title: string;
+  address?: string;
 }
 
 const TrackRouteScreen: React.FC = () => {
@@ -32,25 +34,33 @@ const TrackRouteScreen: React.FC = () => {
   const [startLocation, setStartLocation] = useState<Location>({
     latitude: 10.762622,
     longitude: 106.660172,
-    title: "Restaurant",
+    title: "Your Location",
   });
   const [endLocation, setEndLocation] = useState<Location>({
     latitude: 10.773831,
     longitude: 106.685149,
-    title: "Your Location",
+    title: "Restaurant",
   });
   const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
   const [orderDetail, setOrderDetail] = useState<any>(null);
-  // Add a flag to control which map implementation to use
   const [useWebViewMap, setUseWebViewMap] = useState<boolean>(true);
+
+  // Location selection modal state - only for starting point
+  const [showStartLocationModal, setShowStartLocationModal] =
+    useState<boolean>(false);
+
   const getUserInfoMutation = useMutation({
     mutationFn: getCustomerInfo,
     onSuccess: (data) => {
-      setStartLocation({
-        latitude: data.addressCoordinates[0].latitude,
-        longitude: data.addressCoordinates[0].longitude,
-        title: data.name || "Your Location",
-      });
+      // Set user's location from the first address with coordinates
+      if (data.addressCoordinates && data.addressCoordinates.length > 0) {
+        setStartLocation({
+          latitude: data.addressCoordinates[0].latitude,
+          longitude: data.addressCoordinates[0].longitude,
+          title: data.name || "Your Location",
+          address: data.addressCoordinates[0].address,
+        });
+      }
     },
     onError: (error) => {
       console.error("Error fetching user info:", error);
@@ -71,9 +81,10 @@ const TrackRouteScreen: React.FC = () => {
       }
 
       const orderData = await fetchOrderById(orderId);
+      console.log("Fetched order data:", orderData);
       setOrderDetail(orderData);
 
-      // Check if restaurant data with coordinates is available
+      // Check if restaurant data with coordinates is available (using original logic)
       if (
         orderData.restaurant_id &&
         typeof orderData.restaurant_id === "object" &&
@@ -84,6 +95,7 @@ const TrackRouteScreen: React.FC = () => {
           latitude: orderData.restaurant_id.latitude,
           longitude: orderData.restaurant_id.longitude,
           title: orderData.restaurant_id.name || "Restaurant",
+          address: orderData.restaurant_id.address,
         });
       }
 
@@ -92,11 +104,29 @@ const TrackRouteScreen: React.FC = () => {
 
       // Fetch route after locations are set
       fetchRoute();
+      console.log("End location set:", endLocation);
     } catch (err) {
       console.error("Error loading order details:", err);
       setError("Failed to load order details");
       setIsLoading(false);
     }
+  };
+
+  const handleSelectStartLocation = (location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    title?: string;
+  }) => {
+    setStartLocation({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      title: location.title || "Your Location",
+      address: location.address,
+    });
+
+    // Refresh the route with the new starting location
+    fetchRoute();
   };
 
   const fetchRoute = async () => {
@@ -215,10 +245,16 @@ const TrackRouteScreen: React.FC = () => {
           }).addTo(map);
           
           const startMarker = L.marker(${startCoords}).addTo(map)
-            .bindPopup("${startLocation.title}");
+            .bindPopup("${startLocation.title}${
+      startLocation.address
+        ? ": " + startLocation.address.replace(/"/g, '\\"')
+        : ""
+    }");
             
           const endMarker = L.marker(${endCoords}).addTo(map)
-            .bindPopup("${endLocation.title}");
+            .bindPopup("${endLocation.title}${
+      endLocation.address ? ": " + endLocation.address.replace(/"/g, '\\"') : ""
+    }");
           
           // Add route polyline if waypoints exist
           ${
@@ -266,19 +302,76 @@ const TrackRouteScreen: React.FC = () => {
           domStorageEnabled={true}
         />
         <View style={styles.infoContainer}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons
-              style={{ marginRight: 8 }}
-              name="chevron-back-outline"
-              size={24}
-              color="black"
-              onClick={() => {
-                router.back();
-              }}
-            ></Ionicons>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons
+                style={{ marginRight: 8 }}
+                name="chevron-back-outline"
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
             <Text style={styles.infoTitle}>Track route</Text>
           </View>
+
+          {/* Location selection section - only for start location */}
+          <View style={styles.locationContainer}>
+            <Text style={styles.locationLabel}>From:</Text>
+            <TouchableOpacity
+              style={styles.locationSelector}
+              onPress={() => setShowStartLocationModal(true)}
+            >
+              <Ionicons
+                name="location"
+                size={20}
+                color="#2196F3"
+                style={styles.locationIcon}
+              />
+              <Text numberOfLines={1} style={styles.locationText}>
+                {startLocation.address || startLocation.title}
+              </Text>
+              <Ionicons name="pencil" size={16} color="#757575" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Fixed destination - restaurant */}
+          <View style={styles.locationContainer}>
+            <Text style={styles.locationLabel}>To:</Text>
+            <View
+              style={[styles.locationSelector, { backgroundColor: "#f8f8f8" }]}
+            >
+              <Ionicons
+                name="restaurant"
+                size={20}
+                color="#F44336"
+                style={styles.locationIcon}
+              />
+              <Text
+                numberOfLines={2}
+                style={[styles.locationText, { color: "#333" }]}
+              >
+                {endLocation.title}
+                {endLocation.address ? ` (${endLocation.address})` : ""}
+              </Text>
+            </View>
+          </View>
         </View>
+
+        {/* Location selection modal - only for starting point */}
+        <RouteLocationSelectionModal
+          visible={showStartLocationModal}
+          onClose={() => setShowStartLocationModal(false)}
+          userId={userId}
+          onSelectLocation={handleSelectStartLocation}
+          title="Select Your Starting Point"
+          purpose="start"
+        />
       </View>
     );
   }
@@ -313,7 +406,17 @@ const TrackRouteScreen: React.FC = () => {
         />
       </MapView>
       <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>Track route</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons
+              style={{ marginRight: 8 }}
+              name="chevron-back-outline"
+              size={24}
+              color="black"
+            />
+          </TouchableOpacity>
+          <Text style={styles.infoTitle}>Track route</Text>
+        </View>
       </View>
     </View>
   );
@@ -353,6 +456,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#757575",
     marginBottom: 4,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  locationLabel: {
+    width: 40,
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  locationSelector: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    padding: 8,
+    borderRadius: 4,
+  },
+  locationIcon: {
+    marginRight: 8,
+  },
+  locationText: {
+    flex: 1,
+    fontSize: 14,
   },
   loadingContainer: {
     flex: 1,

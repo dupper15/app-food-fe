@@ -37,7 +37,7 @@ const OrderComponent = ({
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
     if (statusLower === "cancel") return "#FF3B30"; // Red
-    if (statusLower === "complete") return "#34C759"; // Green
+    if (statusLower === "completedd") return "#34C759"; // Green
     if (statusLower === "pending") return "#FF9500"; // Orange
     if (statusLower === "received") return "#5AC8FA"; // Light Blue
     if (statusLower === "preparing") return "#007AFF"; // Blue
@@ -127,7 +127,7 @@ const OrderComponent = ({
         ) : (
           // History mode buttons
           <>
-            {displayStatus.toLowerCase() === "complete" && (
+            {displayStatus.toLowerCase() === "completed" && (
               <TouchableOpacity
                 style={styles.rateButton}
                 onPress={() => onRate && onRate(item.order._id)}
@@ -135,7 +135,13 @@ const OrderComponent = ({
                 <Text style={styles.rateButtonText}>Rate</Text>
               </TouchableOpacity>
             )}
-            <ReorderButton orderId={item.order._id} returnToHistory={true} />
+            <ReorderButton
+              orderId={item.order._id}
+              orderItems={item.orderItems}
+              style={styles.reorderButton}
+              textStyle={styles.reorderButtonText}
+              returnToHistory={true}
+            />
           </>
         )}
       </View>

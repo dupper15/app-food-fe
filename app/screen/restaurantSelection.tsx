@@ -24,6 +24,7 @@ import {
 } from "@/services/api/userApi";
 import { RestaurantData } from "@/interfaces/RestaurantInterface";
 import * as Location from "expo-location";
+import LocationSelectionModal from "@/components/LocationSelectionModal";
 
 const calculateDistance = (
   lat1: number,
@@ -65,6 +66,12 @@ const RestaurantSelection = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
+  const [selectedLocationInfo, setSelectedLocationInfo] = useState<{
+    source: string;
+    addressName?: string;
+  } | null>(null);
+
   const calculateRestaurantDistances = (restaurants: RestaurantData[]) => {
     if (!userCoordinates) return restaurants;
 
@@ -116,39 +123,34 @@ const RestaurantSelection = () => {
     },
   });
 
-  const getUserInfoMutation = useMutation({
-    mutationFn: getCustomerInfo,
-    onSuccess: (data) => {
-      if (data.addressCoordinates && data.addressCoordinates.length > 0) {
-        const { latitude, longitude } = data.addressCoordinates[0];
+  const handleLocationSelection = (location: {
+    latitude: number;
+    longitude: number;
+    source: string;
+    addressName?: string;
+  }) => {
+    setUserCoordinates({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
 
-        setUserCoordinates({ latitude, longitude });
-        getNearbyRestaurantsMutation.mutate({
-          latitude,
-          longitude,
-          maxDistance: 20, //khoảng cách tối đa theo km
-        });
-      } else {
-        setIsLoading(false);
-        Alert.alert(
-          "Location Error",
-          "Could not retrieve your saved location. Please update your profile address."
-        );
-      }
-    },
-    onError: (error) => {
-      console.error("Error fetching user location from API:", error);
-      setIsLoading(false);
-      Alert.alert(
-        "Location Error",
-        "Could not retrieve your location information. Please try again."
-      );
-    },
-  });
+    setSelectedLocationInfo({
+      source: location.source,
+      addressName: location.addressName,
+    });
 
-  const getUserLocation = () => {
+    setIsLoading(true);
+    getNearbyRestaurantsMutation.mutate({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      maxDistance: 20, // maximum distance in km
+    });
+  };
+
+  const initiateNearMeSearch = () => {
     if (userId) {
-      getUserInfoMutation.mutate(userId);
+      // Just show the location selection modal directly instead of fetching user info first
+      setShowLocationModal(true);
     } else {
       setIsLoading(false);
       Alert.alert(
@@ -167,7 +169,7 @@ const RestaurantSelection = () => {
       setIsLoading(true);
 
       if (restaurantCriteriaString === "Near me") {
-        getUserLocation();
+        initiateNearMeSearch();
       } else {
         const data = {
           restaurantCriteria: restaurantCriteria,
@@ -236,43 +238,78 @@ const RestaurantSelection = () => {
   };
 
   return (
-    <View className='flex-1 bg-gray-100 '>
-      <View className='flex-row items-start bg-white px-2 pt-4 pb-2 mb-4'>
+    <View className="flex-1 bg-gray-100 ">
+      <View className="flex-row items-start bg-white px-2 pt-4 pb-2 mb-4">
         <TouchableHighlight
-          className='rounded-full p-2'
+          className="rounded-full p-2"
           onPress={() => {
             router.back();
-          }}>
-          <Icon name='arrow-back' size={24} color='gray' />
+          }}
+        >
+          <Icon name="arrow-back" size={24} color="gray" />
         </TouchableHighlight>
-        <Text className='text-2xl font-semibold text-gray-800'>{header}</Text>
+        <Text className="text-2xl font-semibold text-gray-800">{header}</Text>
       </View>
 
-      {isLoading ? (
-        <View className='flex-1 justify-center items-center'>
-          <ActivityIndicator size='large' color='#facc15' />
-          <Text className='mt-2 text-gray-500'>Loading restaurants...</Text>
+      {isLoading && !showLocationModal ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#facc15" />
+          <Text className="mt-2 text-gray-500">Loading restaurants...</Text>
         </View>
       ) : (
-        <ScrollView className='px-4' showsVerticalScrollIndicator={false}>
+        <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+          {selectedLocationInfo && (
+            <View className="flex-row items-center bg-white p-3 rounded-lg mb-3">
+              <Icon
+                name={
+                  selectedLocationInfo.source === "device"
+                    ? "my-location"
+                    : "place"
+                }
+                size={20}
+                color="#facc15"
+              />
+              <Text className="ml-2 text-gray-600">
+                {selectedLocationInfo.source === "device"
+                  ? "Using your current device location"
+                  : `Using address: ${selectedLocationInfo.addressName?.substring(
+                      0,
+                      24
+                    )}${
+                      selectedLocationInfo.addressName &&
+                      selectedLocationInfo.addressName.length > 24
+                        ? "..."
+                        : ""
+                    }`}
+              </Text>
+              <TouchableHighlight
+                className="ml-auto rounded-full p-1"
+                onPress={() => setShowLocationModal(true)}
+              >
+                <Text className="text-customYellow font-medium">Change</Text>
+              </TouchableHighlight>
+            </View>
+          )}
+
           {restaurants && restaurants.length > 0 ? (
             restaurants.map((restaurant) => (
               <View
                 key={restaurant._id}
-                className='bg-white rounded-lg p-5 mb-6 border border-gray-300 '>
-                <View className='flex-row items-start justify-between'>
-                  <View className='flex-row items-start w-full'>
+                className="bg-white rounded-lg p-5 mb-6 border border-gray-300 "
+              >
+                <View className="flex-row items-start justify-between">
+                  <View className="flex-row items-start w-full">
                     {restaurant.owner_id?.avatar && (
                       <Image
                         source={{ uri: restaurant.owner_id.avatar }}
-                        className='w-16 h-16 rounded-lg border border-gray-300'
+                        className="w-16 h-16 rounded-lg border border-gray-300"
                       />
                     )}
-                    <View className='flex-1 ml-4'>
-                      <Text className='text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden'>
+                    <View className="flex-1 ml-4">
+                      <Text className="text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden">
                         {restaurant.name}
                       </Text>
-                      <Text className='text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden'>
+                      <Text className="text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden">
                         {restaurant.description}
                       </Text>
                     </View>
@@ -286,7 +323,8 @@ const RestaurantSelection = () => {
                       favoriteRestaurants.includes(restaurant._id)
                     )
                   }
-                  className='absolute top-3 right-3'>
+                  className="absolute top-3 right-3"
+                >
                   <Icon
                     name={
                       favoriteRestaurants.includes(restaurant._id)
@@ -301,19 +339,20 @@ const RestaurantSelection = () => {
                     }
                   />
                 </TouchableHighlight>
-                <View className='flex-row items-center justify-between mt-4'>
-                  <Text className='text-xl ml-2 text-gray-900'>
+                <View className="flex-row items-center justify-between mt-4">
+                  <Text className="text-xl ml-2 text-gray-900">
                     {restaurant.distance
                       ? `${restaurant.distance.toFixed(1)}km`
                       : "3.5km"}
                   </Text>
 
                   <TouchableHighlight
-                    className='bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300'
+                    className="bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300"
                     onPress={() => {
                       handleDishNavigate(restaurant);
-                    }}>
-                    <Text className='text-lg font-semibold text-white'>
+                    }}
+                  >
+                    <Text className="text-lg font-semibold text-white">
                       Order
                     </Text>
                   </TouchableHighlight>
@@ -321,8 +360,8 @@ const RestaurantSelection = () => {
               </View>
             ))
           ) : (
-            <View className='flex-1 justify-center items-center py-20'>
-              <Text className='text-gray-500 text-lg'>
+            <View className="flex-1 justify-center items-center py-20">
+              <Text className="text-gray-500 text-lg">
                 No{" "}
                 {restaurantCriteria
                   .slice(1, -1)
@@ -335,6 +374,19 @@ const RestaurantSelection = () => {
           )}
         </ScrollView>
       )}
+
+      <LocationSelectionModal
+        visible={showLocationModal}
+        onClose={() => {
+          setShowLocationModal(false);
+          // If the user closes without selecting and we don't have coordinates yet, go back
+          if (!userCoordinates) {
+            setIsLoading(false);
+          }
+        }}
+        userId={userId}
+        onSelectLocation={handleLocationSelection}
+      />
     </View>
   );
 };

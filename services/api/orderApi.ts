@@ -78,12 +78,3 @@ export const fetchWeeklyRevenueByRestaurant = async (
   const response = await axiosInstance.get(`/order/fetch-weekly-revenue/${id}`);
   return response.data;
 };
-
-export const fetchOrderWithRestaurantDetails = async (
-  orderId: string
-): Promise<any> => {
-  const response = await axiosInstance.get(
-    `/order/detail-with-restaurant/${orderId}`
-  );
-  return response.data;
-};

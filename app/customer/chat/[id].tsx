@@ -8,14 +8,19 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import {
   getConversationDetail,
   sendMessage as apiSendMessage,
+  uploadImage,
 } from "@/services/api/chatApi";
 import { getRestaurantDetail } from "@/services/api/restaurantApi";
 import socketService from "@/services/socket/socketService";
@@ -27,6 +32,7 @@ interface ApiMessage {
   receiver_id: string;
   conversationId: string;
   content: string;
+  image?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -42,7 +48,9 @@ export default function ChatDetail() {
   const [inputMessage, setInputMessage] = useState("");
   const [recipientId, setRecipientId] = useState<string>("");
   const [restaurantName, setRestaurantName] = useState<string>("");
+  const [restaurantAvatar, setRestaurantAvatar] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -64,18 +72,44 @@ export default function ChatDetail() {
           console.log("Joined conversation:", joined);
         }
 
-        // Set up message listener
+        // Set up message listener with improved duplicate detection
         const messageUnsubscribe = socketService.onReceiveMessage(
           (newMessage) => {
             console.log("New message received:", newMessage);
 
             if (newMessage.conversationId === id) {
               setMessages((prevMessages) => {
-                // Avoid duplicates by checking message ID
-                const exists = prevMessages.some(
-                  (msg) => msg._id === newMessage._id
+                // More robust duplicate checking
+                const isDuplicate = prevMessages.some(
+                  (msg) =>
+                    // Check if the message has the same ID (for server messages)
+                    msg._id === newMessage._id ||
+                    // Check if this is a server version of a temp message
+                    (msg._id.startsWith("temp-") &&
+                      msg.content === newMessage.content &&
+                      msg.sender_id === newMessage.sender_id &&
+                      Math.abs(
+                        new Date(msg.createdAt).getTime() -
+                          new Date(newMessage.createdAt).getTime()
+                      ) < 5000) ||
+                    // Check for duplicate image messages (same sender and image URL)
+                    (msg.image &&
+                      newMessage.image &&
+                      msg.image === newMessage.image &&
+                      msg.sender_id === newMessage.sender_id &&
+                      Math.abs(
+                        new Date(msg.createdAt).getTime() -
+                          new Date(newMessage.createdAt).getTime()
+                      ) < 10000)
                 );
-                if (exists) return prevMessages;
+
+                if (isDuplicate) {
+                  console.log(
+                    "Duplicate message detected, ignoring:",
+                    newMessage._id
+                  );
+                  return prevMessages;
+                }
                 return [...prevMessages, newMessage];
               });
 
@@ -109,21 +143,26 @@ export default function ChatDetail() {
     };
   }, [userId, id]);
 
-  // Fetch restaurant name
+  // Fetch restaurant name and avatar
   useEffect(() => {
-    const fetchRestaurantName = async () => {
+    const fetchRestaurantDetails = async () => {
       if (recipientId) {
         try {
           const restaurantData = await getRestaurantDetail(recipientId);
           setRestaurantName(restaurantData.name || "Restaurant");
+
+          // Check if the restaurant has an avatar image
+          if (restaurantData.logo || restaurantData.image) {
+            setRestaurantAvatar(restaurantData.logo || restaurantData.image);
+          }
         } catch (error) {
-          console.error("Error fetching restaurant name:", error);
+          console.error("Error fetching restaurant details:", error);
           setRestaurantName("Restaurant");
         }
       }
     };
 
-    fetchRestaurantName();
+    fetchRestaurantDetails();
   }, [recipientId]);
 
   // Fetch messages for this conversation
@@ -163,14 +202,190 @@ export default function ChatDetail() {
     fetchData();
   }, [id, userId]);
 
+  // Function to handle image selection from camera
+  const handleCameraPress = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant camera permissions to take photos."
+        );
+        return;
+      }
+
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        await handleImageUpload(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      Alert.alert("Error", "Could not access camera");
+    }
+  };
+
+  // Function to handle image selection from gallery
+  const handleDocumentPress = async () => {
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant media library permissions to select images."
+        );
+        return;
+      }
+
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        await handleImageUpload(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error accessing media library:", error);
+      Alert.alert("Error", "Could not access media library");
+    }
+  };
+
+  // Function to upload an image and send as message
+  const handleImageUpload = async (imageUri: string) => {
+    if (!recipientId || !id) return;
+
+    try {
+      setIsUploading(true);
+
+      // Create a unique ID for this upload to track it
+      const tempId = `temp-${Date.now()}`;
+
+      // Create a temporary message with image indicator
+      const tempMessage: ApiMessage = {
+        _id: tempId,
+        sender_id: userId || "",
+        receiver_id: recipientId,
+        conversationId: id,
+        content: "📷 Sending image...",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        __v: 0,
+      };
+
+      // Show temporary message in UI
+      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+      // Scroll to bottom
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+
+      console.log(
+        "Starting image upload from URI:",
+        imageUri.substring(0, 30) + "..."
+      );
+
+      // Upload the image to server
+      const response = await uploadImage(imageUri, id);
+      console.log("Upload image response:", response);
+
+      if (!response) {
+        console.error("Upload response is empty");
+        throw new Error("Failed to upload image: Empty response");
+      }
+
+      let imageUrl: string;
+
+      // Handle different response formats to extract the image URL
+      if (typeof response === "string") {
+        imageUrl = response;
+      } else if (Array.isArray(response) && response.length > 0) {
+        imageUrl = response[0];
+      } else if (response.imageUrl) {
+        imageUrl = response.imageUrl;
+      } else {
+        console.error("Invalid response format:", response);
+        throw new Error("Failed to get image URL from response");
+      }
+
+      console.log("Successfully extracted image URL:", imageUrl);
+
+      // Message data for API with image URL
+      const messageData = {
+        sender_id: userId || "",
+        receiver_id: recipientId,
+        content: "Image",
+        _id: id,
+        image: imageUrl,
+      };
+
+      // Send message with image URL
+      const result = await apiSendMessage(messageData);
+      console.log("Image message sent via API:", result);
+
+      // Store the message ID to prevent duplicates
+      const sentMessageId = result._id;
+
+      // Remove temporary message
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg._id !== tempId)
+      );
+
+      // Only add the final message if we're not using sockets
+      // If using sockets, the message will come through the socket
+      if (!socketConnected) {
+        const finalMessage: ApiMessage = {
+          _id: sentMessageId || `image-${Date.now()}`,
+          sender_id: userId || "",
+          receiver_id: recipientId,
+          conversationId: id,
+          content: "Image",
+          image: imageUrl,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          __v: 0,
+        };
+
+        setMessages((prevMessages) => [...prevMessages, finalMessage]);
+      } else {
+        // If socket connected, we'll track this ID to avoid duplicates
+        // Store the sent message ID in a ref or state if needed
+        console.log(
+          "Message sent via API, waiting for socket update with ID:",
+          sentMessageId
+        );
+      }
+
+      // When using socket, don't send the message through socket again,
+      // since the server will broadcast it back to all connected clients
+      // including this one
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      Alert.alert("Error", "Failed to upload image. Please try again.");
+
+      // Remove any temporary message
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => !msg._id.startsWith("temp-"))
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Function to send a message
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "" || !recipientId) return;
 
     try {
-      // Create a temporary message to show immediately
       const tempMessage: ApiMessage = {
-        _id: `temp-${Date.now()}`, // Temporary ID for UI
+        _id: `temp-${Date.now()}`,
         sender_id: userId || "",
         receiver_id: recipientId,
         conversationId: id,
@@ -221,6 +436,35 @@ export default function ChatDetail() {
     return senderId === userId;
   };
 
+  // Function to render avatar for message
+  const renderAvatar = (senderId: string) => {
+    if (senderId !== userId && restaurantAvatar) {
+      return (
+        <Image
+          source={{ uri: restaurantAvatar }}
+          style={styles.messageAvatar}
+          onError={() => console.log("Error loading avatar image")}
+        />
+      );
+    }
+    return <View style={styles.messageAvatar} />;
+  };
+
+  // Function to render message content
+  const renderMessageContent = (message: ApiMessage) => {
+    if (message.image) {
+      return (
+        <Image
+          source={{ uri: message.image }}
+          style={styles.messageImage}
+          resizeMode="cover"
+          onError={() => console.log("Error loading message image")}
+        />
+      );
+    }
+    return <Text style={styles.messageText}>{message.content}</Text>;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -228,7 +472,23 @@ export default function ChatDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <View style={styles.avatar} />
+
+        {restaurantAvatar ? (
+          <Image
+            source={{ uri: restaurantAvatar }}
+            style={styles.avatar}
+            onError={() => console.log("Error loading avatar image")}
+          />
+        ) : (
+          <View style={styles.avatar}>
+            {restaurantName && (
+              <Text style={styles.avatarText}>
+                {restaurantName.charAt(0).toUpperCase()}
+              </Text>
+            )}
+          </View>
+        )}
+
         <Text style={styles.headerTitle}>{restaurantName || "Loading..."}</Text>
         {!socketConnected && (
           <View style={styles.offlineIndicator}>
@@ -245,6 +505,7 @@ export default function ChatDetail() {
       >
         {isLoading ? (
           <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FFC515" />
             <Text>Loading messages...</Text>
           </View>
         ) : messages.length === 0 ? (
@@ -264,7 +525,7 @@ export default function ChatDetail() {
                   isUser ? styles.userMessage : styles.otherMessage,
                 ]}
               >
-                {!isUser && <View style={styles.messageAvatar} />}
+                {!isUser && renderAvatar(message.sender_id)}
                 <View
                   style={[
                     styles.messageContent,
@@ -273,20 +534,30 @@ export default function ChatDetail() {
                       : styles.otherMessageContent,
                   ]}
                 >
-                  <Text style={styles.messageText}>{message.content}</Text>
+                  {renderMessageContent(message)}
                 </View>
               </View>
             );
           })
         )}
+
+        {isUploading && (
+          <View style={styles.uploadingContainer}>
+            <ActivityIndicator size="small" color="#FFC515" />
+            <Text style={styles.uploadingText}>Uploading image...</Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Message Input */}
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={handleCameraPress}>
           <Ionicons name="camera" size={24} color="#666" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleDocumentPress}
+        >
           <Ionicons name="document" size={24} color="#666" />
         </TouchableOpacity>
         <TextInput
@@ -308,6 +579,22 @@ export default function ChatDetail() {
 }
 
 const styles = StyleSheet.create({
+  messageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+  },
+  uploadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+  },
+  uploadingText: {
+    marginLeft: 10,
+    color: "#666",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -325,10 +612,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#f0f0f0",
     marginHorizontal: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#666",
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: "500",
+    flex: 1,
   },
   messagesList: {
     flex: 1,
@@ -355,6 +651,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: "#f0f0f0",
     marginRight: 8,
+    overflow: "hidden",
   },
   messageContent: {
     borderRadius: 18,
