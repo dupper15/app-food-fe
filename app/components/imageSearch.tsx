@@ -66,7 +66,7 @@ const ImageSearch: React.FC<ImageSearchProps> = ({ setShowModal }) => {
   const uploadImageMutation = useMutation({
     mutationFn: uploadImage,
     onSuccess: (data) => {
-      const searchString = data.toString().trim().slice(0, -1);
+      const searchString = data.toString().trim();
       setSearchText(searchString);
     },
     onError: (error: any) => {
