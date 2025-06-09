@@ -204,7 +204,7 @@ const CreateRestaurantScreen: React.FC = () => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className='flex flex-row gap-4 gap-x-4 h-max w-full'>
+            className='flex flex-row gap-4 h-max w-full'>
             {image.map((item, index) => (
               <View key={index} className='w-48 h-40 rounded-md bg-slate-300'>
                 <Image
@@ -212,7 +212,7 @@ const CreateRestaurantScreen: React.FC = () => {
                     uri: item.uri,
                   }}
                   resizeMode='cover'
-                  className='h-full w-full'
+                  className='h-full w-full mr-4'
                 />
               </View>
             ))}
