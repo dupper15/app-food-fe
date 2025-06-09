@@ -96,7 +96,18 @@ const Login: React.FC = () => {
           }
         }
       } else {
-        router.push("/authen/verifiedScreen");
+        if (data.userType === "restaurantOwner") {
+          if (status === "Incomplete") {
+            router.push("/authen/createRestaurant");
+          } else if (status === "Pending") {
+            router.push("/screen/pendingPage");
+          } else {
+            router.push("/authen/verifiedScreen");
+          }
+        }
+        if (data.userType === "customer") {
+          router.push("/authen/verifiedScreen");
+        }
       }
     },
     onError: (data: any) => {
