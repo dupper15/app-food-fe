@@ -16,7 +16,13 @@ import * as CartApi from "@/services/api/cartApi";
 import { CustomToast } from "./toast";
 import * as DishApi from "@/services/api/dishApi";
 import { useSelector } from "react-redux";
-const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
+const EditOIModal = ({
+  getCart,
+  orderItem,
+  showModal,
+  setShowModal,
+  setEditedItem,
+}) => {
   const translateY = useRef(new Animated.Value(300)).current;
   const [dish, setDish] = useState(null);
   const [quantity, setQuantity] = useState(orderItem.quantity || 1);
@@ -128,6 +134,7 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
         onPress={() => {
           setShowModal(false);
           setEditedItem(null);
+          getCart();
         }}>
         <View className='flex-1 justify-end bg-black/50'>
           <Animated.View style={{ width: "100%", transform: [{ translateY }] }}>
@@ -141,6 +148,7 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
                     deleteItem();
                     setEditedItem(null);
                     setShowModal(false);
+                    getCart();
                   }}>
                   <Icon name='delete' size={24} color='#e74c3c' />
                 </TouchableOpacity>
@@ -199,6 +207,7 @@ const EditOIModal = ({ orderItem, showModal, setShowModal, setEditedItem }) => {
                 onPress={() => {
                   editCart();
                   setEditedItem(null);
+                  getCart();
                   setShowModal(false);
                 }}
                 className='mt-6 bg-yellow-400 py-3.5 rounded-lg shadow-sm shadow-black/20'>

@@ -202,7 +202,7 @@ const PaymentPage = () => {
                 {/* Nút xóa voucher với icon thùng rác */}
                 <TouchableOpacity
                   onPress={() => setVoucher(null)}
-                  className='bg-white px-3 py-1 rounded-lg shadow'>
+                  className='bg-white px-3 py-1 rounded-lg '>
                   <Icon name='trash' size={20} color='red' />
                 </TouchableOpacity>
               </View>
