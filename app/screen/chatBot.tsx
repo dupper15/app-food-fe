@@ -1,5 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, TextInput } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ScrollView,
+  TextInput,
+} from "react-native";
 import { Image, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView, View } from "react-native";
 import { useState, useRef, useEffect } from "react";
@@ -21,6 +28,21 @@ const ChatBot = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   const sendMessageMutation = useMutation({
     mutationFn: sendChatBotMessage,
     onSuccess: (data) => {
@@ -39,6 +61,7 @@ const ChatBot = () => {
 
   const handleSendMessage = () => {
     if (inputMessage.trim() === "") return;
+    setInputMessage("");
     const newMessage = {
       content: inputMessage,
       sender_id: userId,
@@ -47,6 +70,7 @@ const ChatBot = () => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     sendMessageMutation.mutate(newMessage);
   };
+
   useEffect(() => {
     setIsLoading(true);
     handleGetChatBotMutation.mutate(userId);
@@ -67,73 +91,84 @@ const ChatBot = () => {
     },
   });
   return (
-    <SafeAreaView className='flex-1 bg-gray-100'>
-      <View className='flex-row items-center mb-2 px-4 py-2 bg-white border-b border-gray-200 gap-4'>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name='chevron-back' size={24} color='#000' />
-        </TouchableOpacity>
+    <KeyboardAvoidingView
+      className='flex-1 bg-gray-100'
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // có thể điều chỉnh
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView className='flex-1'>
+          <View className='flex-row items-center mb-2 px-4 py-2 bg-white border-b border-gray-200 gap-4'>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name='chevron-back' size={24} color='#000' />
+            </TouchableOpacity>
 
-        <Image
-          source={require("../../assets/images/chatbot.png")}
-          className='w-10 h-10 rounded-full'
-          style={{ width: 40, height: 40, borderRadius: 20 }}
-        />
+            <Image
+              source={require("../../assets/images/chatbot.png")}
+              className='w-10 h-10 rounded-full'
+              style={{ width: 40, height: 40, borderRadius: 20 }}
+            />
 
-        <Text className='text-lg font-semibold text-gray-900'>Chat Bot</Text>
-      </View>
-
-      <ScrollView
-        className='flex-1 px-4 py-2'
-        ref={scrollViewRef}
-        contentContainerStyle={{ paddingVertical: 16 }}>
-        {isLoading ? (
-          <View className='items-center mt-4'>
-            <Text className='text-gray-500'>Loading messages...</Text>
-          </View>
-        ) : messages.length === 0 ? (
-          <View className='items-center mt-4'>
-            <Text className='text-gray-500'>
-              No messages yet. Start the conversation!
+            <Text className='text-lg font-semibold text-gray-900'>
+              Chat Bot
             </Text>
           </View>
-        ) : (
-          messages.map((message, index) =>
-            message.sender_id === "chat-bot" ? (
-              <BotFunction key={index} message={message} />
-            ) : (
-              <View
-                key={index}
-                className='self-end bg-blue-500 rounded-lg px-4 py-2 mb-3 max-w-[75%]'>
-                <Text className='text-white'>{message.content}</Text>
+
+          <ScrollView
+            className='flex-1 px-4 py-2'
+            ref={scrollViewRef}
+            contentContainerStyle={{ paddingVertical: 16 }}>
+            {isLoading ? (
+              <View className='items-center mt-4'>
+                <Text className='text-gray-500'>Loading messages...</Text>
               </View>
-            )
-          )
-        )}
-      </ScrollView>
+            ) : messages.length === 0 ? (
+              <View className='items-center mt-4'>
+                <Text className='text-gray-500'>
+                  No messages yet. Start the conversation!
+                </Text>
+              </View>
+            ) : (
+              messages.map((message, index) =>
+                message.sender_id === "chat-bot" ? (
+                  <BotFunction key={index} message={message} />
+                ) : (
+                  <View
+                    key={index}
+                    className='self-end bg-blue-500 rounded-lg px-4 py-2 mb-3 max-w-[75%]'>
+                    <Text className='text-white'>{message.content}</Text>
+                  </View>
+                )
+              )
+            )}
+          </ScrollView>
 
-      <View className='flex-row items-center p-3 bg-white border-t border-gray-200 gap-x-2'>
-        <TouchableOpacity className='p-2'>
-          <Ionicons name='camera' size={24} color='#666' />
-        </TouchableOpacity>
-        <TouchableOpacity className='p-2'>
-          <Ionicons name='document' size={24} color='#666' />
-        </TouchableOpacity>
+          <View className='flex-row items-center p-3 bg-white border-t border-gray-200 gap-x-2'>
+            <TouchableOpacity className='p-2'>
+              <Ionicons name='camera' size={24} color='#666' />
+            </TouchableOpacity>
+            <TouchableOpacity className='p-2'>
+              <Ionicons name='document' size={24} color='#666' />
+            </TouchableOpacity>
 
-        <TextInput
-          className='flex-1 px-4 py-2 bg-gray-100 rounded-full text-base'
-          placeholder='Message...'
-          value={inputMessage}
-          onChangeText={setInputMessage}
-        />
+            <TextInput
+              className='flex-1 px-4 py-2 bg-gray-100 rounded-full text-base'
+              placeholder='Message...'
+              placeholderTextColor={"#999"}
+              value={inputMessage}
+              onChangeText={setInputMessage}
+            />
 
-        <TouchableOpacity
-          className='p-2'
-          onPress={handleSendMessage}
-          disabled={inputMessage.trim() === ""}>
-          <Ionicons name='send' size={20} color='#000' />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+            <TouchableOpacity
+              className='p-2'
+              onPress={handleSendMessage}
+              disabled={inputMessage.trim() === ""}>
+              <Ionicons name='send' size={20} color='#000' />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

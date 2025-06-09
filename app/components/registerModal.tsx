@@ -33,7 +33,7 @@ const RegisterModal: React.FC<{
       setLoading(false);
       CustomToast("success", "Successfull", "Register successfully🎉");
       setShowModal(false);
-      router.push("/auth/login");
+      router.push("/authen/login");
     },
     onError: () => {
       CustomToast("error", "Error", "Register failed 😢");
@@ -49,7 +49,7 @@ const RegisterModal: React.FC<{
       CustomToast("success", "Successfull", "Register successfully");
       setLoading(false);
       setShowModal(false);
-      router.push("/auth/createRestaurant");
+      router.push("/authen/createRestaurant");
     },
     onError: () => {
       CustomToast("error", "Error", "Register failed 😢");

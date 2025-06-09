@@ -19,6 +19,8 @@ import { CustomToast } from "../components/toast";
 import { setAvatarRes } from "@/services/api/owner";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native";
+
 // import MapView, { Marker } from "react-native-maps";
 type ReactNativeFile = {
   uri: string;
@@ -47,15 +49,18 @@ const CreateRestaurantScreen: React.FC = () => {
 
     fetchUserId();
   }, []);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const submitMutation = useMutation({
     mutationFn: createRestaurant,
     onSuccess: (data) => {
       console.log("success", data);
+      setIsLoading(false);
       CustomToast("success", "Success", "Upload success");
       router.push("/authen/login");
     },
     onError: (data) => {
+      setIsLoading(false);
       console.log("error", data);
       CustomToast("error", "Error", "Upload failed");
     },
@@ -80,6 +85,7 @@ const CreateRestaurantScreen: React.FC = () => {
       avatar &&
       userId
     ) {
+      setIsLoading(true);
       const formData = new FormData();
       formData.append("owner_id", userId);
       formData.append("name", name);
@@ -253,12 +259,17 @@ const CreateRestaurantScreen: React.FC = () => {
               </MapView> */}
         </View>
       </View>
-      <TouchableOpacity className='bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4'>
-        <Text
-          onPress={handleSubmit}
-          className='text-white font-medium text-lg text-center'>
-          Submit
-        </Text>
+      <TouchableOpacity
+        onPress={handleSubmit}
+        disabled={isLoading}
+        className='bg-customYellow w-max px-4 py-2 rounded-lg mx-auto mb-4'>
+        {isLoading ? (
+          <ActivityIndicator color='#fff' />
+        ) : (
+          <Text className='text-white font-medium text-lg text-center'>
+            Submit
+          </Text>
+        )}
       </TouchableOpacity>
       {showModal && (
         <UploadImageModal

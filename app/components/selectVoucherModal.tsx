@@ -59,19 +59,25 @@ const SelectVoucherModal = ({
     : [];
 
   return (
-    <Modal transparent={true} visible={showModal} animationType='fade'>
+    <Modal
+      className='h-screen w-full'
+      transparent={true}
+      visible={showModal}
+      animationType='fade'>
       <TouchableWithoutFeedback onPress={() => setShowModal(false)}>
         <View className='flex-1 justify-end bg-black/50'>
           <Animated.View
-            className='h-screen w-full '
+            className='w-full flex-1 justify-end'
             style={{ transform: [{ translateY }] }}>
-            <View className='bg-white w-full h-full max-h-96  rounded-t-2xl p-4'>
+            <View
+              className='bg-white w-full rounded-t-2xl p-4'
+              style={{ height: "60%" }}>
               <Text className='text-xl font-bold text-center mb-4'>
-                Chọn Voucher
+                Select Voucher
               </Text>
 
               <ScrollView
-                className='flex-1'
+                className='flex-1 h-max'
                 showsVerticalScrollIndicator={false}>
                 {sortedVoucherList.map((item, index) => (
                   <TouchableOpacity
@@ -82,7 +88,7 @@ const SelectVoucherModal = ({
                         item.min <= totalPrice
                       )
                     }
-                    className={`mb-3 p-4 border border-gray-300 rounded-xl shadow-md flex-row items-center justify-between ${
+                    className={`mb-3 p-4 border border-gray-300 rounded-xl  flex-row items-center justify-between ${
                       typeof item.min === "undefined" || item.min <= totalPrice
                         ? "bg-white"
                         : "bg-slate-200 opacity-70"
@@ -122,7 +128,7 @@ const SelectVoucherModal = ({
                     </View>
 
                     <TouchableOpacity
-                      className='bg-yellow-500 rounded-lg px-5 py-2 shadow-md'
+                      className='bg-customYellow rounded-lg px-5 py-2'
                       onPress={() => {
                         setVoucher(item);
                         setShowModal(false);

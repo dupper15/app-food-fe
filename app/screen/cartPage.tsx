@@ -112,7 +112,7 @@ const CartPage = () => {
 
       {getCartMutation.isPending ? (
         Array.from({ length: 5 }, (_, index) => (
-          <View className='mt-4 bg-white p-4 rounded-lg'>
+          <View key={index} className='mt-4 bg-white p-4 rounded-lg'>
             <View className='flex-row items-center justify-between mb-4'>
               <View className='flex-row gap-2 items-center'>
                 <PlaceholderMedia
@@ -187,6 +187,7 @@ const CartPage = () => {
       )}
       {showModal && editedItem && (
         <EditOIModal
+          getCart={getCart}
           orderItem={editedItem}
           setShowModal={setShowModal}
           showModal={showModal}

@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ScrollView,
   TouchableHighlight,
+  ActivityIndicator,
 } from "react-native";
 import SelectVoucherModal from "../components/selectVoucherModal";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -73,16 +74,23 @@ const PaymentPage = () => {
     }
     return "0 mins";
   };
+  const [isLoading, setIsLoading] = useState(false);
   const paymentMutation = useMutation({
     mutationFn: completePayment,
+    onMutate: () => {
+      setIsLoading(true); // bắt đầu loading
+    },
     onSuccess: (data) => {
       console.log("Payment success:", data);
+      setIsLoading(false); // kết thúc loading
       router.push("/screen/successPage");
     },
     onError: (error) => {
       console.log("Payment error:", error);
+      setIsLoading(false); // kết thúc loading khi lỗi
     },
   });
+
   const getIds = (items) => {
     let ids = [];
     items.forEach((item) => {
@@ -194,7 +202,7 @@ const PaymentPage = () => {
                 {/* Nút xóa voucher với icon thùng rác */}
                 <TouchableOpacity
                   onPress={() => setVoucher(null)}
-                  className='bg-white px-3 py-1 rounded-lg shadow'>
+                  className='bg-white px-3 py-1 rounded-lg '>
                   <Icon name='trash' size={20} color='red' />
                 </TouchableOpacity>
               </View>
@@ -259,7 +267,11 @@ const PaymentPage = () => {
           <TouchableOpacity
             onPress={handleSubmit}
             className='mt-6 bg-customYellow p-4 rounded-lg shadow-sm flex items-center'>
-            <Text className='text-xl font-medium text-white'>Payment</Text>
+            {isLoading ? (
+              <ActivityIndicator color='white' />
+            ) : (
+              <Text className='text-xl font-medium text-white'>Payment</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
