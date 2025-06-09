@@ -151,7 +151,7 @@ const OrderHistoryScreen = () => {
     // Only include completed or canceled orders (case-insensitive comparison)
     return historyData.filter((item) => {
       const orderStatus = item.order.status.toLowerCase();
-      return orderStatus === "complete" || orderStatus === "cancel";
+      return orderStatus === "completed" || orderStatus === "cancel";
     });
   }, [historyData]);
 

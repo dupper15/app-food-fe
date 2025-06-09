@@ -109,3 +109,51 @@ export const getChatBotMessage = async (userId: string) => {
   const response = await axiosInstance.get(`conversation/chat-bot/${userId}`);
   return response.data;
 };
+
+export const uploadImage = async (
+  imageUri: string,
+  conversationId: string
+): Promise<{ imageUrl: string }> => {
+  try {
+    // Create a FormData object
+    const formData = new FormData();
+
+    // Get filename from the URI
+    const uriParts = imageUri.split("/");
+    const filename = uriParts[uriParts.length - 1];
+
+    // Append the file to the FormData with the correct structure for React Native
+    // @ts-ignore - React Native's type definitions for FormData don't match the web implementations
+    formData.append("images", {
+      uri: imageUri,
+      type: "image/jpeg", // Default to JPEG
+      name: filename || "photo.jpg",
+    });
+
+    console.log("Uploading image with FormData:", JSON.stringify(formData));
+
+    const response = await axiosInstance.post("upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log("Image upload response:", response.data);
+
+    // Handle different response formats
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      return { imageUrl: response.data[0] };
+    }
+
+    if (typeof response.data === "string") {
+      return { imageUrl: response.data };
+    }
+
+    // If we get here, the response format is unexpected
+    console.error("Unexpected response format:", response.data);
+    throw new Error("Unexpected response format from server");
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+};

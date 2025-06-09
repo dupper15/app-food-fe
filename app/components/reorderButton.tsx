@@ -7,12 +7,13 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { reorder } from "@/services/api/orderApi";
 import Toast from "react-native-toast-message";
 import { useHistoryRefresh } from "../customer/(tabs)/history";
+import { CompleteHistoryItem } from "@/services/historyService";
 
 interface ReorderButtonProps {
   orderId: string;
+  orderItems?: any[];
   style?: object;
   textStyle?: object;
   returnToHistory?: boolean;
@@ -20,6 +21,7 @@ interface ReorderButtonProps {
 
 const ReorderButton = ({
   orderId,
+  orderItems,
   style,
   textStyle,
   returnToHistory = true,
@@ -30,23 +32,38 @@ const ReorderButton = ({
   const handleReorder = async () => {
     try {
       setIsLoading(true);
-      const response = await reorder(orderId);
-      if (response) {
+      console.log("Reordering items for order ID:", orderId);
+      console.log("Order items:", orderItems);
+      if (orderItems && orderItems.length > 0) {
+        // Transform order items to format expected by payment page
+        const items = orderItems.map((item) => ({
+          dish_id: {
+            _id: item.dish._id,
+            name: item.dish.name,
+            price: item.dish.price,
+            image: item.dish.image,
+            restaurant_id: item.dish.restaurant_id || item.order?.restaurant_id,
+            time: item.dish.time || 15, // Default preparation time if not available
+          },
+          quantity: item.quantity,
+          topping: item.toppings || [],
+        }));
+
         Toast.show({
           type: "success",
-          text1: "Reorder Successful",
-          text2: "Your order has been placed successfully.",
+          text1: "Re-ordering items",
+          text2: "Proceeding to payment page",
         });
 
-        // Refresh history data
-        await refreshHistory();
-
-        if (returnToHistory) {
-          // Navigate to history tab
-          router.replace("/customer/(tabs)/history" as any);
-        }
+        // Navigate to payment page with the order items
+        router.push({
+          pathname: "/screen/paymentPage",
+          params: {
+            selectedDish: JSON.stringify(items),
+          },
+        } as any);
       } else {
-        throw new Error("Failed to create reorder");
+        throw new Error("No items to reorder");
       }
     } catch (error) {
       console.error("Error reordering:", error);
