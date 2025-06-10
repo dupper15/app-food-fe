@@ -3,6 +3,7 @@ import {
   View,
   Text,
   FlatList,
+  Dimensions,
   Image,
   TouchableOpacity,
   ActivityIndicator,
@@ -18,6 +19,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ConfirmDeleteModal from "./deleteModal";
 import { useRouter } from "expo-router";
+const { width } = Dimensions.get("window");
 
 interface ListMenuItemProps {
   setRefresh: (value: boolean) => void;
@@ -120,42 +122,41 @@ export default function ListMenuItem({
   const renderItem = ({ item }: { item: DishData }) => (
     <TouchableOpacity
       onPress={(e) => e.preventDefault()}
-      className="flex-row items-center mt-4 mx-2"
-    >
-      <View className="rounded-lg items-center justify-center shadow-sm bg-[#f8f8f8] w-48 gap-1">
+      style={{ width: width * 0.45 }}
+      className='flex-row items-center mt-4 '>
+      <View className='rounded-lg items-center justify-center border border-slate-200 bg-white  gap-1'>
         <Image
           source={{ uri: item.image }}
-          className="w-48 h-28 rounded-t-lg"
-          resizeMode="cover"
+          className='w-full h-32 rounded-t-lg'
+          resizeMode='cover'
         />
-        <View className="flex-row items-center justify-start space-x-2 px-2 w-full">
-          <View className="flex-1 flex-row items-center">
-            <Text className="text-base font-semibold truncate">
+        <View className='flex-row items-center justify-start space-x-2 px-2 w-full'>
+          <View className='flex-1 flex-row items-center'>
+            <Text className='text-base font-semibold truncate'>
               {item.name}
             </Text>
           </View>
 
-          <View className="flex-row items-center justify-center gap-1">
-            <Entypo name="time-slot" size={18} color="black" />
-            <Text className="text-base text-gray-600">{item.time}m</Text>
+          <View className='flex-row items-center justify-center gap-1'>
+            <Entypo name='time-slot' size={18} color='black' />
+            <Text className='text-base text-gray-600'>{item.time}m</Text>
           </View>
         </View>
-        <View className="flex-row w-full items-center justify-between px-2 mb-3">
-          <Text className="text-start mt-2 text-xl text-[#E23637] font-extrabold">
+        <View className='flex-row w-full items-center justify-between px-2 mb-3'>
+          <Text className='text-start mt-2 text-xl text-[#E23637] font-extrabold'>
             {formatPrice(item.price)}
           </Text>
-          <View className="flex-row mt-2 gap-1">
+          <View className='flex-row mt-2 gap-1'>
             <TouchableOpacity
               onPress={(e) => {
                 e.preventDefault();
                 openDeleteConfirmation(item);
               }}
-              className="w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full"
-            >
+              className='w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full'>
               <MaterialCommunityIcons
-                name="delete-outline"
+                name='delete-outline'
                 size={20}
-                color="white"
+                color='white'
               />
             </TouchableOpacity>
             <TouchableOpacity
@@ -163,9 +164,8 @@ export default function ListMenuItem({
                 e.preventDefault();
                 handleEditDish(item);
               }}
-              className="w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full"
-            >
-              <Ionicons name="pencil-outline" size={20} color="white" />
+              className='w-8 h-8 items-center justify-center bg-[#FFC515] rounded-full'>
+              <Ionicons name='pencil-outline' size={20} color='white' />
             </TouchableOpacity>
           </View>
         </View>
@@ -174,9 +174,9 @@ export default function ListMenuItem({
   );
 
   return (
-    <View className="bg-white h-full relative">
+    <View className='bg-slate-100 h-full relative px-4'>
       {isLoading ? (
-        <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
+        <ActivityIndicator size='large' color='#FFC515' className='mt-10' />
       ) : (
         <FlatList
           data={dishes}

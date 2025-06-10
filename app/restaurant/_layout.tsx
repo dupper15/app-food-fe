@@ -13,6 +13,10 @@ export default function CustomerLayout() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarStyle: {
+          height: 45,
+          paddingBottom: 0,
+        },
         tabBarActiveTintColor: "#FFC515",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = "";
@@ -31,13 +35,12 @@ export default function CustomerLayout() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-      })}
-    >
-      <Tab.Screen name="Order" component={Order} />
-      <Tab.Screen name="History" component={History} />
-      <Tab.Screen name="Notification" component={Notification} />
-      <Tab.Screen name="Revenue" component={Revenue} />
-      <Tab.Screen name="Restaurant" component={RestaurantStackNavigator} />
+      })}>
+      <Tab.Screen name='Order' component={Order} />
+      <Tab.Screen name='History' component={History} />
+      <Tab.Screen name='Notification' component={Notification} />
+      <Tab.Screen name='Revenue' component={Revenue} />
+      <Tab.Screen name='Restaurant' component={RestaurantStackNavigator} />
     </Tab.Navigator>
   );
 }
