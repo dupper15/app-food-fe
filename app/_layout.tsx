@@ -9,8 +9,12 @@ import { store } from "./store";
 import { UpdateUsageTime } from "./components/UpdateUsageTime";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useNotificationListener } from "@/services/api/notificationApi";
+import { LogBox } from "react-native";
+
 export default function RootLayout() {
   useNotificationListener();
+  LogBox.ignoreAllLogs(true);
+
   const queryClient = new QueryClient();
 
   return (
