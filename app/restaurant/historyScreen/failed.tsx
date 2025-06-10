@@ -39,7 +39,9 @@ export default function Failed({
         item.customer_id?.name
           ?.toLowerCase()
           .includes(searchKeyword.toLowerCase()) ||
-        formatCodeOrder(item._id).toLowerCase().includes(searchKeyword.toLowerCase());
+        formatCodeOrder(item._id)
+          .toLowerCase()
+          .includes(searchKeyword.toLowerCase());
       return matchKeyword;
     });
   }, [items, searchKeyword]);
@@ -92,10 +94,10 @@ export default function Failed({
     </TouchableOpacity>
   );
 
-  if (items.length === 0) {
+  if (data.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#FFC515" />
+        <Text className="text-gray-500">No data available</Text>
       </View>
     );
   }

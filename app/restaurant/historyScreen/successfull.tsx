@@ -33,15 +33,17 @@ export default function Successful({
   }, [data]);
 
   const filteredItems = useMemo(() => {
-      return items.filter((item) => {
-        const matchKeyword =
-          item.customer_id?.name
-            ?.toLowerCase()
-            .includes(searchKeyword.toLowerCase()) ||
-          formatCodeOrder(item._id).toLowerCase().includes(searchKeyword.toLowerCase());
-        return matchKeyword;
-      });
-    }, [items, searchKeyword]);
+    return items.filter((item) => {
+      const matchKeyword =
+        item.customer_id?.name
+          ?.toLowerCase()
+          .includes(searchKeyword.toLowerCase()) ||
+        formatCodeOrder(item._id)
+          .toLowerCase()
+          .includes(searchKeyword.toLowerCase());
+      return matchKeyword;
+    });
+  }, [items, searchKeyword]);
 
   const handleNavigateOrderDetails = (item: any) => {
     console.log(item);
@@ -85,33 +87,33 @@ export default function Successful({
     </TouchableOpacity>
   );
 
-  if (items.length === 0) {
+  if (data.length === 0) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#FFC515" />
+        <Text className="text-gray-500">No data available</Text>
       </View>
     );
   }
 
   return (
     <View className="flex-1 px-4">
-          <TextInput
-            placeholder="Search by name or order code"
-            value={searchKeyword}
-            onChangeText={setSearchKeyword}
-            className="border border-gray-300 rounded-md px-4 py-2 mt-3 mb-2 bg-white"
-          />
-          <FlatList
-            data={filteredItems}
-            keyExtractor={(item, index) => item._id || index.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingVertical: 8 }}
-            ListEmptyComponent={
-              <Text className="text-center text-gray-500 mt-4">
-                No matching results found.
-              </Text>
-            }
-          />
-        </View>
+      <TextInput
+        placeholder="Search by name or order code"
+        value={searchKeyword}
+        onChangeText={setSearchKeyword}
+        className="border border-gray-300 rounded-md px-4 py-2 mt-3 mb-2 bg-white"
+      />
+      <FlatList
+        data={filteredItems}
+        keyExtractor={(item, index) => item._id || index.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingVertical: 8 }}
+        ListEmptyComponent={
+          <Text className="text-center text-gray-500 mt-4">
+            No matching results found.
+          </Text>
+        }
+      />
+    </View>
   );
 }
