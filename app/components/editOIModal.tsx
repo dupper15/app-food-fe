@@ -71,6 +71,7 @@ const EditOIModal = ({
   const deleteItemMutation = useMutation({
     mutationFn: CartApi.deleteCart,
     onSuccess: () => {
+      getCart();
       CustomToast("success", "Success", "Delete successfully");
     },
     onError: () => {
