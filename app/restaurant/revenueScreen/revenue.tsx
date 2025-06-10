@@ -1,22 +1,25 @@
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
+
 import {
   fetchLoyalCustomerByRestaurant,
   fetchOrderRateByRestaurant,
   fetchRevenueByRestaurant,
   fetchWeeklyRevenueByRestaurant,
 } from "@/services/api/orderApi";
-import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
-import { ScrollView, View } from "react-native";
-import { useSelector } from "react-redux";
+import ratingApi from "@/services/api/ratingApi";
+
 import MonthlyRevenueCard from "./monthlyRevenue";
 import MonthlyOrderCard from "./monthlyOrder";
 import OrderRateChart from "./orderStatusChart";
 import LoyalCustomerList from "./listTopCustomers";
 import WeeklyRevenueChart from "./weeklyRevenueChart";
-import { WeeklyRevenueItem } from "@/interfaces/RevenueInterface";
-import { useFocusEffect } from "expo-router";
-import ratingApi from "@/services/api/ratingApi";
 import AverageRating from "./averageRating";
+
+import { WeeklyRevenueItem } from "@/interfaces/RevenueInterface";
 
 export default function DashboardScreen() {
   const [mockMonthlyRevenue, setMockMonthlyRevenue] = useState(0);
@@ -28,9 +31,9 @@ export default function DashboardScreen() {
   const [rateSuccess, setRateSuccess] = useState(0);
 
   const [topCustomers, setTopCustomers] = useState([]);
-
   const [weeklyRevenue, setWeeklyRevenue] = useState<WeeklyRevenueItem[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
+  const [weeklyChartData, setWeeklyChartData] = useState(null);
 
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
@@ -54,16 +57,30 @@ export default function DashboardScreen() {
     },
   ];
 
-  const weeklyChartData = {
-    labels: weeklyRevenue.map((item) => item.day),
-    datasets: [
-      {
-        data: weeklyRevenue.map((item) => item.total),
-        color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  };
+  useEffect(() => {
+    if (!weeklyRevenue || weeklyRevenue.length === 0) return;
+
+    const labels = weeklyRevenue.map((item) => item?.day ?? "");
+    const data = weeklyRevenue.map((item) => {
+      const value = Number(item?.total);
+      if (!isFinite(value) || isNaN(value)) {
+        console.warn("Invalid value found:", item);
+        return 0;
+      }
+      return value;
+    });
+
+    setWeeklyChartData({
+      labels,
+      datasets: [
+        {
+          data,
+          color: (opacity = 1) => `rgba(255, 165, 0, ${opacity})`,
+          strokeWidth: 2,
+        },
+      ],
+    });
+  }, [weeklyRevenue]);
 
   const fetchRevenue = useMutation({
     mutationFn: fetchRevenueByRestaurant,
@@ -72,7 +89,6 @@ export default function DashboardScreen() {
       setTotalOrders(data.totalOrders);
       setRateMonth(data.percentageRevenue);
     },
-    onError: () => {},
   });
 
   const fetchOrderRate = useMutation({
@@ -80,9 +96,8 @@ export default function DashboardScreen() {
     onSuccess: (data) => {
       setSuccessOrder(data.totalSuccessful);
       setFailOrder(data.totalFailed);
-      setRateSuccess(data.successRate);
+      setRateSuccess(data.successRate ?? 0); // tránh null
     },
-    onError: () => {},
   });
 
   const fetchLoyalCustomer = useMutation({
@@ -90,7 +105,6 @@ export default function DashboardScreen() {
     onSuccess: (data) => {
       setTopCustomers(data);
     },
-    onError: () => {},
   });
 
   const fetchWeeklyRevenue = useMutation({
@@ -98,7 +112,6 @@ export default function DashboardScreen() {
     onSuccess: (data) => {
       setWeeklyRevenue(data);
     },
-    onError: () => {},
   });
 
   const fetchAverage = useMutation({
@@ -106,8 +119,8 @@ export default function DashboardScreen() {
     onSuccess: (data) => {
       setAverageRating(data);
     },
-    onError: () => {},
   });
+
   useFocusEffect(
     useCallback(() => {
       if (restaurantId) {
@@ -122,18 +135,17 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white px-4 py-4"
-      showsVerticalScrollIndicator={false}
-    >
+      className='flex-1 bg-white px-4 py-4'
+      showsVerticalScrollIndicator={false}>
       <MonthlyRevenueCard
         mockMonthlyRevenue={mockMonthlyRevenue}
         rateMonth={rateMonth}
       />
-      <View className="flex-row gap-4 mb-4">
-        <View className="flex-1">
+      <View className='flex-row gap-4 mb-4'>
+        <View className='flex-1'>
           <MonthlyOrderCard totalOrders={totalOrders} />
         </View>
-        <View className="flex-1">
+        <View className='flex-1'>
           <AverageRating rating={averageRating} />
         </View>
       </View>
@@ -143,7 +155,13 @@ export default function DashboardScreen() {
         failOrder={failOrder}
         rateSuccess={rateSuccess}
       />
-      <WeeklyRevenueChart weeklyChartData={weeklyChartData} />
+      {weeklyChartData ? (
+        <WeeklyRevenueChart weeklyChartData={weeklyChartData} />
+      ) : (
+        <Text className='text-center text-gray-400 mb-4'>
+          Loading weekly revenue...
+        </Text>
+      )}
       <LoyalCustomerList topCustomers={topCustomers} />
     </ScrollView>
   );

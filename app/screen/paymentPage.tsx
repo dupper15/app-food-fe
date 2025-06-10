@@ -78,16 +78,16 @@ const PaymentPage = () => {
   const paymentMutation = useMutation({
     mutationFn: completePayment,
     onMutate: () => {
-      setIsLoading(true); // bắt đầu loading
+      setIsLoading(true);
     },
     onSuccess: (data) => {
       console.log("Payment success:", data);
-      setIsLoading(false); // kết thúc loading
+      setIsLoading(false);
       router.push("/screen/successPage");
     },
     onError: (error) => {
       console.log("Payment error:", error);
-      setIsLoading(false); // kết thúc loading khi lỗi
+      setIsLoading(false);
     },
   });
 

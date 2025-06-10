@@ -155,19 +155,23 @@ const CartPage = () => {
         ))
       ) : cart && cart.length > 0 ? (
         <ScrollView className='p-4'>
-          {cart.map((item, restaurantIndex) => (
-            <CardItem
-              setShowModal={setShowModal}
-              setEditedItem={setEditedItem}
-              key={restaurantIndex}
-              selectedDish={selectedDish}
-              item={item}
-              restaurantIndex={restaurantIndex}
-              toggleRestaurantCheckbox={toggleRestaurantCheckbox}
-              toggleCheckbox={toggleCheckbox}
-              updateQuantity={updateQuantity}
-            />
-          ))}
+          {cart.map(
+            (item, restaurantIndex) =>
+              item.order_items &&
+              item.order_items.length > 0 && (
+                <CardItem
+                  key={restaurantIndex}
+                  setShowModal={setShowModal}
+                  setEditedItem={setEditedItem}
+                  selectedDish={selectedDish}
+                  item={item}
+                  restaurantIndex={restaurantIndex}
+                  toggleRestaurantCheckbox={toggleRestaurantCheckbox}
+                  toggleCheckbox={toggleCheckbox}
+                  updateQuantity={updateQuantity}
+                />
+              )
+          )}
           <TouchableOpacity
             className='m-4 bg-customYellow p-4 rounded-lg shadow-sm'
             onPress={() => {

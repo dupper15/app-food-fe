@@ -12,10 +12,10 @@ const OrderRateChart: React.FC<OrderRateChartProps> = ({
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-      <Text className="text-lg font-bold text-gray-800 mb-2">Order rate</Text>
+    <View className='bg-white rounded-xl p-4 mb-4 shadow-sm'>
+      <Text className='text-lg font-bold text-gray-800 mb-2'>Order rate</Text>
 
-      <View className="items-center justify-center my-2">
+      <View className='items-center justify-center my-2'>
         <PieChart
           data={orderStatusData}
           width={screenWidth - 64}
@@ -26,24 +26,26 @@ const OrderRateChart: React.FC<OrderRateChartProps> = ({
             backgroundGradientTo: "#fff",
             color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
           }}
-          accessor="count"
-          backgroundColor="transparent"
-          paddingLeft="15"
+          accessor='count'
+          backgroundColor='transparent'
+          paddingLeft='15'
           absolute
         />
       </View>
 
-      <View className="flex-row justify-between mt-2">
-        <View className="items-center flex-row gap-1">
-          <Text className="text-sm text-gray-600">Total orders:</Text>
-          <Text className="text-base font-bold text-gray-800">
+      <View className='flex-row justify-between mt-2'>
+        <View className='items-center flex-row gap-1'>
+          <Text className='text-sm text-gray-600'>Total orders:</Text>
+          <Text className='text-base font-bold text-gray-800'>
             {successOrder + failOrder}
           </Text>
         </View>
-        <View className="items-center flex-row gap-1">
-          <Text className="text-sm text-gray-600">Success rate:</Text>
-          <Text className="text-base font-bold text-gray-800">
-            {rateSuccess.toFixed(2)}%
+        <View className='items-center flex-row gap-1'>
+          <Text className='text-sm text-gray-600'>Success rate:</Text>
+          <Text className='text-base font-bold text-gray-800'>
+            {typeof rateSuccess === "number" && isFinite(rateSuccess)
+              ? `${rateSuccess.toFixed(2)}%`
+              : "N/A"}
           </Text>
         </View>
       </View>

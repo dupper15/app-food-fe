@@ -70,6 +70,7 @@ const AddressPage = () => {
   const addAddressMutation = useMutation({
     mutationFn: addAddress,
     onSuccess: (data) => {
+      setIsLoading(false);
       getAddressesMutation.mutate(userId);
       setIsAdding(false);
       setNewAddress("");
@@ -83,6 +84,7 @@ const AddressPage = () => {
     mutationFn: deleteAddress,
     onSuccess: (data) => {
       getAddressesMutation.mutate(userId);
+      setIsLoading(false);
       if (editingIndex !== null) {
         setEditingIndex(null);
         setEditedText("");
@@ -250,11 +252,10 @@ const AddressPage = () => {
       <View className='px-4 pb-6 pt-2'>
         <TouchableOpacity
           className='bg-yellow-400 py-4 rounded-xl items-center'
-          onPress={handleAddNewAddress}
-          disabled={isLoading || isAdding}>
+          onPress={handleAddNewAddress}>
           {isLoading ? (
-            <View className='items-center py-4'>
-              <ActivityIndicator size='large' color='#facc15' />
+            <View className='items-center py-2'>
+              <ActivityIndicator size='small' color='#ffffff' />
             </View>
           ) : (
             <Text className='text-white font-semibold text-xl'>

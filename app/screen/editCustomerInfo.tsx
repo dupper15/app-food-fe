@@ -206,25 +206,12 @@ const EditCustomerInfo = () => {
 
             <View>
               <Text className='text-sm text-gray-500'>Phone</Text>
-              {isEdit ? (
-                <TextInput
-                  editable={!editCustomerMutation.isPending}
-                  defaultValue={user.phone}
-                  value={editUser.phone}
-                  onChangeText={(text) =>
-                    setEditUser({ ...editUser, phone: text })
-                  }
-                  className='bg-white px-3 py-2 rounded-md mt-1'
-                  keyboardType='phone-pad'
-                />
-              ) : (
-                <View className='flex-row items-center mt-1'>
-                  <Ionicons name='call' size={16} color='gray' />
-                  <Text className='ml-2 text-base font-medium text-gray-700'>
-                    {user.phone}
-                  </Text>
-                </View>
-              )}
+              <View className='flex-row items-center mt-1'>
+                <Ionicons name='call' size={16} color='gray' />
+                <Text className='ml-2 text-base font-medium text-gray-700'>
+                  {user.phone}
+                </Text>
+              </View>
             </View>
 
             <View className='border-t border-gray-300 pt-4'>
