@@ -22,4 +22,5 @@ export interface DishData {
   topping: Topping[];
   category_id: string;
   bestSeller: boolean;
+  isAvailable: boolean;
 }
