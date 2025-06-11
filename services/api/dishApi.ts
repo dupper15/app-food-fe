@@ -8,7 +8,7 @@ export const fetchAllDishByRestaurant = async (
   const response = await axiosInstance.get(
     `dish/fetchall-dish-by-restaurant/${id}`
   );
-  console.log(response);
+  console.log("dish", response.data);
   return response.data;
 };
 
