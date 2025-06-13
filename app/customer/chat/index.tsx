@@ -19,7 +19,7 @@ import { RootState } from "@/app/store";
 import { getRestaurantDetail } from "@/services/api/restaurantApi";
 import socketService from "@/services/socket/socketService";
 
-interface Conversation {
+export interface Conversation {
   _id: string;
   user1: string;
   user2: string;
@@ -30,11 +30,11 @@ interface Conversation {
   last_message: string;
 }
 
-interface UserNames {
+export interface UserNames {
   [key: string]: string;
 }
 
-interface MessageContents {
+export interface MessageContents {
   [key: string]: string;
 }
 
