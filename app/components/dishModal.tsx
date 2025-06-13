@@ -66,8 +66,11 @@ export default function VoucherModal() {
   const [contentError, setContentError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAvailable, setIsAvailable] = useState<boolean>(
-    parsedDish?.isAvailable || true
+    parsedDish?.isAvailable
   );
+  useEffect(() => {
+    console.log("isAvailable", isAvailable);
+  }, [isAvailable]);
   const fetchAllCategoryMutation = useMutation({
     mutationFn: fetchAllCategory,
     onSuccess: (data: any) => {
@@ -83,7 +86,6 @@ export default function VoucherModal() {
     },
     onError: (data: any) => {},
   });
-
   const createDishMutation = useMutation({
     mutationFn: createDish,
     onSuccess: () => {
@@ -131,7 +133,7 @@ export default function VoucherModal() {
     formData.append("introduce", introduce.toString() || "");
     formData.append("price", price.toString() || "0");
     formData.append("time", time.toString() || "0");
-    formData.append("isAvailable", isAvailable.toString() || "true");
+    formData.append("isAvailable", isAvailable.toString());
     selectedTopping.forEach((toppingId) => {
       formData.append("topping", toppingId.toString());
     });
