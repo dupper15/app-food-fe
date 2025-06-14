@@ -173,7 +173,7 @@ const RestaurantPage = () => {
 
     if (!userId) {
       console.log("User not logged in, redirecting to login");
-      router.push("/auth/login");
+      router.push("/authen/login");
       return;
     }
 
@@ -198,20 +198,22 @@ const RestaurantPage = () => {
   };
 
   return (
-    <ScrollView className='bg-gray-100 flex-1'>
-      <View className='absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10'>
+    <ScrollView className="bg-gray-100 flex-1">
+      <View className="absolute flex-1 flex-row w-screen right-5 items-center justify-between top-5 left-5 z-10">
         <TouchableOpacity
           onPress={() => router.back()}
-          className='bg-white rounded-full p-2 shadow-md'>
-          <Icon name='arrow-back' size={24} color='black' />
+          className="bg-white rounded-full p-2 shadow-md"
+        >
+          <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
-          className='bg-customYellow p-1 rounded-lg'
-          style={{ zIndex: 30 }}>
-          <Icon name='cart-outline' size={24} color={"black"} />
+          className="bg-customYellow p-1 rounded-lg"
+          style={{ zIndex: 30 }}
+        >
+          <Icon name="cart-outline" size={24} color={"black"} />
         </TouchableOpacity>
       </View>
-      <View className='relative'>
+      <View className="relative">
         {restaurant?.banners && restaurant.banners.length > 0 && (
           <>
             <Carousel
@@ -225,12 +227,12 @@ const RestaurantPage = () => {
               renderItem={({ item }) => (
                 <Image
                   source={{ uri: item }}
-                  className='w-full h-52 rounded-lg'
-                  resizeMode='cover'
+                  className="w-full h-52 rounded-lg"
+                  resizeMode="cover"
                 />
               )}
             />
-            <View className='absolute bottom-4 left-1/2 -translate-x-1/2 flex-row'>
+            <View className="absolute bottom-4 left-1/2 -translate-x-1/2 flex-row">
               {restaurant.banners.map((_, index) => (
                 <View
                   key={index}
@@ -246,13 +248,13 @@ const RestaurantPage = () => {
         )}
       </View>
 
-      <View className='px-4 py-2'>
-        <View className='flex-row items-center justify-between gap-2 mb-2'>
-          <Text className='text-3xl font-bold text-gray-900' numberOfLines={2}>
+      <View className="px-4 py-2">
+        <View className="flex-row items-center justify-between gap-2 mb-2">
+          <Text className="text-3xl font-bold text-gray-900" numberOfLines={2}>
             {restaurant?.name}
           </Text>
 
-          <View className='flex-row items-center gap-4'>
+          <View className="flex-row items-center gap-4">
             <TouchableHighlight onPress={handleAddToFavorite}>
               <Icon
                 name={isFavorite ? "favorite" : "favorite-border"}
@@ -265,32 +267,33 @@ const RestaurantPage = () => {
                 padding: 10,
                 borderRadius: 20,
               }}
-              underlayColor='#f0f0f0'
+              underlayColor="#f0f0f0"
               onPress={() => {
                 console.log("Chat button pressed");
                 handleChatWithRestaurant();
-              }}>
+              }}
+            >
               {isStartingChat ? (
-                <ActivityIndicator size='small' color='blue' />
+                <ActivityIndicator size="small" color="blue" />
               ) : (
-                <Icon name='chat-bubble-outline' size={24} color='blue' />
+                <Icon name="chat-bubble-outline" size={24} color="blue" />
               )}
             </TouchableHighlight>
           </View>
         </View>
 
-        <View className='flex-row items-center space-x-2 mb-2'>
-          <Icon name='location-on' size={22} color='#FF6347' />
-          <Text className='text-lg text-gray-700'>{restaurant?.address}</Text>
+        <View className="flex-row items-center space-x-2 mb-2">
+          <Icon name="location-on" size={22} color="#FF6347" />
+          <Text className="text-lg text-gray-700">{restaurant?.address}</Text>
         </View>
 
-        <Text className='text-base text-gray-600 leading-6'>
+        <Text className="text-base text-gray-600 leading-6">
           {restaurant?.description}
         </Text>
 
-        <View className='flex-row items-center mt-4 space-x-2'>
-          <Icon name='star' size={24} color={"#FFC107"} />
-          <Text className='text-lg font-medium text-gray-800'>
+        <View className="flex-row items-center mt-4 space-x-2">
+          <Icon name="star" size={24} color={"#FFC107"} />
+          <Text className="text-lg font-medium text-gray-800">
             {restaurant?.rating} 4.5 / 5
           </Text>
         </View>
@@ -298,7 +301,8 @@ const RestaurantPage = () => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className='flex-row px-4 py-2 '>
+        className="flex-row px-4 py-2 "
+      >
         {getCategoryMutation.isPending ? (
           <CategoryButtonSkeleton />
         ) : (
@@ -308,18 +312,20 @@ const RestaurantPage = () => {
               onPress={() => {
                 setCurrentCategory(category);
               }}
-              underlayColor='#FACC15'
+              underlayColor="#FACC15"
               className={`rounded-lg px-4 py-2 transition-all border mx-1 border-customYellow duration-300 ${
                 category._id == currentCategory._id
                   ? "bg-customYellow"
                   : "bg-white"
-              }`}>
+              }`}
+            >
               <Text
                 className={`text-sm font-semibold ${
                   category._id == currentCategory._id
                     ? "text-white"
                     : "text-customYellow"
-                }`}>
+                }`}
+              >
                 {category.name}
               </Text>
             </TouchableHighlight>
@@ -328,19 +334,19 @@ const RestaurantPage = () => {
       </ScrollView>
       <View>
         {dishesMutation.isPending ? (
-          <View className='flex-row flex-wrap p-4 justify-between gap-y-4'>
+          <View className="flex-row flex-wrap p-4 justify-between gap-y-4">
             {Array.from({ length: 6 }, (_, index) => (
               <DishBoxSkeleton key={index} />
             ))}
           </View>
         ) : dishes.length > 0 ? (
-          <View className='flex-row flex-wrap p-4 justify-between gap-y-4'>
+          <View className="flex-row flex-wrap p-4 justify-between gap-y-4">
             {dishes.map((dish, index) => (
               <DishBox key={index} dish={dish} />
             ))}
           </View>
         ) : (
-          <Text className='text-center text-gray-500'>No dishes found</Text>
+          <Text className="text-center text-gray-500">No dishes found</Text>
         )}
       </View>
       {restaurant?._id && <RatingList restaurantId={restaurant?._id} />}
