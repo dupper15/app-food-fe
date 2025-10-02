@@ -3,12 +3,12 @@ import "./global.css";
 import { SafeAreaView } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
-import toastConfig from "@/services/toastConfig";
+import toastConfig from "@/services/config/toastConfig";
 import { Provider } from "react-redux";
-import { store } from "./store";
-import { UpdateUsageTime } from "./components/UpdateUsageTime";
+import { store } from "./services/redux/store";
+import { UpdateUsageTime } from "@/components/features/UpdateUsageTime";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useNotificationListener } from "@/services/api/notificationApi";
+import { useNotificationListener } from "@/apis/notificationApi";
 import { LogBox } from "react-native";
 
 export default function RootLayout() {

@@ -6,7 +6,7 @@ const Start: React.FC = () => {
   const router = useRouter();
 
   const handleGetStarted = (): void => {
-    router.push("/authen/login");
+    router.push("/screens/authen/login");
   };
   return (
     <ImageBackground

@@ -1,0 +1,123 @@
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  Text,
+  TouchableHighlight,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { transPrice } from "./../../utils/transPrice";
+import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import * as CartApi from "@/apis/cartApi";
+import { RootState } from "@/services/redux/store";
+const { width } = Dimensions.get("window");
+interface DishBoxProps {
+  dish: Dish;
+}
+
+interface Dish {
+  _id: string;
+  name: string;
+  image: string;
+  price: number;
+  best_seller?: boolean;
+  [key: string]: any;
+}
+interface OrderItem {
+  quantity: number;
+}
+const DishBox = ({ dish }: DishBoxProps) => {
+  const route = useRouter();
+  const [orderItem, setOrderItem] = useState<OrderItem | null>(null);
+
+  const handleNavigate = () => {
+    const params: Record<string, string> = { data: JSON.stringify(dish) };
+
+    if (orderItem) {
+      params._orderItem = JSON.stringify(orderItem);
+    }
+
+    route.push({
+      pathname: "../screen/dishPage",
+      params,
+    });
+  };
+
+  const userId = useSelector((state: RootState) => state.user.userId);
+  const getOrderItemMutation = useMutation<
+    OrderItem,
+    unknown,
+    { userId: string; dishId: string }
+  >({
+    mutationFn: CartApi.getOrderItem,
+    onSuccess: (data) => {
+      setOrderItem(data);
+    },
+  });
+  const getOrderItem = () => {
+    if (userId && dish._id) {
+      const data = {
+        userId,
+        dishId: dish._id,
+      };
+      getOrderItemMutation.mutate(data);
+    }
+  };
+  useEffect(() => {
+    if (userId) {
+      getOrderItem();
+    }
+  }, [userId]);
+
+  return (
+    <View className='relative' style={{ width: width * 0.45 }}>
+      <TouchableHighlight
+        onPress={handleNavigate}
+        className='relative bg-white rounded-lg border border-slate-200 w-full'>
+        <View>
+          {Boolean(dish.best_seller) && (
+            <Image
+              source={require("@/assets/images/best-seller.png")}
+              style={{ width: 60, height: 60 }}
+              className='absolute z-10 -top-4 -right-4'
+              resizeMode='cover'
+            />
+          )}
+
+          <Image
+            className='w-full h-32 rounded-md'
+            source={{ uri: dish.image }}
+          />
+
+          <View className='p-2'>
+            <Text className='text-sm font-semibold mt-1'>{dish.name}</Text>
+
+            <View className='flex flex-row justify-between items-center mt-1'>
+              <Text className='text-lg font-bold text-red-700'>
+                {transPrice(dish.price)}
+              </Text>
+              <TouchableOpacity className='bg-customYellow p-2 rounded-full w-10 h-10 flex items-center justify-center'>
+                {getOrderItemMutation.isPending ? (
+                  <ActivityIndicator size='small' color='white' />
+                ) : orderItem && orderItem.quantity ? (
+                  <Text className='text-white font-medium text-lg text-center'>
+                    {orderItem.quantity}
+                  </Text>
+                ) : (
+                  <Icon name='shopping-cart' size={20} color='white' />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </TouchableHighlight>
+    </View>
+  );
+};
+
+export default DishBox;

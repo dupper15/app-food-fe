@@ -1,0 +1,166 @@
+import {
+  ScrollView,
+  Text,
+  TouchableHighlight,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useRouter } from "expo-router";
+import {
+  getFavoriteRestaurants,
+  removeFavoriteRestaurant,
+} from "@/services/api/userApi";
+import { useSelector } from "react-redux";
+import {
+  Placeholder,
+  PlaceholderMedia,
+  PlaceholderLine,
+  Fade,
+} from "rn-placeholder";
+import { useFavoriteRestaurants } from "@/hooks/useFavoriteRestaurants";
+
+export default function Favorite() {
+  const userId = useSelector((state) => state.user.userId);
+  const router = useRouter();
+
+  const navigateCart = () => {
+    router.push("/screen/cartPage");
+  };
+
+  const { restaurants, fetchFavorites, removeFavorite, isLoading, error } =
+    useFavoriteRestaurants({
+      userId,
+      getFavoriteRestaurants,
+      removeFavoriteRestaurant,
+    });
+
+  const handleRemoveFavorite = (restaurantId: string) => {
+    removeFavorite(restaurantId);
+  };
+
+  const handleNavigateToRestaurant = (restaurant) => {
+    router.push({
+      pathname: "/screen/restaurantPage",
+      params: {
+        data: JSON.stringify(restaurant),
+      },
+    });
+  };
+  useEffect(() => {
+    if (userId) {
+      getFavoriteRestaurantMutation.mutate(userId);
+    }
+  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        getFavoriteRestaurantMutation.mutate(userId);
+      }
+    }, [userId])
+  );
+  return (
+    <View className='flex-1 bg-gray-100'>
+      <View className='flex-row justify-between items-center px-4 pt-2 pb-4 bg-white'>
+        <Text className='text-2xl font-semibold text-gray-900'>
+          Favorite Restaurants
+        </Text>
+        <View className='flex-row gap-3'>
+          <TouchableOpacity
+            onPress={navigateCart}
+            className='bg-customYellow p-2 rounded-lg'>
+            <Icon name='cart-outline' size={24} color={"black"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className='bg-black p-2 rounded-lg'
+            onPress={() => {
+              console.log("Chat button pressed");
+              router.push("/customer/chat");
+            }}>
+            <Ionicons
+              name='chatbubble-ellipses-outline'
+              size={24}
+              color={"#FFC515"}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {getFavoriteRestaurantMutation.isPending ? (
+        <ScrollView
+          className='px-4 py-4 pb-8'
+          showsVerticalScrollIndicator={false}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <View key={index} className='bg-white rounded-xl p-4 mb-2'>
+              <Placeholder Animation={Fade}>
+                <View className='flex-row'>
+                  <PlaceholderMedia size={64} isRound={true} />
+                  <View className='ml-4 flex-1'>
+                    <PlaceholderLine width={80} />
+                    <PlaceholderLine width={50} />
+                  </View>
+                </View>
+                <View className='flex-row justify-end mt-4'>
+                  <PlaceholderLine width={30} height={30} />
+                </View>
+              </Placeholder>
+            </View>
+          ))}
+        </ScrollView>
+      ) : restaurants.length > 0 ? (
+        <ScrollView
+          className='px-4 py-4 pb-8'
+          showsVerticalScrollIndicator={false}>
+          {restaurants.map((restaurant) => (
+            <View
+              key={restaurant._id}
+              className='bg-white rounded-xl p-4 mb-2 '>
+              <View className='flex-row'>
+                {restaurant.owner_id.avatar ? (
+                  <Image
+                    source={{ uri: restaurant.owner_id.avatar }}
+                    className='w-16 h-16 rounded-full'
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/images/default_avatar.jpg")}
+                    className='w-16 h-16 rounded-full'
+                  />
+                )}
+                <View className='ml-4 flex-1'>
+                  <Text className='text-xl font-bold text-gray-900'>
+                    {restaurant.name}
+                  </Text>
+                  <Text className='text-sm text-gray-600 mt-1'>
+                    {restaurant.description}
+                  </Text>
+                </View>
+                <TouchableHighlight
+                  onPress={() => handleRemoveFavorite(restaurant._id)}
+                  className='absolute top-0 right-1'>
+                  <Icon name={"heart"} size={28} color={"red"} />
+                </TouchableHighlight>
+              </View>
+
+              <View className='flex-row justify-end items-center'>
+                <TouchableHighlight
+                  className='bg-customYellow px-6 py-2 rounded-lg'
+                  onPress={() => handleNavigateToRestaurant(restaurant)}>
+                  <Text className='text-white font-semibold'>Order</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <View className='flex items-center justify-center h-full'>
+          <Text className='text-gray-600 text-lg font-semibold'>
+            You have no favorite restaurants yet.
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}

@@ -8,6 +8,11 @@ config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,
   "react-native": require.resolve("react-native"),
 };
+
+// Add path alias support
+config.resolver.alias = {
+  "@": "./app",
+};
 config.resolver.unstable_enablePackageExports = false;
 config.resolver.unstable_enableSymlinks = false;
 
