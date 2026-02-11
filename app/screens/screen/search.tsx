@@ -1,4 +1,4 @@
-import { textSearch } from "@/services/api/searchApi";
+import { textSearch } from "@/apis/searchApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -36,7 +36,7 @@ const Search = () => {
     onSuccess: (data) => {
       const searchedRestaurants = JSON.stringify(data);
       router.push({
-        pathname: "/screen/searchPage",
+        pathname: "/screens/screen/searchPage",
         params: { search: query, searchedRestaurants: searchedRestaurants },
       });
     },
@@ -75,7 +75,7 @@ const Search = () => {
 
       history = [newQuery, ...history.filter((q) => q !== newQuery)].slice(
         0,
-        10
+        10,
       );
 
       await AsyncStorage.setItem(key, history.join("|"));

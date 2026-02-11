@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableHighlight, Image } from "react-native";
-import DishBox from "./dishBox";
+import DishBox from "../items/dishBox";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 

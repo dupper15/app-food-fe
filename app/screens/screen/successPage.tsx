@@ -6,12 +6,12 @@ import { useRouter } from "expo-router";
 const SuccessPage = () => {
   const router = useRouter();
   const handleGoHome = () => {
-    router.push("/customer/(tabs)/home");
+    router.push("/screens/customer/(tabs)/home");
   };
   return (
     <View className='flex-1'>
       <ImageBackground
-        source={require("../../assets/images/Order Succesfully.png")}
+        source={require("../../../assets/images/Order Succesfully.png")}
         className='flex-1 justify-end items-center px-6 pb-6'
         resizeMode='cover'>
         <View className='flex flex-row justify-center items-center gap-4 '>

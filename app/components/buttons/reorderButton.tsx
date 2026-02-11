@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
-import { useHistoryRefresh } from "../customer/(tabs)/history";
+import { useHistoryRefresh } from "@/screens/customer/(tabs)/history";
 import { CompleteHistoryItem } from "@/services/historyService";
 
 interface ReorderButtonProps {
@@ -80,10 +80,9 @@ const ReorderButton = ({
     <TouchableOpacity
       style={[styles.reorderButton, style]}
       onPress={handleReorder}
-      disabled={isLoading}
-    >
+      disabled={isLoading}>
       {isLoading ? (
-        <ActivityIndicator size="small" color="#FFFFFF" />
+        <ActivityIndicator size='small' color='#FFFFFF' />
       ) : (
         <Text style={[styles.reorderButtonText, textStyle]}>Re-Order</Text>
       )}

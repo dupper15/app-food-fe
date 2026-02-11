@@ -1,4 +1,4 @@
-import { CreateVoucherDto, VoucherData } from "@/interfaces/VoucherInterface";
+import { CreateVoucherDto, VoucherData } from "@/types/VoucherInterface";
 import axiosInstance from "./axiosInstance";
 
 export interface Voucher {
@@ -13,7 +13,7 @@ export interface Voucher {
 }
 
 export const fetchVouchers = async (
-  voucherIds: string[] | null
+  voucherIds: string[] | null,
 ): Promise<Voucher[]> => {
   if (!voucherIds || voucherIds.length === 0) {
     return [];
@@ -27,7 +27,7 @@ export const fetchVouchers = async (
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -43,7 +43,7 @@ export const getVouchers = async (restaurantId: string) => {
 
 export const getAllVouchers = async (restaurantId: string) => {
   const response = await axiosInstance.get(
-    `voucher/all-voucher/${restaurantId}`
+    `voucher/all-voucher/${restaurantId}`,
   );
   return response.data;
 };

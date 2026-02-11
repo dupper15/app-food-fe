@@ -10,7 +10,7 @@ const Start: React.FC = () => {
   };
   return (
     <ImageBackground
-      source={require("@/assets/images/welcome.gif")}
+      source={require("../assets/images/welcome.gif")}
       className='flex-1 object-cover'>
       <View className='flex-1 justify-end p-10 items-center'>
         <TouchableHighlight

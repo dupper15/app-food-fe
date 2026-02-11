@@ -12,16 +12,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { setUser } from "@/features/counter/userSlice";
+import { setUser } from "@/services/redux/userSlice";
 import { getUserIdFromToken } from "@/utils/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
-import { loginUser } from "@/services/api/userApi";
-import { CustomToast } from "../components/toast";
+import { loginUser } from "@/apis/userApi";
+import { CustomToast } from "@/components/ui/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { fetchRestaurantByOwner } from "@/services/api/restaurantApi";
-import { setRestaurant } from "@/features/counter/restaurantSlice";
-import LoginGoogleButton from "../components/loginGoogleButton";
+import { fetchRestaurantByOwner } from "@/apis/restaurantApi";
+import { setRestaurant } from "@/services/redux/restaurantSlice";
+import LoginGoogleButton from "@/components/buttons/loginGoogleButton";
 
 interface LoginResponse {
   accessToken: string;
@@ -59,24 +59,24 @@ const Login: React.FC = () => {
             if (result?.data?._id) {
               await AsyncStorage.setItem(
                 "restaurant_id",
-                String(result?.data?._id)
+                String(result?.data?._id),
               );
               dispatch(
                 setRestaurant({
                   restaurantId: result.data._id,
                   name: result.data.name,
-                })
+                }),
               );
             }
             if (status === "Pending") {
-              router.push("/screen/pendingPage");
+              router.push("/screens/screen/pendingPage");
             } else if (status === "Incomplete") {
-              router.push("/authen/createRestaurant");
+              router.push("/screens/authen/createRestaurant");
             } else if (status === "Disable") {
-              router.push("/screen/disablePage");
+              router.push("/screens/screen/disablePage");
             } else {
-              router.push("/restaurant/orderScreen/order");
-              router.push("/restaurant/orderScreen/order");
+              router.push("/screens/restaurant/orderScreen/order");
+              router.push("/screens/restaurant/orderScreen/order");
             }
           } catch (error) {
             CustomToast("error", "Error", "Failed to fetch restaurant details");
@@ -85,28 +85,28 @@ const Login: React.FC = () => {
         if (data.userType === "customer") {
           AsyncStorage.setItem("customer_id", String(userId));
           if (status === "Disable") {
-            router.push("/screen/disablePage");
+            router.push("/screens/screen/disablePage");
           } else {
-            router.push("/customer/(tabs)/home");
+            router.push("/screens/customer/(tabs)/home");
           }
           if (status === "Disable") {
-            router.push("/screen/disablePage");
+            router.push("/screens/screen/disablePage");
           } else {
-            router.push("/customer/(tabs)/home");
+            router.push("/screens/customer/(tabs)/home");
           }
         }
       } else {
         if (data.userType === "restaurantOwner") {
           if (status === "Incomplete") {
-            router.push("/authen/createRestaurant");
+            router.push("/screens/authen/createRestaurant");
           } else if (status === "Pending") {
-            router.push("/screen/pendingPage");
+            router.push("/screens/screen/pendingPage");
           } else {
-            router.push("/authen/verifiedScreen");
+            router.push("/screens/authen/verifiedScreen");
           }
         }
         if (data.userType === "customer") {
-          router.push("/authen/verifiedScreen");
+          router.push("/screens/authen/verifiedScreen");
         }
       }
     },
@@ -127,7 +127,7 @@ const Login: React.FC = () => {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps='handled'>
         <ImageBackground
-          source={require("@/assets/images/login.jpg")}
+          source={require("../../../assets/images/login.jpg")}
           className='flex-1 object-cover'>
           <View className='flex-1 justify-end'>
             <View className='absolute inset-0 bg-black opacity-40' />
@@ -176,7 +176,7 @@ const Login: React.FC = () => {
               <View className='w-4/5'>
                 <TouchableOpacity
                   onPress={() => {
-                    router.push("/authen/forgetPassword");
+                    router.push("/screens/authen/forgetPassword");
                   }}
                   className='self-end mb-6'>
                   <Text className='text-blue-500'>Forgot password?</Text>
@@ -199,11 +199,13 @@ const Login: React.FC = () => {
 
               <Text className='text-gray-500 my-5'>Or</Text>
               <LoginGoogleButton />
-              <Link href='/authen/register' className='mt-8'>
+              <TouchableOpacity
+                onPress={() => router.push("/screens/authen/register")}
+                className='mt-8'>
                 <Text className='text-blue-500'>
                   Don't have an account? Sign up
                 </Text>
-              </Link>
+              </TouchableOpacity>
             </View>
           </View>
         </ImageBackground>

@@ -4,7 +4,7 @@ import EditRestaurant from "./editRestaurant";
 import Menu from "./menu";
 import Voucher from "./voucher";
 import Rating from "./rating";
-import VoucherModal from "@/app/components/voucherModal";
+import VoucherModal from "@/components/modals/voucherModal";
 import Topping from "./topping";
 import ChangePassword from "./changePassword";
 
@@ -14,41 +14,41 @@ export const RestaurantStackNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Overview"
+        name='Overview'
         component={Restaurant}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="EditRestaurant"
+        name='EditRestaurant'
         component={EditRestaurant}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Menu"
+        name='Menu'
         component={Menu}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Voucher"
+        name='Voucher'
         component={Voucher}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Rating"
+        name='Rating'
         component={Rating}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Topping"
+        name='Topping'
         component={Topping}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="ChangePassword"
+        name='ChangePassword'
         component={ChangePassword}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="VoucherModal" component={VoucherModal} />
+      <Stack.Screen name='VoucherModal' component={VoucherModal} />
     </Stack.Navigator>
   );
 };

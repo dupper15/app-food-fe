@@ -9,8 +9,8 @@ import {
   fetchOrderRateByRestaurant,
   fetchRevenueByRestaurant,
   fetchWeeklyRevenueByRestaurant,
-} from "@/services/api/orderApi";
-import ratingApi from "@/services/api/ratingApi";
+} from "@/apis/orderApi";
+import ratingApi from "@/apis/ratingApi";
 
 import MonthlyRevenueCard from "./monthlyRevenue";
 import MonthlyOrderCard from "./monthlyOrder";
@@ -19,7 +19,7 @@ import LoyalCustomerList from "./listTopCustomers";
 import WeeklyRevenueChart from "./weeklyRevenueChart";
 import AverageRating from "./averageRating";
 
-import { WeeklyRevenueItem } from "@/interfaces/RevenueInterface";
+import { WeeklyRevenueItem } from "@/types/RevenueInterface";
 
 export default function DashboardScreen() {
   const [mockMonthlyRevenue, setMockMonthlyRevenue] = useState(0);
@@ -37,7 +37,7 @@ export default function DashboardScreen() {
 
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
+      state.restaurant.restaurantId,
   );
 
   const orderStatusData = [
@@ -130,7 +130,7 @@ export default function DashboardScreen() {
         fetchWeeklyRevenue.mutate(restaurantId);
         fetchAverage.mutate(restaurantId);
       }
-    }, [restaurantId])
+    }, [restaurantId]),
   );
 
   return (

@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import RestaurantBox from "../components/restaurantBox";
+import RestaurantBox from "@/components/items/restaurantBox";
 
 const SearchPage = () => {
   const { search, searchedRestaurants } = useLocalSearchParams();
@@ -34,7 +34,8 @@ const SearchPage = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/customer/(tabs)/home")}>
+        <TouchableOpacity
+          onPress={() => router.push("/screens/customer/(tabs)/home")}>
           <Text className='text-slate-800 font-medium'>Close</Text>
         </TouchableOpacity>
       </View>

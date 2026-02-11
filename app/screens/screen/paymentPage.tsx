@@ -12,13 +12,13 @@ import {
   TouchableHighlight,
   ActivityIndicator,
 } from "react-native";
-import SelectVoucherModal from "../components/selectVoucherModal";
+import SelectVoucherModal from "@/components/modals/selectVoucherModal";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useMutation } from "@tanstack/react-query";
-import { completePayment } from "@/services/api/cartApi";
+import { completePayment } from "@/apis/cartApi";
 import { useSelector } from "react-redux";
 import Slider from "@react-native-community/slider";
-import { getPoint } from "@/services/api/userApi";
+import { getPoint } from "@/apis/userApi";
 
 const PaymentPage = () => {
   const [items, setItems] = useState([]);
@@ -37,10 +37,10 @@ const PaymentPage = () => {
         const itemPrice = item.dish_id.price * item.quantity;
         const toppingPrice = item.topping.reduce(
           (sum, topping) => sum + topping.price,
-          0
+          0,
         );
         return total + itemPrice + toppingPrice;
-      }, 0)
+      }, 0),
     );
   }, [items]);
   useEffect(() => {
@@ -83,7 +83,7 @@ const PaymentPage = () => {
     onSuccess: (data) => {
       console.log("Payment success:", data);
       setIsLoading(false);
-      router.push("/screen/successPage");
+      router.push("/screens/screen/successPage");
     },
     onError: (error) => {
       console.log("Payment error:", error);
@@ -259,7 +259,7 @@ const PaymentPage = () => {
             <Text className='text-lg font-bold text-gray-900 mt-2'>
               Grand Total:{" "}
               {transPrice(
-                totalPrice - handleCaculateVoucher(voucher) - point * 1000
+                totalPrice - handleCaculateVoucher(voucher) - point * 1000,
               )}
             </Text>
           </View>

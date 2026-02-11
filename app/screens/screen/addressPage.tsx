@@ -3,7 +3,7 @@ import {
   deleteAddress,
   editAddress,
   getAddresses,
-} from "@/services/api/userApi";
+} from "@/apis/userApi";
 import { Ionicons, Feather, Entypo } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -31,7 +31,7 @@ const AddressPage = () => {
   };
 
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
 
   const [address, setAddress] = useState<string[]>([]);

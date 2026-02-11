@@ -12,11 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { getAddressFromCoordinates } from "@/utils/getAddressFromCoordinates";
 import { useMutation } from "@tanstack/react-query";
-import { createRestaurant } from "@/services/api/restaurantApi";
-import UploadImageModal from "../components/uploadImageModal";
-import { useSelector } from "react-redux";
-import { CustomToast } from "../components/toast";
-import { setAvatarRes } from "@/services/api/owner";
+import { createRestaurant } from "@/apis/restaurantApi";
+import UploadImageModal from "@/components/modals/uploadImageModal";
+import { CustomToast } from "@/components/ui/toast";
+import { setAvatarRes } from "@/apis/owner";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { ActivityIndicator } from "react-native";
@@ -57,7 +56,7 @@ const CreateRestaurantScreen: React.FC = () => {
       console.log("success", data);
       setIsLoading(false);
       CustomToast("success", "Success", "Upload success");
-      router.push("/authen/login");
+      router.push("/screens/authen/login");
     },
     onError: (data) => {
       setIsLoading(false);
@@ -118,7 +117,7 @@ const CreateRestaurantScreen: React.FC = () => {
   };
   const handleImagePicker = async (
     _file: { uri: string; name: string; type: string },
-    uri: string
+    uri: string,
   ) => {
     const file = createFileFromUri(uri);
 

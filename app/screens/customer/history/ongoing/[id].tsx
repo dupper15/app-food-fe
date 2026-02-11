@@ -19,7 +19,6 @@ import {
   MoreVertical,
   Navigation,
 } from "lucide-react-native";
-import { fetchOrderWithRestaurantDetails } from "@/services/api/orderApi";
 import { useSelector } from "react-redux";
 import { transPrice } from "@/utils/transPrice";
 import { fetchCompleteHistory } from "@/services/historyService";
@@ -34,7 +33,7 @@ const OrderDetailScreen = () => {
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [restaurant, setRestaurant] = useState<any>(null);
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const OrderDetailScreen = () => {
           (item) =>
             item.order._id === orderId ||
             item.historyItem.order_id === orderId ||
-            item.historyItem._id === orderId
+            item.historyItem._id === orderId,
         );
 
         if (!order) {
@@ -133,7 +132,7 @@ const OrderDetailScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FFCC00" />
+        <ActivityIndicator size='large' color='#FFCC00' />
         <Text style={styles.loadingText}>Loading order details...</Text>
       </SafeAreaView>
     );
@@ -145,8 +144,7 @@ const OrderDetailScreen = () => {
         <Text style={styles.errorText}>{error || "Order not found"}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
+          onPress={() => router.back()}>
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -156,7 +154,7 @@ const OrderDetailScreen = () => {
   const subtotal =
     orderDetail.orderItems?.reduce(
       (sum: number, item: any) => sum + item.dish.price * item.quantity,
-      0
+      0,
     ) || 0;
 
   const toppingTotal =
@@ -165,32 +163,31 @@ const OrderDetailScreen = () => {
         sum +
         item.toppings.reduce(
           (toppingSum: number, topping: any) => toppingSum + topping.price,
-          0
+          0,
         ) *
           item.quantity,
-      0
+      0,
     ) || 0;
 
   const voucherDiscount =
     orderDetail.vouchers?.reduce(
       (sum: number, voucher: any) => sum + voucher.value,
-      0
+      0,
     ) || 0;
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
 
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={24} color="#000" />
+          onPress={() => router.back()}>
+          <ChevronLeft size={24} color='#000' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Orders</Text>
         <TouchableOpacity style={styles.menuButton}>
-          <MoreVertical size={24} color="#000" />
+          <MoreVertical size={24} color='#000' />
         </TouchableOpacity>
       </View>
 
@@ -221,11 +218,10 @@ const OrderDetailScreen = () => {
                 styles.statusText,
                 {
                   color: getStatusColor(
-                    orderDetail.order?.status || orderDetail.status
+                    orderDetail.order?.status || orderDetail.status,
                   ),
                 },
-              ]}
-            >
+              ]}>
               {(orderDetail.order?.status || orderDetail.status)
                 ?.charAt(0)
                 .toUpperCase() +
@@ -236,7 +232,7 @@ const OrderDetailScreen = () => {
 
         <View style={styles.locationContainer}>
           <View style={styles.locationRow}>
-            <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
+            <MapPin size={18} color='#e74c3c' style={styles.locationIcon} />
             <Text style={styles.locationText}>
               {restaurant?.address || "Address not available"}
             </Text>
@@ -244,11 +240,10 @@ const OrderDetailScreen = () => {
           {restaurant?.latitude && restaurant?.longitude && (
             <TouchableOpacity
               style={styles.navigationButton}
-              onPress={openMapsApp}
-            >
+              onPress={openMapsApp}>
               <Navigation
                 size={18}
-                color="#FFFFFF"
+                color='#FFFFFF'
                 style={styles.navigationIcon}
               />
               <Text style={styles.navigationText}>Navigate to Restaurant</Text>

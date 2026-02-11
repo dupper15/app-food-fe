@@ -1,4 +1,4 @@
-import { LoyalCustomerListProps } from "@/interfaces/RevenueInterface";
+import { LoyalCustomerListProps } from "@/types/RevenueInterface";
 import { formatPrice } from "@/utils/format";
 import React from "react";
 import { View, Text } from "react-native";
@@ -20,8 +20,8 @@ const LoyalCustomerList: React.FC<LoyalCustomerListProps> = ({
   topCustomers,
 }) => {
   return (
-    <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-      <Text className="text-lg font-bold text-gray-800 mb-2">
+    <View className='bg-white rounded-xl p-4 mb-4 shadow-sm'>
+      <Text className='text-lg font-bold text-gray-800 mb-2'>
         Loyal customer
       </Text>
       {topCustomers.map((customer, index) => {
@@ -30,30 +30,27 @@ const LoyalCustomerList: React.FC<LoyalCustomerListProps> = ({
         return (
           <View
             key={`${customer._id}-${index}`}
-            className="flex-row items-center py-3 border-b border-gray-100"
-          >
+            className='flex-row items-center py-3 border-b border-gray-100'>
             <View
-              className={`w-8 h-8 rounded-full justify-center items-center mr-3 ${rankStyle}`}
-            >
+              className={`w-8 h-8 rounded-full justify-center items-center mr-3 ${rankStyle}`}>
               <Text
                 className={`font-bold ${
                   index > 2 ? "text-gray-600" : "text-white"
-                }`}
-              >
+                }`}>
                 {index + 1}
               </Text>
             </View>
 
-            <View className="flex-1">
-              <Text className="text-sm font-semibold text-gray-800">
+            <View className='flex-1'>
+              <Text className='text-sm font-semibold text-gray-800'>
                 {customer.customerName}
               </Text>
-              <Text className="text-xs text-gray-500 mt-0.5">
+              <Text className='text-xs text-gray-500 mt-0.5'>
                 {customer.totalOrders} orders
               </Text>
             </View>
 
-            <Text className="text-sm font-bold text-[#389C9A]">
+            <Text className='text-sm font-bold text-[#389C9A]'>
               {formatPrice(customer.totalSpent)}
             </Text>
           </View>

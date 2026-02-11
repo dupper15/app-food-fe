@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 import {
   getFavoriteRestaurants,
   removeFavoriteRestaurant,
-} from "@/services/api/userApi";
+} from "@/apis/userApi";
 import { useSelector } from "react-redux";
 import {
   Placeholder,
@@ -21,13 +21,15 @@ import {
   Fade,
 } from "rn-placeholder";
 import { useFavoriteRestaurants } from "@/hooks/useFavoriteRestaurants";
+import { useCallback, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Favorite() {
-  const userId = useSelector((state) => state.user.userId);
+  const userId = useSelector((state: any) => state.user.userId);
   const router = useRouter();
 
   const navigateCart = () => {
-    router.push("/screen/cartPage");
+    router.push("/screens/screen/cartPage");
   };
 
   const { restaurants, fetchFavorites, removeFavorite, isLoading, error } =
@@ -43,7 +45,7 @@ export default function Favorite() {
 
   const handleNavigateToRestaurant = (restaurant) => {
     router.push({
-      pathname: "/screen/restaurantPage",
+      pathname: "/screens/screen/restaurantPage",
       params: {
         data: JSON.stringify(restaurant),
       },
@@ -51,15 +53,15 @@ export default function Favorite() {
   };
   useEffect(() => {
     if (userId) {
-      getFavoriteRestaurantMutation.mutate(userId);
+      getFavoriteRestaurants(userId);
     }
   }, [userId]);
   useFocusEffect(
     useCallback(() => {
       if (userId) {
-        getFavoriteRestaurantMutation.mutate(userId);
+        getFavoriteRestaurants(userId);
       }
-    }, [userId])
+    }, [userId]),
   );
   return (
     <View className='flex-1 bg-gray-100'>
@@ -77,7 +79,7 @@ export default function Favorite() {
             className='bg-black p-2 rounded-lg'
             onPress={() => {
               console.log("Chat button pressed");
-              router.push("/customer/chat");
+              router.push("/screens/customer/chat");
             }}>
             <Ionicons
               name='chatbubble-ellipses-outline'
@@ -88,7 +90,7 @@ export default function Favorite() {
         </View>
       </View>
 
-      {getFavoriteRestaurantMutation.isPending ? (
+      {isLoading ? (
         <ScrollView
           className='px-4 py-4 pb-8'
           showsVerticalScrollIndicator={false}>
@@ -125,7 +127,7 @@ export default function Favorite() {
                   />
                 ) : (
                   <Image
-                    source={require("../../../assets/images/default_avatar.jpg")}
+                    source={require("../../../../assets/images/default_avatar.jpg")}
                     className='w-16 h-16 rounded-full'
                   />
                 )}

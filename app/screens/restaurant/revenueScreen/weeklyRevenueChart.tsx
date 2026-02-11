@@ -1,4 +1,4 @@
-import { WeeklyRevenueChartProps } from "@/interfaces/RevenueInterface";
+import { WeeklyRevenueChartProps } from "@/types/RevenueInterface";
 import React from "react";
 import { View, Text, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
@@ -9,15 +9,15 @@ const WeeklyRevenueChart: React.FC<WeeklyRevenueChartProps> = ({
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-      <Text className="text-lg font-bold text-gray-800 mb-2">
+    <View className='bg-white rounded-xl p-4 mb-4 shadow-sm'>
+      <Text className='text-lg font-bold text-gray-800 mb-2'>
         Last 7 days revenue
       </Text>
       <LineChart
         data={weeklyChartData}
         width={screenWidth - 64}
         height={220}
-        yAxisSuffix="đ"
+        yAxisSuffix='đ'
         chartConfig={{
           backgroundColor: "#fff",
           backgroundGradientFrom: "#fff",

@@ -1,4 +1,4 @@
-import { OrderOngoingRestaurant } from "@/interfaces/OrderInterface";
+import { OrderOngoingRestaurant } from "@/types/OrderInterface";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,8 +10,8 @@ import {
 import StepIndicator from "react-native-step-indicator";
 import { formatCodeOrder } from "./../../../utils/format";
 import { useMutation } from "@tanstack/react-query";
-import { updateStatusOrderByRestaurant } from "@/services/api/orderApi";
-import { CustomToast } from "@/app/components/toast";
+import { updateStatusOrderByRestaurant } from "@/apis/orderApi";
+import { CustomToast } from "@/components/ui/toast";
 
 const statusText = ["Received", "Preparing", "Ready"];
 
@@ -84,7 +84,7 @@ export default function StatusModal({
       CustomToast(
         "error",
         "Error",
-        "Failed to change status order! Please try again"
+        "Failed to change status order! Please try again",
       );
     },
   });
@@ -97,23 +97,22 @@ export default function StatusModal({
 
   return (
     <Modal
-      animationType="fade"
+      animationType='fade'
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View className='flex-1 justify-center items-center bg-black/50'>
           <TouchableWithoutFeedback onPress={() => {}}>
-            <View className="bg-white rounded-lg p-5 w-4/5 shadow-lg items-start">
-              <Text className="text-base font-semibold mb-1">
+            <View className='bg-white rounded-lg p-5 w-4/5 shadow-lg items-start'>
+              <Text className='text-base font-semibold mb-1'>
                 ID: {formatCodeOrder(data?._id || "")}
               </Text>
-              <Text className="text-base font-semibold mb-1">
+              <Text className='text-base font-semibold mb-1'>
                 Customer: {data?.customer_id?.name}
               </Text>
               {/* Progress bar */}
-              <View className="w-full mt-4 mb-6 px-2">
+              <View className='w-full mt-4 mb-6 px-2'>
                 <StepIndicator
                   customStyles={customStyles}
                   currentPosition={step}
@@ -124,10 +123,9 @@ export default function StatusModal({
 
               {/* Next step button */}
               <TouchableOpacity
-                className="bg-[#FFC515] px-6 py-2 rounded-lg mt-4 w-full"
-                onPress={handleNext}
-              >
-                <Text className="text-white text-center font-semibold">
+                className='bg-[#FFC515] px-6 py-2 rounded-lg mt-4 w-full'
+                onPress={handleNext}>
+                <Text className='text-white text-center font-semibold'>
                   Next step
                 </Text>
               </TouchableOpacity>

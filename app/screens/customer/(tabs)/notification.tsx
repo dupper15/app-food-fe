@@ -18,17 +18,17 @@ import { useLocalSearchParams } from "expo-router";
 import {
   fetchAllNotifcationsByUser,
   updateNotification,
-} from "@/services/api/notificationApi";
-import { NotificationInterface } from "@/interfaces/NotificationInterface";
+} from "@/apis/notificationApi";
+import { NotificationInterface } from "@/types/NotificationInterface";
 import { formatRelativeTime } from "@/utils/format";
 
 const NotificationsScreen = () => {
   const [processedSession, setProcessedSession] = useState(false);
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
   const [notifications, setNotifications] = useState<NotificationInterface[]>(
-    []
+    [],
   );
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
@@ -79,7 +79,7 @@ const NotificationsScreen = () => {
         // Only process unseen notifications once per focus session
         if (!processedSession && notifications && notifications.length > 0) {
           const unseenNotifications = notifications.filter(
-            (notification) => !notification.isSeen
+            (notification) => !notification.isSeen,
           );
 
           if (unseenNotifications.length > 0) {
@@ -90,7 +90,7 @@ const NotificationsScreen = () => {
           }
         }
       };
-    }, [userId, notifications, processedSession])
+    }, [userId, notifications, processedSession]),
   );
 
   // Handle notification press - mark as seen if not already
@@ -111,11 +111,10 @@ const NotificationsScreen = () => {
         styles.notificationItem,
         !item.isSeen && styles.unreadNotification,
       ]}
-      onPress={() => handleNotificationPress(item)}
-    >
+      onPress={() => handleNotificationPress(item)}>
       <View style={styles.notificationIcon}>
         <Ionicons
-          name="notifications-circle"
+          name='notifications-circle'
           size={24}
           color={!item.isSeen ? "#FFCC00" : "#9E9E9E"}
         />
@@ -125,12 +124,11 @@ const NotificationsScreen = () => {
           style={[
             styles.notificationText,
             !item.isSeen && styles.unreadNotificationText,
-          ]}
-        >
+          ]}>
           {item.content}
         </Text>
         <View style={styles.notificationMeta}>
-          <Ionicons name="time-outline" size={14} color="#9E9E9E" />
+          <Ionicons name='time-outline' size={14} color='#9E9E9E' />
           <Text style={styles.timeText}>
             {item.createdAt
               ? formatRelativeTime(item.createdAt)
@@ -138,7 +136,7 @@ const NotificationsScreen = () => {
           </Text>
           {item.isSeen && (
             <View style={styles.seenIndicator}>
-              <Ionicons name="checkmark" size={14} color="#129575" />
+              <Ionicons name='checkmark' size={14} color='#129575' />
               <Text style={styles.seenText}>Seen</Text>
             </View>
           )}
@@ -151,7 +149,7 @@ const NotificationsScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FFCC00" />
+        <ActivityIndicator size='large' color='#FFCC00' />
         <Text style={styles.loadingText}>Loading notifications...</Text>
       </SafeAreaView>
     );
@@ -159,7 +157,7 @@ const NotificationsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Notifications</Text>
@@ -181,9 +179,9 @@ const NotificationsScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons
-              name="notifications-off-outline"
+              name='notifications-off-outline'
               size={48}
-              color="#E0E0E0"
+              color='#E0E0E0'
             />
             <Text style={styles.emptyText}>No notifications yet</Text>
             <Text style={styles.emptySubText}>

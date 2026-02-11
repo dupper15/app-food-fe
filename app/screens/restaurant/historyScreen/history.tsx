@@ -7,17 +7,17 @@ import { useMutation } from "@tanstack/react-query";
 import {
   fetchAllHistoryFailed,
   fetchAllHistorySuccess,
-} from "@/services/api/historyApi";
-import { HistoryData } from "@/interfaces/HistoryInterface";
+} from "@/apis/historyApi";
+import { HistoryData } from "@/types/HistoryInterface";
 
 export default function History() {
   const [activeTab, setActiveTab] = useState<"successful" | "failed">(
-    "successful"
+    "successful",
   );
 
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
+      state.restaurant.restaurantId,
   );
   const [refresh, setRefresh] = useState<boolean>(false);
   const [itemsSuccess, setItemsSuccess] = useState<any[]>([]);
@@ -57,19 +57,17 @@ export default function History() {
   };
 
   return (
-    <View className="h-full flex-col bg-white">
+    <View className='h-full flex-col bg-white'>
       {/* tabs */}
-      <View className="flex-row justify-around px-4 pt-2 border-b border-gray-200">
+      <View className='flex-row justify-around px-4 pt-2 border-b border-gray-200'>
         {/* Successful tab */}
         <TouchableOpacity
-          className="flex-1 items-center"
-          onPress={() => handleTabChange("successful")}
-        >
+          className='flex-1 items-center'
+          onPress={() => handleTabChange("successful")}>
           <Text
             className={`text-base font-medium ${
               activeTab === "successful" ? "text-[#FFC515]" : "text-gray-500"
-            }`}
-          >
+            }`}>
             Successful
           </Text>
           <View
@@ -81,14 +79,12 @@ export default function History() {
 
         {/* Failed tab */}
         <TouchableOpacity
-          className="flex-1 items-center"
-          onPress={() => handleTabChange("failed")}
-        >
+          className='flex-1 items-center'
+          onPress={() => handleTabChange("failed")}>
           <Text
             className={`text-base font-medium ${
               activeTab === "failed" ? "text-[#FFC515]" : "text-gray-500"
-            }`}
-          >
+            }`}>
             Failed
           </Text>
           <View
@@ -100,7 +96,7 @@ export default function History() {
       </View>
 
       {/* tab content */}
-      <View className="flex-1 px-4">
+      <View className='flex-1 px-4'>
         {activeTab === "successful" ? (
           <Successful
             data={itemsSuccess}

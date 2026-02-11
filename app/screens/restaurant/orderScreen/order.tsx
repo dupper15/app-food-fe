@@ -6,20 +6,20 @@ import { useMutation } from "@tanstack/react-query";
 import {
   fetchOngoingOrderByRestaurant,
   fetchPendingOrderByRestaurant,
-} from "@/services/api/orderApi";
+} from "@/apis/orderApi";
 import {
   OrderOngoingRestaurant,
   OrderPendingRestaurant,
-} from "@/interfaces/OrderInterface";
+} from "@/types/OrderInterface";
 import { useSelector } from "react-redux";
 
 export default function Order() {
   const [activeTab, setActiveTab] = useState<"pending" | "in progress">(
-    "pending"
+    "pending",
   );
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
+      state.restaurant.restaurantId,
   );
   const [refresh, setRefresh] = useState<boolean>(false);
   const [countInProgress, setCountInProgress] = useState<number>(0);
@@ -28,7 +28,7 @@ export default function Order() {
   >([]);
   const [countPending, setCountPending] = useState<number>(0);
   const [itemsPending, setItemsPending] = useState<OrderPendingRestaurant[]>(
-    []
+    [],
   );
 
   const fetchOngoing = useMutation({
@@ -61,28 +61,26 @@ export default function Order() {
   }, [restaurantId, refresh]);
 
   return (
-    <View className="h-full flex-col bg-white">
+    <View className='h-full flex-col bg-white'>
       {/* tabs */}
-      <View className="flex-row justify-around px-4 pt-2 border-b border-gray-200">
+      <View className='flex-row justify-around px-4 pt-2 border-b border-gray-200'>
         {/* Pending tab */}
         <TouchableOpacity
-          className="flex-1 items-center"
+          className='flex-1 items-center'
           onPress={() => {
-            setActiveTab("pending"), setRefresh(!refresh);
-          }}
-        >
-          <View className="flex-row items-center gap-2">
+            (setActiveTab("pending"), setRefresh(!refresh));
+          }}>
+          <View className='flex-row items-center gap-2'>
             <Text
               className={`text-base font-medium ${
                 activeTab === "pending" ? "text-[#FFC515]" : "text-gray-500"
-              }`}
-            >
+              }`}>
               Pending
             </Text>
 
             {countPending > 0 && (
-              <View className="ml-1 px-1.5 py-0.5 rounded-full bg-red-500">
-                <Text className="text-white text-xs font-bold">
+              <View className='ml-1 px-1.5 py-0.5 rounded-full bg-red-500'>
+                <Text className='text-white text-xs font-bold'>
                   {countPending}
                 </Text>
               </View>
@@ -97,23 +95,21 @@ export default function Order() {
 
         {/* In progress tab */}
         <TouchableOpacity
-          className="flex-1 items-center"
+          className='flex-1 items-center'
           onPress={() => {
-            setActiveTab("in progress"), setRefresh(!refresh);
-          }}
-        >
-          <View className="flex-row items-center gap-2">
+            (setActiveTab("in progress"), setRefresh(!refresh));
+          }}>
+          <View className='flex-row items-center gap-2'>
             <Text
               className={`text-base font-medium ${
                 activeTab === "in progress" ? "text-[#FFC515]" : "text-gray-500"
-              }`}
-            >
+              }`}>
               In progress
             </Text>
 
             {countInProgress > 0 && (
-              <View className="ml-1 px-1.5 py-0.5 rounded-full bg-red-500">
-                <Text className="text-white text-xs font-bold">
+              <View className='ml-1 px-1.5 py-0.5 rounded-full bg-red-500'>
+                <Text className='text-white text-xs font-bold'>
                   {countInProgress}
                 </Text>
               </View>
@@ -128,7 +124,7 @@ export default function Order() {
       </View>
 
       {/* tab content */}
-      <View className="flex-1 px-4">
+      <View className='flex-1 px-4'>
         {activeTab === "pending" ? (
           <Pending
             setCount={setCountPending}

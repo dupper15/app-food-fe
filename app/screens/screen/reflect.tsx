@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
-import ReflectForm from "../components/reflectForm";
+import ReflectForm from "@/components/forms/reflectForm";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
-import { getReflectByUserId } from "@/services/api/reflectApi";
+import { getReflectByUserId } from "@/apis/reflectApi";
 import { useSelector } from "react-redux";
 import {
   Placeholder,
@@ -21,7 +21,7 @@ import {
   PlaceholderLine,
   Fade,
 } from "rn-placeholder";
-import { RootState } from "../store";
+import { RootState } from "@/services/redux/store";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);

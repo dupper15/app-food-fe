@@ -1,4 +1,4 @@
-import { fetchAllCategory } from "@/services/api/categoryApi";
+import { fetchAllCategory } from "@/apis/categoryApi";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";

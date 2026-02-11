@@ -14,15 +14,15 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store";
+import { RootState } from "@/services/redux/store";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {
   getConversationDetail,
   sendMessage as apiSendMessage,
   uploadImage,
-} from "@/services/api/chatApi";
-import { getRestaurantDetail } from "@/services/api/restaurantApi";
+} from "@/apis/chatApi";
+import { getRestaurantDetail } from "@/apis/restaurantApi";
 import socketService from "@/services/socket/socketService";
 
 // Define the message type based on API response
@@ -90,7 +90,7 @@ export default function ChatDetail() {
                       msg.sender_id === newMessage.sender_id &&
                       Math.abs(
                         new Date(msg.createdAt).getTime() -
-                          new Date(newMessage.createdAt).getTime()
+                          new Date(newMessage.createdAt).getTime(),
                       ) < 5000) ||
                     // Check for duplicate image messages (same sender and image URL)
                     (msg.image &&
@@ -99,14 +99,14 @@ export default function ChatDetail() {
                       msg.sender_id === newMessage.sender_id &&
                       Math.abs(
                         new Date(msg.createdAt).getTime() -
-                          new Date(newMessage.createdAt).getTime()
-                      ) < 10000)
+                          new Date(newMessage.createdAt).getTime(),
+                      ) < 10000),
                 );
 
                 if (isDuplicate) {
                   console.log(
                     "Duplicate message detected, ignoring:",
-                    newMessage._id
+                    newMessage._id,
                   );
                   return prevMessages;
                 }
@@ -118,7 +118,7 @@ export default function ChatDetail() {
                 scrollViewRef.current?.scrollToEnd({ animated: true });
               }, 100);
             }
-          }
+          },
         );
 
         cleanupFunction = () => {
@@ -131,7 +131,7 @@ export default function ChatDetail() {
         console.error("Socket connection failed:", error);
         Alert.alert(
           "Connection Error",
-          "Could not connect to chat service. Messages may be delayed."
+          "Could not connect to chat service. Messages may be delayed.",
         );
       }
     };
@@ -209,7 +209,7 @@ export default function ChatDetail() {
       if (status !== "granted") {
         Alert.alert(
           "Permission needed",
-          "Please grant camera permissions to take photos."
+          "Please grant camera permissions to take photos.",
         );
         return;
       }
@@ -237,7 +237,7 @@ export default function ChatDetail() {
       if (status !== "granted") {
         Alert.alert(
           "Permission needed",
-          "Please grant media library permissions to select images."
+          "Please grant media library permissions to select images.",
         );
         return;
       }
@@ -289,7 +289,7 @@ export default function ChatDetail() {
 
       console.log(
         "Starting image upload from URI:",
-        imageUri.substring(0, 30) + "..."
+        imageUri.substring(0, 30) + "...",
       );
 
       // Upload the image to server
@@ -335,7 +335,7 @@ export default function ChatDetail() {
 
       // Remove temporary message
       setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg._id !== tempId)
+        prevMessages.filter((msg) => msg._id !== tempId),
       );
 
       // Only add the final message if we're not using sockets
@@ -359,7 +359,7 @@ export default function ChatDetail() {
         // Store the sent message ID in a ref or state if needed
         console.log(
           "Message sent via API, waiting for socket update with ID:",
-          sentMessageId
+          sentMessageId,
         );
       }
 
@@ -372,7 +372,7 @@ export default function ChatDetail() {
 
       // Remove any temporary message
       setMessages((prevMessages) =>
-        prevMessages.filter((msg) => !msg._id.startsWith("temp-"))
+        prevMessages.filter((msg) => !msg._id.startsWith("temp-")),
       );
     } finally {
       setIsUploading(false);
@@ -457,7 +457,7 @@ export default function ChatDetail() {
         <Image
           source={{ uri: message.image }}
           style={styles.messageImage}
-          resizeMode="cover"
+          resizeMode='cover'
           onError={() => console.log("Error loading message image")}
         />
       );
@@ -470,7 +470,7 @@ export default function ChatDetail() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Ionicons name='chevron-back' size={24} color='#000' />
         </TouchableOpacity>
 
         {restaurantAvatar ? (
@@ -501,11 +501,10 @@ export default function ChatDetail() {
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesList}
-        contentContainerStyle={styles.messagesContainer}
-      >
+        contentContainerStyle={styles.messagesContainer}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFC515" />
+            <ActivityIndicator size='large' color='#FFC515' />
             <Text>Loading messages...</Text>
           </View>
         ) : messages.length === 0 ? (
@@ -523,8 +522,7 @@ export default function ChatDetail() {
                 style={[
                   styles.messageBubble,
                   isUser ? styles.userMessage : styles.otherMessage,
-                ]}
-              >
+                ]}>
                 {!isUser && renderAvatar(message.sender_id)}
                 <View
                   style={[
@@ -532,8 +530,7 @@ export default function ChatDetail() {
                     isUser
                       ? styles.userMessageContent
                       : styles.otherMessageContent,
-                  ]}
-                >
+                  ]}>
                   {renderMessageContent(message)}
                 </View>
               </View>
@@ -543,7 +540,7 @@ export default function ChatDetail() {
 
         {isUploading && (
           <View style={styles.uploadingContainer}>
-            <ActivityIndicator size="small" color="#FFC515" />
+            <ActivityIndicator size='small' color='#FFC515' />
             <Text style={styles.uploadingText}>Uploading image...</Text>
           </View>
         )}
@@ -552,26 +549,24 @@ export default function ChatDetail() {
       {/* Message Input */}
       <View style={styles.inputContainer}>
         <TouchableOpacity style={styles.iconButton} onPress={handleCameraPress}>
-          <Ionicons name="camera" size={24} color="#666" />
+          <Ionicons name='camera' size={24} color='#666' />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconButton}
-          onPress={handleDocumentPress}
-        >
-          <Ionicons name="document" size={24} color="#666" />
+          onPress={handleDocumentPress}>
+          <Ionicons name='document' size={24} color='#666' />
         </TouchableOpacity>
         <TextInput
           style={styles.input}
           value={inputMessage}
           onChangeText={setInputMessage}
-          placeholder="Message..."
+          placeholder='Message...'
         />
         <TouchableOpacity
           style={styles.sendButton}
           onPress={handleSendMessage}
-          disabled={inputMessage.trim() === "" || isLoading}
-        >
-          <Ionicons name="send" size={20} color="#000" />
+          disabled={inputMessage.trim() === "" || isLoading}>
+          <Ionicons name='send' size={20} color='#000' />
         </TouchableOpacity>
       </View>
     </SafeAreaView>

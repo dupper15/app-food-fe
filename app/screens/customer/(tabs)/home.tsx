@@ -1,4 +1,4 @@
-import { RestaurantData } from "@/interfaces/RestaurantInterface";
+import { RestaurantData } from "@/types/RestaurantInterface";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -11,22 +11,22 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
-import * as ResApi from "@/services/api/restaurantApi";
-import Category from "@/app/components/category";
-import RestaurantBox from "@/app/components/restaurantBox";
+import * as ResApi from "@/apis/restaurantApi";
+import Category from "@/components/features/category";
+import RestaurantBox from "@/components/items/restaurantBox";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import ImageSearch from "@/app/components/imageSearch";
-import CriteriaComponent from "@/app/components/criteriaComponent";
-import RestaurantPlaceholderBox from "@/app/components/skeleton/restaurantPlaceholderBox";
+import ImageSearch from "@/components/features/imageSearch";
+import CriteriaComponent from "@/components/forms/criteriaComponent";
+import RestaurantPlaceholderBox from "@/components/skeleton/restaurantPlaceholderBox";
 
 export default function Home() {
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
 
   const [restaurantHistory, setRestaurantHistory] = useState<RestaurantData[]>(
-    []
+    [],
   );
   const [isImageSearch, setIsImageSearch] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,7 +76,7 @@ export default function Home() {
     }
   }, [userId]);
   const navigateCart = () => {
-    router.push("/screen/cartPage");
+    router.push("/screens/screen/cartPage");
   };
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -103,7 +103,7 @@ export default function Home() {
     };
 
     router.push({
-      pathname: "/screen/restaurantSelection",
+      pathname: "/screens/screen/restaurantSelection",
       params,
     });
   };
@@ -120,7 +120,7 @@ export default function Home() {
           <View className='flex-1 flex-row items-center w-full bg-white rounded-lg pr-2 gap-2 border border-gray-300'>
             <TouchableOpacity
               className='flex-1 flex-row items-center px-4 py-2 rounded-full'
-              onPress={() => router.push("/screen/search")}>
+              onPress={() => router.push("/screens/screen/search")}>
               <Icon name='search' size={20} color='#94a3b8' className='mr-2' />
               <Text className='text-slate-400'>Search for meals...</Text>
             </TouchableOpacity>
@@ -143,7 +143,7 @@ export default function Home() {
             activeOpacity={0.7}
             onPress={() => {
               console.log("Chat button pressed");
-              router.push("/customer/chat");
+              router.push("/screens/customer/chat");
             }}>
             <Ionicons
               name='chatbubble-ellipses-outline'
@@ -180,7 +180,7 @@ export default function Home() {
       <Animated.ScrollView
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
+          { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
         style={{

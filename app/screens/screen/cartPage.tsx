@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import CardItem from "../components/cartItem";
+import CardItem from "@/components/items/cartItem";
 import { useMutation } from "@tanstack/react-query";
-import * as CartApi from "@/services/api/cartApi";
+import * as CartApi from "@/apis/cartApi";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
-import { CustomToast } from "../components/toast";
-import EditOIModal from "../components/editOIModal";
+import { CustomToast } from "@/components/ui/toast";
+import EditOIModal from "@/components/modals/editOIModal";
 import {
   Placeholder,
   PlaceholderLine,
@@ -24,7 +24,7 @@ const CartPage = () => {
 
     if (selectedDish.length > 0) {
       const currentRestaurant = cart.find((res) =>
-        res.order_items.some((item) => selectedDish.includes(item))
+        res.order_items.some((item) => selectedDish.includes(item)),
       );
       if (currentRestaurant && currentRestaurant !== selectedRestaurant) {
         setSelectedDish([selectedItem]);
@@ -45,7 +45,7 @@ const CartPage = () => {
 
     if (selectedDish.length > 0) {
       const currentRestaurant = cart.find((res) =>
-        res.order_items.some((item) => selectedDish.includes(item))
+        res.order_items.some((item) => selectedDish.includes(item)),
       );
       if (currentRestaurant && currentRestaurant !== selectedRestaurant) {
         setSelectedDish([...restaurantItems]);
@@ -54,7 +54,7 @@ const CartPage = () => {
     }
 
     const allSelected = restaurantItems.every((item) =>
-      selectedDish.includes(item)
+      selectedDish.includes(item),
     );
 
     setSelectedDish(allSelected ? [] : [...restaurantItems]);
@@ -81,7 +81,7 @@ const CartPage = () => {
   const updateQuantity = (
     restaurantIndex: number,
     itemIndex: number,
-    value: number
+    value: number,
   ) => {
     const newCart = [...cart];
     newCart[restaurantIndex].order_items[itemIndex].quantity = value;
@@ -170,7 +170,7 @@ const CartPage = () => {
                   toggleCheckbox={toggleCheckbox}
                   updateQuantity={updateQuantity}
                 />
-              )
+              ),
           )}
           <TouchableOpacity
             className='m-4 bg-customYellow p-4 rounded-lg shadow-sm'

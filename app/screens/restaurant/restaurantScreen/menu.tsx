@@ -2,7 +2,7 @@ import { Text, View, TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect, useRouter } from "expo-router";
-import ListMenuItem from "@/app/components/menuItem";
+import ListMenuItem from "@/components/items/menuItem";
 import { useCallback, useState } from "react";
 
 export default function Menu() {
@@ -10,18 +10,18 @@ export default function Menu() {
   const [refresh, setRefresh] = useState(false);
 
   const handleCreateDish = () => {
-    router.push({
-      pathname: "/components/dishModal",
-      params: {
-        dish: null,
-      },
-    });
+    // router.push({
+    //   pathname: "/screens/components/dishModal",
+    //   params: {
+    //     dish: null,
+    //   },
+    // });
   };
 
   useFocusEffect(
     useCallback(() => {
       setRefresh((prev) => !prev);
-    }, [])
+    }, []),
   );
 
   return (

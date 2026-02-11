@@ -1,4 +1,4 @@
-import { RestaurantData } from "@/interfaces/RestaurantInterface";
+import { RestaurantData } from "@/types/RestaurantInterface";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
@@ -12,16 +12,16 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
 import * as ResApi from "../../apis/restaurantApi";
-import Category from "../components/category";
-import RestaurantBox from "../components/restaurantBox";
+import Category from "@/components/features/category";
+import RestaurantBox from "@/components/items/restaurantBox";
 import { useRouter } from "expo-router";
 export default function Home() {
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
 
   const [restaurantHistory, setRestaurantHistory] = useState<RestaurantData[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [rcmRestaurant, setRcmRestaurant] = useState<RestaurantData[]>([]);
@@ -56,6 +56,10 @@ export default function Home() {
     }
   }, [userId]);
   const router = useRouter();
+  const handlePickCriteria = (id: string, header: string) => {
+    // navigate to a search/results screen with the selected criteria
+    router.push(`/screens/screen/search?criteriaId=${encodeURIComponent(id)}&header=${encodeURIComponent(header)}`);
+  };
   return (
     <View className='flex-1 bg-gray-100'>
       <View className='h-40 bg-gradient-to-b from-black to-gray-600 px-4 py-8'>
@@ -74,7 +78,7 @@ export default function Home() {
 
           <TouchableOpacity
             className='bg-customYellow p-1 rounded-lg'
-            onPress={() => router.push("/screen/cartPage")}>
+            onPress={() => router.push("/screens/screen/cartPage")}>
             <Icon name='cart-outline' size={24} color={"black"} />
           </TouchableOpacity>
 
@@ -99,7 +103,7 @@ export default function Home() {
       </View>
 
       <ScrollView className='flex-1 mt-28 px-4 py-6 pr-0'>
-        <Category />
+        <Category handlePickCriteria={handlePickCriteria} />
 
         <View className='flex-1 gap-4 pr-6 '>
           <View className='flex-row justify-between items-center gap-4'>

@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useMutation } from "@tanstack/react-query";
-import { editCustomerInfo } from "@/services/api/userApi";
-import UploadImageModal from "../components/uploadImageModal";
+import { editCustomerInfo } from "@/apis/userApi";
+import UploadImageModal from "@/components/modals/uploadImageModal";
 
 type ReactNativeFile = {
   uri: string;
@@ -56,7 +56,7 @@ const EditCustomerInfo = () => {
 
   const handleImagePicker = async (
     _file: { uri: string; name: string; type: string },
-    uri: string
+    uri: string,
   ) => {
     const file = createFileFromUri(uri);
     setAvatar(file);
@@ -97,7 +97,7 @@ const EditCustomerInfo = () => {
         name: editUser.name,
         email: editUser.email,
         phone: editUser.phone,
-      })
+      }),
     );
     if (avatar) {
       formData.append("avatar", {
@@ -146,7 +146,7 @@ const EditCustomerInfo = () => {
                   uri:
                     avatar?.uri ||
                     user.avatar ||
-                    require("../../assets/images/default_avatar.jpg"),
+                    require("../../../assets/images/default_avatar.jpg"),
                 }}
                 className='w-full h-full'
                 resizeMode='cover'

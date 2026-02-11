@@ -11,9 +11,9 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import RegisterModal from "../components/registerModal";
-import { CustomToast } from "../components/toast";
-import LoginGoogleButton from "../components/loginGoogleButton";
+import RegisterModal from "@/components/modals/registerModal";
+import { CustomToast } from "@/components/ui/toast";
+import LoginGoogleButton from "@/components/buttons/loginGoogleButton";
 
 const RegisterScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -40,7 +40,7 @@ const RegisterScreen: React.FC = () => {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps='handled'>
         <ImageBackground
-          source={require("@/assets/images/login.jpg")}
+          source={require("../../../assets/images/login.jpg")}
           className='flex-1 object-cover'>
           <View className='flex-1 justify-end pt-4'>
             <View className='absolute inset-0 bg-black opacity-40' />
@@ -159,7 +159,7 @@ const RegisterScreen: React.FC = () => {
 
               <Text className='text-gray-500 my-5'>Or</Text>
               <LoginGoogleButton />
-              <Link href='/authen/login' className='mt-8'>
+              <Link href='/screens/authen/login' className='mt-8'>
                 <Text className='text-blue-500'>
                   Already have an account? Log in
                 </Text>

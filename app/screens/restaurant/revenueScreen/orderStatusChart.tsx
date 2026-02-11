@@ -1,4 +1,4 @@
-import { OrderRateChartProps } from "@/interfaces/RevenueInterface";
+import { OrderRateChartProps } from "@/types/RevenueInterface";
 import React from "react";
 import { View, Text, Dimensions } from "react-native";
 import { PieChart } from "react-native-chart-kit";

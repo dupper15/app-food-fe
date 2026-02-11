@@ -2,7 +2,7 @@ import {
   checkCodeNoDeleteCode,
   resetPassword,
   sendCodeByPhone,
-} from "@/services/api/userApi";
+} from "@/apis/userApi";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -17,7 +17,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { CustomToast } from "../components/toast";
+import { CustomToast } from "@/components/ui/toast";
 
 const ForgetPasswordScreen = () => {
   const [isSent, setIsSent] = useState<boolean>(false);
@@ -76,7 +76,7 @@ const ForgetPasswordScreen = () => {
     mutationFn: resetPassword,
     onSuccess: (data) => {
       CustomToast("success", "Successfull", "Password changed successfully");
-      router.push("/authen/login");
+      router.push("/screens/authen/login");
     },
     onError: (error) => {
       console.log(error);
@@ -195,8 +195,8 @@ const ForgetPasswordScreen = () => {
               isSetPassword
                 ? handleChangePassword
                 : isSent
-                ? handleVerify
-                : handleSendCode
+                  ? handleVerify
+                  : handleSendCode
             }
             disabled={isLoading}
             className={`bg-yellow-400 rounded-lg px-10 py-3 shadow-sm active:opacity-80 ${
@@ -208,12 +208,12 @@ const ForgetPasswordScreen = () => {
                   ? "Changing..."
                   : "Change Password"
                 : isSent
-                ? checkCodeMutation.isPending
-                  ? "Verifying..."
-                  : "Verify"
-                : sendVerifyCodeMutation.isPending
-                ? "Sending..."
-                : "Send Code"}
+                  ? checkCodeMutation.isPending
+                    ? "Verifying..."
+                    : "Verify"
+                  : sendVerifyCodeMutation.isPending
+                    ? "Sending..."
+                    : "Send Code"}
             </Text>
           </TouchableOpacity>
         </View>

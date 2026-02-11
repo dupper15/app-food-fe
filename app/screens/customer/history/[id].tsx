@@ -20,7 +20,7 @@ import {
 import { fetchCompleteHistory } from "@/services/historyService";
 import { useSelector } from "react-redux";
 import { transPrice } from "@/utils/transPrice";
-import ReorderButton from "@/app/components/reorderButton";
+import ReorderButton from "@/components/buttons/reorderButton";
 
 const OrderDetailScreen = () => {
   const router = useRouter();
@@ -32,7 +32,7 @@ const OrderDetailScreen = () => {
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [order, setOrder] = useState<any>(null);
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
 
   const getStatusColor = (status: string) => {
@@ -59,7 +59,7 @@ const OrderDetailScreen = () => {
           (item) =>
             item.order._id === orderId ||
             item.historyItem.order_id === orderId ||
-            item.historyItem._id === orderId
+            item.historyItem._id === orderId,
         );
 
         if (!order) {
@@ -85,7 +85,7 @@ const OrderDetailScreen = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FFCC00" />
+        <ActivityIndicator size='large' color='#FFCC00' />
         <Text style={styles.loadingText}>Loading order details...</Text>
       </SafeAreaView>
     );
@@ -97,8 +97,7 @@ const OrderDetailScreen = () => {
         <Text style={styles.errorText}>{error || "Order not found"}</Text>
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => router.back()}
-        >
+          onPress={() => router.back()}>
           <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -107,7 +106,7 @@ const OrderDetailScreen = () => {
 
   const subtotal = orderDetail.orderItems.reduce(
     (sum: number, item: any) => sum + item.dish.price * item.quantity,
-    0
+    0,
   );
 
   const toppingTotal = orderDetail.orderItems.reduce(
@@ -115,31 +114,30 @@ const OrderDetailScreen = () => {
       sum +
       item.toppings.reduce(
         (toppingSum: number, topping: any) => toppingSum + topping.price,
-        0
+        0,
       ) *
         item.quantity,
-    0
+    0,
   );
 
   const voucherDiscount = orderDetail.vouchers.reduce(
     (sum: number, voucher: any) => sum + voucher.value,
-    0
+    0,
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
 
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={24} color="#000" />
+          onPress={() => router.back()}>
+          <ChevronLeft size={24} color='#000' />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Orders</Text>
         <TouchableOpacity style={styles.menuButton}>
-          <MoreVertical size={24} color="#000" />
+          <MoreVertical size={24} color='#000' />
         </TouchableOpacity>
       </View>
 
@@ -166,8 +164,7 @@ const OrderDetailScreen = () => {
               style={[
                 styles.statusText,
                 { color: getStatusColor(orderDetail.order.status) },
-              ]}
-            >
+              ]}>
               {orderDetail.order.status.charAt(0).toUpperCase() +
                 orderDetail.order.status.slice(1)}
             </Text>
@@ -176,7 +173,7 @@ const OrderDetailScreen = () => {
 
         <View style={styles.locationContainer}>
           <View style={styles.locationRow}>
-            <MapPin size={18} color="#e74c3c" style={styles.locationIcon} />
+            <MapPin size={18} color='#e74c3c' style={styles.locationIcon} />
             <Text style={styles.locationText}>
               {orderDetail.restaurant.address}
             </Text>

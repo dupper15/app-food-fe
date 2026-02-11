@@ -5,25 +5,34 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ListSetting from "@/app/components/settingItem";
+import ListSetting from "@/components/items/settingItem";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
-import { getDetailOwner } from "@/services/api/owner";
+import { getDetailOwner } from "@/apis/owner";
 import { useCallback, useEffect, useState } from "react";
-import { CustomToast } from "@/app/components/toast";
+import { CustomToast } from "@/components/ui/toast";
 import { router, useFocusEffect } from "expo-router";
 import { ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getOrInitializeConversation } from "@/services/api/chatApi";
-import { MessageContents, UserNames } from "@/app/customer/chat";
+import {
+  getAllConversations,
+  getMessage,
+  getOrInitializeConversation,
+} from "@/apis/chatApi";
+import {
+  Conversation,
+  MessageContents,
+  UserNames,
+} from "@/screens/customer/chat";
+import { getRestaurantDetail } from "@/apis/restaurantApi";
 
 export default function Restaurant() {
   const ownerId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
   const name = useSelector(
-    (state: { restaurant: { name: string } }) => state.restaurant.name
+    (state: { restaurant: { name: string } }) => state.restaurant.name,
   );
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -31,6 +40,10 @@ export default function Restaurant() {
   const [userNames, setUserNames] = useState<UserNames>({});
   const [userAvatars, setUserAvatars] = useState<{ [key: string]: string }>({});
   const [messageContents, setMessageContents] = useState<MessageContents>({});
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [filteredConversations, setFilteredConversations] = useState<
+    Conversation[]
+  >([]);
   const userId = "67d9214bf4722d58ebc02690";
 
   useFocusEffect(
@@ -38,7 +51,7 @@ export default function Restaurant() {
       if (ownerId) {
         fetchDetailOwnerMutation.mutate(ownerId);
       }
-    }, [ownerId])
+    }, [ownerId]),
   );
 
   const fetchDetailOwnerMutation = useMutation({
@@ -64,7 +77,7 @@ export default function Restaurant() {
     AsyncStorage.removeItem("startTime");
     AsyncStorage.removeItem("usageTime");
     AsyncStorage.removeItem("customer_id");
-    router.push("/authen/login");
+    router.push("/screens/authen/login");
   };
 
   const chatInitMutation = useMutation({
@@ -75,7 +88,7 @@ export default function Restaurant() {
       setIsStartingChat(false);
       if (data && data.conversationId) {
         router.push({
-          pathname: "/customer/chat",
+          pathname: "/screens/customer/chat",
           params: { id: data.conversationId },
         });
       } else {
@@ -95,7 +108,7 @@ export default function Restaurant() {
 
     if (!userId) {
       console.log("User not logged in, redirecting to login");
-      router.push("/authen/login");
+      router.push("/screens/authen/login");
       return;
     }
 
@@ -106,7 +119,7 @@ export default function Restaurant() {
     }
 
     console.log(
-      `Starting chat between user ${userId} and restaurant ${ownerId}`
+      `Starting chat between user ${userId} and restaurant ${ownerId}`,
     );
     setIsStartingChat(true);
 
@@ -123,7 +136,7 @@ export default function Restaurant() {
     if (!userId) return;
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       const data = await getAllConversations(userId);
 
       // Sort conversations by updatedAt timestamp (newest first)
@@ -161,7 +174,7 @@ export default function Restaurant() {
             console.error(`Error fetching details for user ${id}:`, error);
             namesMap[id] = "Unknown User";
           }
-        })
+        }),
       );
 
       // Fetch all last message contents
@@ -181,7 +194,7 @@ export default function Restaurant() {
             console.error(`Error fetching message ${msgId}:`, error);
             messagesMap[msgId] = "Unable to load message";
           }
-        })
+        }),
       );
 
       setMessageContents(messagesMap);
@@ -198,20 +211,20 @@ export default function Restaurant() {
   }, [userId]);
 
   return (
-    <ScrollView className="bg-white px-6 pt-6 flex-col h-full gap-8">
+    <ScrollView className='bg-white px-6 pt-6 flex-col h-full gap-8'>
       {isLoading ? (
-        <ActivityIndicator size="large" color="#FFC515" className="mt-10" />
+        <ActivityIndicator size='large' color='#FFC515' className='mt-10' />
       ) : (
         <>
           {/* avatar and fullname */}
-          <View className="flex-row items-center gap-10">
+          <View className='flex-row items-center gap-10'>
             <Image
               source={{ uri: avatarUrl }}
-              className="rounded-full w-24 h-24"
+              className='rounded-full w-24 h-24'
             />
-            <View className="gap-1 flex-1">
-              <Text className="font-semibold text-xl">{name}</Text>
-              <Text className="text-base text-gray-400">I love fast food</Text>
+            <View className='gap-1 flex-1'>
+              <Text className='font-semibold text-xl'>{name}</Text>
+              <Text className='text-base text-gray-400'>I love fast food</Text>
             </View>
           </View>
         </>
@@ -224,25 +237,23 @@ export default function Restaurant() {
 
       <TouchableOpacity
         onPress={handleChatWithRestaurant}
-        className="flex-row gap-2 items-center px-4 py-5 mt-5 mb-5 bg-gray-100 rounded-xl"
-      >
-        <View className="bg-white rounded-full p-2">
-          <Ionicons name="chatbubble-outline" size={20} color="#FF5733" />
+        className='flex-row gap-2 items-center px-4 py-5 mt-5 mb-5 bg-gray-100 rounded-xl'>
+        <View className='bg-white rounded-full p-2'>
+          <Ionicons name='chatbubble-outline' size={20} color='#FF5733' />
         </View>
-        <Text className="flex-1 ml-4 text-base">Message</Text>
-        <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
+        <Text className='flex-1 ml-4 text-base'>Message</Text>
+        <MaterialIcons name='keyboard-arrow-right' size={24} color='black' />
       </TouchableOpacity>
 
       {/* logout */}
       <TouchableOpacity
         onPress={handleLogout}
-        className="flex-row gap-2 items-center px-4 py-5 mb-20 bg-gray-100 rounded-xl"
-      >
-        <View className="bg-white rounded-full p-2">
-          <Ionicons name="log-out-outline" size={20} color="#FF5733" />
+        className='flex-row gap-2 items-center px-4 py-5 mb-20 bg-gray-100 rounded-xl'>
+        <View className='bg-white rounded-full p-2'>
+          <Ionicons name='log-out-outline' size={20} color='#FF5733' />
         </View>
-        <Text className="flex-1 ml-4 text-base">Logout</Text>
-        <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
+        <Text className='flex-1 ml-4 text-base'>Logout</Text>
+        <MaterialIcons name='keyboard-arrow-right' size={24} color='black' />
       </TouchableOpacity>
     </ScrollView>
   );

@@ -13,8 +13,8 @@ import { useState, useRef, useEffect } from "react";
 import { router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { getChatBotMessage, sendChatBotMessage } from "@/services/api/chatApi";
-import BotFunction from "../components/botFunction";
+import { getChatBotMessage, sendChatBotMessage } from "@/apis/chatApi";
+import BotFunction from "@/components/features/botFunction";
 
 const ChatBot = () => {
   const [messages, setMessages] = useState([]);
@@ -35,7 +35,7 @@ const ChatBot = () => {
         if (scrollViewRef.current) {
           scrollViewRef.current.scrollToEnd({ animated: true });
         }
-      }
+      },
     );
 
     return () => {
@@ -104,7 +104,7 @@ const ChatBot = () => {
             </TouchableOpacity>
 
             <Image
-              source={require("../../assets/images/chatbot.png")}
+              source={require("../../../assets/images/chatbot.png")}
               className='w-10 h-10 rounded-full'
               style={{ width: 40, height: 40, borderRadius: 20 }}
             />
@@ -138,7 +138,7 @@ const ChatBot = () => {
                     className='self-end bg-blue-500 rounded-lg px-4 py-2 mb-3 max-w-[75%]'>
                     <Text className='text-white'>{message.content}</Text>
                   </View>
-                )
+                ),
               )
             )}
           </ScrollView>

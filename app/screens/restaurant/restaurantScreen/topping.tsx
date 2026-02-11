@@ -1,4 +1,4 @@
-import ToppingMenu from "@/app/components/toppingItem";
+import ToppingMenu from "@/components/items/toppingItem";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -9,32 +9,31 @@ export default function Topping() {
   const [refresh, setRefresh] = useState<boolean>(false);
 
   const handleCreateTopping = () => {
-    router.push({
-      pathname: "/components/toppingModal",
-      params: {
-        topping: null,
-      },
-    });
+    // router.push({
+    //   pathname: "/screens/components/toppingModal",
+    //   params: {
+    //     topping: null,
+    //   },
+    // });
   };
 
   useFocusEffect(
     useCallback(() => {
       setRefresh((prev) => !prev);
-    }, [])
+    }, []),
   );
   return (
-    <View className="h-full flex-col bg-white">
+    <View className='h-full flex-col bg-white'>
       {/* header */}
-      <View className="flex-row w-full h-14 bg-white items-center justify-between px-4 border-b border-gray-100">
+      <View className='flex-row w-full h-14 bg-white items-center justify-between px-4 border-b border-gray-100'>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back-outline" size={24} color="black" />
+          <Ionicons name='chevron-back-outline' size={24} color='black' />
         </TouchableOpacity>
-        <Text className="font-bold text-2xl">Topping</Text>
+        <Text className='font-bold text-2xl'>Topping</Text>
         <TouchableOpacity
           onPress={() => handleCreateTopping()}
-          className="flex-row bg-[#FFC515] rounded-md w-8 h-8 items-center justify-center"
-        >
-          <FontAwesome6 name="plus" size={18} color="white" />
+          className='flex-row bg-[#FFC515] rounded-md w-8 h-8 items-center justify-center'>
+          <FontAwesome6 name='plus' size={18} color='white' />
         </TouchableOpacity>
       </View>
 

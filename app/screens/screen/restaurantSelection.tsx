@@ -15,22 +15,22 @@ import { useSelector } from "react-redux";
 import {
   getRestaurantByCriteria,
   getNearbyRestaurantsByLocation,
-} from "@/services/api/restaurantApi";
+} from "@/apis/restaurantApi";
 import {
   addFavoriteRestaurant,
   getCustomerInfo,
   getFavoriteRestaurantIds,
   removeFavoriteRestaurant,
-} from "@/services/api/userApi";
-import { RestaurantData } from "@/interfaces/RestaurantInterface";
+} from "@/apis/userApi";
+import { RestaurantData } from "@/types/RestaurantInterface";
 import * as Location from "expo-location";
-import LocationSelectionModal from "@/components/LocationSelectionModal";
+import LocationSelectionModal from "@/components/modals/LocationSelectionModal";
 
 const calculateDistance = (
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number
+  lon2: number,
 ): number => {
   // Earth's radius in kilometers
   const R = 6371;
@@ -82,7 +82,7 @@ const RestaurantSelection = () => {
           userCoordinates.latitude,
           userCoordinates.longitude,
           restaurant.latitude,
-          restaurant.longitude
+          restaurant.longitude,
         );
 
         return {
@@ -98,7 +98,7 @@ const RestaurantSelection = () => {
     mutationFn: getNearbyRestaurantsByLocation,
     onSuccess: (data) => {
       const restaurantsWithDistance = calculateRestaurantDistances(
-        data.result || data || []
+        data.result || data || [],
       );
       setRestaurants(restaurantsWithDistance);
       setIsLoading(false);
@@ -108,7 +108,7 @@ const RestaurantSelection = () => {
       setIsLoading(false);
       Alert.alert(
         "Location Error",
-        "Could not fetch nearby restaurants. Please try again."
+        "Could not fetch nearby restaurants. Please try again.",
       );
     },
   });
@@ -155,7 +155,7 @@ const RestaurantSelection = () => {
       setIsLoading(false);
       Alert.alert(
         "Authentication Error",
-        "You need to be logged in to use this feature."
+        "You need to be logged in to use this feature.",
       );
     }
   };
@@ -188,7 +188,7 @@ const RestaurantSelection = () => {
 
   const handleDishNavigate = (item: any) => {
     router.push({
-      pathname: "/screen/restaurantPage",
+      pathname: "/screens/screen/restaurantPage",
       params: {
         data: JSON.stringify(item),
       },
@@ -238,28 +238,27 @@ const RestaurantSelection = () => {
   };
 
   return (
-    <View className="flex-1 bg-gray-100 ">
-      <View className="flex-row items-start bg-white px-2 pt-4 pb-2 mb-4">
+    <View className='flex-1 bg-gray-100 '>
+      <View className='flex-row items-start bg-white px-2 pt-4 pb-2 mb-4'>
         <TouchableHighlight
-          className="rounded-full p-2"
+          className='rounded-full p-2'
           onPress={() => {
             router.back();
-          }}
-        >
-          <Icon name="arrow-back" size={24} color="gray" />
+          }}>
+          <Icon name='arrow-back' size={24} color='gray' />
         </TouchableHighlight>
-        <Text className="text-2xl font-semibold text-gray-800">{header}</Text>
+        <Text className='text-2xl font-semibold text-gray-800'>{header}</Text>
       </View>
 
       {isLoading && !showLocationModal ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#facc15" />
-          <Text className="mt-2 text-gray-500">Loading restaurants...</Text>
+        <View className='flex-1 justify-center items-center'>
+          <ActivityIndicator size='large' color='#facc15' />
+          <Text className='mt-2 text-gray-500'>Loading restaurants...</Text>
         </View>
       ) : (
-        <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+        <ScrollView className='px-4' showsVerticalScrollIndicator={false}>
           {selectedLocationInfo && (
-            <View className="flex-row items-center bg-white p-3 rounded-lg mb-3">
+            <View className='flex-row items-center bg-white p-3 rounded-lg mb-3'>
               <Icon
                 name={
                   selectedLocationInfo.source === "device"
@@ -267,14 +266,14 @@ const RestaurantSelection = () => {
                     : "place"
                 }
                 size={20}
-                color="#facc15"
+                color='#facc15'
               />
-              <Text className="ml-2 text-gray-600">
+              <Text className='ml-2 text-gray-600'>
                 {selectedLocationInfo.source === "device"
                   ? "Using your current device location"
                   : `Using address: ${selectedLocationInfo.addressName?.substring(
                       0,
-                      24
+                      24,
                     )}${
                       selectedLocationInfo.addressName &&
                       selectedLocationInfo.addressName.length > 24
@@ -283,10 +282,9 @@ const RestaurantSelection = () => {
                     }`}
               </Text>
               <TouchableHighlight
-                className="ml-auto rounded-full p-1"
-                onPress={() => setShowLocationModal(true)}
-              >
-                <Text className="text-customYellow font-medium">Change</Text>
+                className='ml-auto rounded-full p-1'
+                onPress={() => setShowLocationModal(true)}>
+                <Text className='text-customYellow font-medium'>Change</Text>
               </TouchableHighlight>
             </View>
           )}
@@ -295,21 +293,20 @@ const RestaurantSelection = () => {
             restaurants.map((restaurant) => (
               <View
                 key={restaurant._id}
-                className="bg-white rounded-lg p-5 mb-6 border border-gray-300 "
-              >
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-row items-start w-full">
+                className='bg-white rounded-lg p-5 mb-6 border border-gray-300 '>
+                <View className='flex-row items-start justify-between'>
+                  <View className='flex-row items-start w-full'>
                     {restaurant.owner_id?.avatar && (
                       <Image
                         source={{ uri: restaurant.owner_id.avatar }}
-                        className="w-16 h-16 rounded-lg border border-gray-300"
+                        className='w-16 h-16 rounded-lg border border-gray-300'
                       />
                     )}
-                    <View className="flex-1 ml-4">
-                      <Text className="text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden">
+                    <View className='flex-1 ml-4'>
+                      <Text className='text-2xl font-semibold text-gray-800 whitespace-nowrap text-ellipsis overflow-hidden'>
                         {restaurant.name}
                       </Text>
-                      <Text className="text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden">
+                      <Text className='text-sm text-gray-600 mt-1 whitespace-nowrap text-ellipsis overflow-hidden'>
                         {restaurant.description}
                       </Text>
                     </View>
@@ -320,11 +317,10 @@ const RestaurantSelection = () => {
                   onPress={() =>
                     handleAddToFavorite(
                       restaurant._id,
-                      favoriteRestaurants.includes(restaurant._id)
+                      favoriteRestaurants.includes(restaurant._id),
                     )
                   }
-                  className="absolute top-3 right-3"
-                >
+                  className='absolute top-3 right-3'>
                   <Icon
                     name={
                       favoriteRestaurants.includes(restaurant._id)
@@ -339,20 +335,19 @@ const RestaurantSelection = () => {
                     }
                   />
                 </TouchableHighlight>
-                <View className="flex-row items-center justify-between mt-4">
-                  <Text className="text-xl ml-2 text-gray-900">
+                <View className='flex-row items-center justify-between mt-4'>
+                  <Text className='text-xl ml-2 text-gray-900'>
                     {restaurant.distance
                       ? `${restaurant.distance.toFixed(1)}km`
                       : "3.5km"}
                   </Text>
 
                   <TouchableHighlight
-                    className="bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300"
+                    className='bg-customYellow rounded-lg px-6 py-3 w-max self-end transition-all duration-300'
                     onPress={() => {
                       handleDishNavigate(restaurant);
-                    }}
-                  >
-                    <Text className="text-lg font-semibold text-white">
+                    }}>
+                    <Text className='text-lg font-semibold text-white'>
                       Order
                     </Text>
                   </TouchableHighlight>
@@ -360,8 +355,8 @@ const RestaurantSelection = () => {
               </View>
             ))
           ) : (
-            <View className="flex-1 justify-center items-center py-20">
-              <Text className="text-gray-500 text-lg">
+            <View className='flex-1 justify-center items-center py-20'>
+              <Text className='text-gray-500 text-lg'>
                 No{" "}
                 {restaurantCriteria
                   .slice(1, -1)

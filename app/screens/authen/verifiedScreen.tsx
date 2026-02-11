@@ -1,4 +1,4 @@
-import { checkCode, sendVerificationCode } from "@/services/api/userApi";
+import { checkCode, sendVerificationCode } from "@/apis/userApi";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -14,8 +14,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { CustomToast } from "../components/toast";
-import { RootState } from "../store";
+import { CustomToast } from "@/components/ui/toast";
+import { RootState } from "@/services/redux/store";
 
 const VerifiedScreen = () => {
   const [isSent, setIsSent] = useState<boolean>(false);
@@ -57,7 +57,7 @@ const VerifiedScreen = () => {
     mutationFn: checkCode,
     onSuccess: (data) => {
       CustomToast("success", "Successfull", "Verified code successfully");
-      router.push("/authen/login");
+      router.push("/screens/authen/login");
     },
     onError: (error) => {
       console.log(error);

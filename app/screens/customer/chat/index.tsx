@@ -1,4 +1,4 @@
-import { getAllConversations, getMessage } from "@/services/api/chatApi";
+import { getAllConversations, getMessage } from "@/apis/chatApi";
 import { router, useFocusEffect } from "expo-router";
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -15,8 +15,8 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector } from "react-redux";
-import { RootState } from "@/app/store";
-import { getRestaurantDetail } from "@/services/api/restaurantApi";
+import { RootState } from "@/services/redux/store";
+import { getRestaurantDetail } from "@/apis/restaurantApi";
 import socketService from "@/services/socket/socketService";
 
 export interface Conversation {
@@ -76,7 +76,7 @@ export default function Chat() {
             console.log("Conversation updated notification:", data);
             // Refresh conversations when updated
             fetchData();
-          }
+          },
         );
 
         cleanupFunction = () => {
@@ -138,7 +138,7 @@ export default function Chat() {
             console.error(`Error fetching details for user ${id}:`, error);
             namesMap[id] = "Unknown User";
           }
-        })
+        }),
       );
 
       // Fetch all last message contents
@@ -158,7 +158,7 @@ export default function Chat() {
             console.error(`Error fetching message ${msgId}:`, error);
             messagesMap[msgId] = "Unable to load message";
           }
-        })
+        }),
       );
 
       setMessageContents(messagesMap);
@@ -183,7 +183,7 @@ export default function Chat() {
       return () => {
         // Optional cleanup
       };
-    }, [userId])
+    }, [userId]),
   );
 
   useEffect(() => {
@@ -203,7 +203,7 @@ export default function Chat() {
 
   const navigateToChatDetail = (conversationId: string): void => {
     router.push({
-      pathname: "/customer/chat/[id]",
+      pathname: "/screens/customer/chat/[id]",
       params: { id: conversationId },
     });
   };
@@ -231,16 +231,15 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
+      <StatusBar barStyle='light-content' backgroundColor='#1A1A1A' />
       <Text style={styles.chatTitle}>chat</Text>
 
       <View style={styles.chatContainer}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
+            onPress={() => router.back()}>
+            <Ionicons name='chevron-back' size={24} color='#000' />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chat</Text>
           <View style={styles.rightHeader}>
@@ -248,10 +247,9 @@ export default function Chat() {
               <Text style={styles.offlineIndicator}>Offline</Text>
             )}
             <TouchableOpacity
-              className="mr-4"
-              onPress={() => router.push("/screen/chatBot")}
-            >
-              <Ionicons name="logo-android" size={24} color="#000" />
+              className='mr-4'
+              onPress={() => router.push("/screens/screen/chatBot")}>
+              <Ionicons name='logo-android' size={24} color='#000' />
             </TouchableOpacity>
           </View>
         </View>
@@ -259,23 +257,23 @@ export default function Chat() {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons
-            name="search"
+            name='search'
             size={20}
-            color="#999"
+            color='#999'
             style={styles.searchIcon}
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search"
+            placeholder='Search'
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
+            placeholderTextColor='#999'
           />
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFC515" />
+            <ActivityIndicator size='large' color='#FFC515' />
             <Text style={styles.loadingText}>Loading conversations...</Text>
           </View>
         ) : (
@@ -286,15 +284,14 @@ export default function Chat() {
               const otherUserId = getOtherUserId(item);
               const otherUserName = getOtherUserName(item);
               const lastMessageContent = getLastMessageContent(
-                item.last_message
+                item.last_message,
               );
               const avatarUrl = userAvatars[otherUserId];
 
               return (
                 <TouchableOpacity
                   style={styles.chatItem}
-                  onPress={() => navigateToChatDetail(item._id)}
-                >
+                  onPress={() => navigateToChatDetail(item._id)}>
                   {avatarUrl ? (
                     <Image
                       source={{ uri: avatarUrl }}

@@ -22,9 +22,9 @@ import {
 } from "@/services/historyService";
 import { useSelector } from "react-redux";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import OrderComponent from "@/app/components/orderItem";
-import RatingPopup from "@/app/components/rating";
-import ratingApi from "@/services/api/ratingApi";
+import OrderComponent from "@/components/items/orderItem";
+import RatingPopup from "@/components/features/rating";
+import ratingApi from "@/apis/ratingApi";
 
 // Tab options
 const TABS = ["Ongoing", "History"];
@@ -46,12 +46,12 @@ const OrderHistoryScreen = () => {
   const [existingRatingId, setExistingRatingId] = useState<string | null>(null);
   const { refresh } = useLocalSearchParams();
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
   useFocusEffect(
     useCallback(() => {
       refreshHistory();
-    }, [userId])
+    }, [userId]),
   );
   // Fetch complete history data
   const {
@@ -69,7 +69,7 @@ const OrderHistoryScreen = () => {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
 
   // Handle the refresh parameter
@@ -96,7 +96,7 @@ const OrderHistoryScreen = () => {
     rating: number,
     feedback: string,
     images: string[],
-    ratingId?: string
+    ratingId?: string,
   ) => {
     try {
       if (ratingId) {

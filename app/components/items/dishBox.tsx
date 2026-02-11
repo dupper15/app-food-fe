@@ -82,7 +82,7 @@ const DishBox = ({ dish }: DishBoxProps) => {
         <View>
           {Boolean(dish.best_seller) && (
             <Image
-              source={require("@/assets/images/best-seller.png")}
+              source={require("../../../assets/images/best-seller.png")}
               style={{ width: 60, height: 60 }}
               className='absolute z-10 -top-4 -right-4'
               resizeMode='cover'

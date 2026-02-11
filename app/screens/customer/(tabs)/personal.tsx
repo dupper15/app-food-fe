@@ -1,5 +1,5 @@
-import { RootState } from "@/app/store";
-import { getCustomerInfo } from "@/services/api/userApi";
+import { RootState } from "@/services/redux/store";
+import { getCustomerInfo } from "@/apis/userApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -28,7 +28,7 @@ export default function Personal() {
     AsyncStorage.removeItem("startTime");
     AsyncStorage.removeItem("usageTime");
     AsyncStorage.removeItem("customer_id");
-    router.push("/authen/login");
+    router.push("/screens/authen/login");
   };
   const menuItems = [
     {
@@ -38,7 +38,7 @@ export default function Personal() {
       onPress: () => {
         if (user) {
           router.push({
-            pathname: "/screen/editCustomerInfo",
+            pathname: "/screens/screen/editCustomerInfo",
             params: { data: JSON.stringify(user) },
           });
         }
@@ -49,7 +49,7 @@ export default function Personal() {
       label: "Addresses",
       iconColor: "#ef4444", // amber-500
       onPress: () => {
-        router.push("/screen/addressPage");
+        router.push("/screens/screen/addressPage");
       },
     },
     {
@@ -57,7 +57,7 @@ export default function Personal() {
       label: "Reflect",
       iconColor: "#10b981", // green-500
       onPress: () => {
-        router.push("/screen/reflect");
+        router.push("/screens/screen/reflect");
       },
     },
     {
@@ -65,7 +65,7 @@ export default function Personal() {
       label: "Change password",
       iconColor: "#f59e0b", // amber-500
       onPress: () => {
-        router.push("/screen/changePasswordPage");
+        router.push("/screens/screen/changePasswordPage");
       },
     },
     {
@@ -73,7 +73,7 @@ export default function Personal() {
       label: "Privacy",
       iconColor: "#f97316", // orange-500
       onPress: () => {
-        router.push("/screen/privacyPage");
+        router.push("/screens/screen/privacyPage");
       },
     },
     {
@@ -106,7 +106,7 @@ export default function Personal() {
       if (userId) {
         getUserInfoMutation.mutate(userId);
       }
-    }, [userId])
+    }, [userId]),
   );
 
   return (
@@ -139,7 +139,7 @@ export default function Personal() {
                   />
                 ) : (
                   <Image
-                    source={require("../../../assets/images/default_avatar.jpg")}
+                    source={require("../../../../assets/images/default_avatar.jpg")}
                     className='w-16 h-16 rounded-full mr-4'
                   />
                 )}

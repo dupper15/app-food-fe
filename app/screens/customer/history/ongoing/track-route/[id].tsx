@@ -7,15 +7,15 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+//import MapView, { Marker, Polyline } from "react-native-maps";
 import { WebView } from "react-native-webview";
 import { router, useLocalSearchParams } from "expo-router";
-import { fetchOrderById } from "@/services/api/orderApi";
+import { fetchOrderById } from "@/apis/orderApi";
 import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
-import { getCustomerInfo } from "@/services/api/userApi";
+import { getCustomerInfo } from "@/apis/userApi";
 import { Ionicons } from "@expo/vector-icons";
-import RouteLocationSelectionModal from "@/components/RouteLocationSelectionModal";
+import RouteLocationSelectionModal from "@/components/modals/RouteLocationSelectionModal";
 
 interface Location {
   latitude: number;
@@ -141,9 +141,9 @@ const TrackRouteScreen: React.FC = () => {
 
       const response = await fetch(
         `https://router.project-osrm.org/route/v1/driving/${start.join(
-          ","
+          ",",
         )};${end.join(",")}?overview=full&geometries=geojson`,
-        { method: "GET" }
+        { method: "GET" },
       );
 
       if (!response.ok) {
@@ -246,15 +246,17 @@ const TrackRouteScreen: React.FC = () => {
           
           const startMarker = L.marker(${startCoords}).addTo(map)
             .bindPopup("${startLocation.title}${
-      startLocation.address
-        ? ": " + startLocation.address.replace(/"/g, '\\"')
-        : ""
-    }");
+              startLocation.address
+                ? ": " + startLocation.address.replace(/"/g, '\\"')
+                : ""
+            }");
             
           const endMarker = L.marker(${endCoords}).addTo(map)
             .bindPopup("${endLocation.title}${
-      endLocation.address ? ": " + endLocation.address.replace(/"/g, '\\"') : ""
-    }");
+              endLocation.address
+                ? ": " + endLocation.address.replace(/"/g, '\\"')
+                : ""
+            }");
           
           // Add route polyline if waypoints exist
           ${
@@ -276,7 +278,7 @@ const TrackRouteScreen: React.FC = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size='large' color='#0000ff' />
         <Text style={styles.loadingText}>Loading route information...</Text>
       </View>
     );
@@ -307,14 +309,13 @@ const TrackRouteScreen: React.FC = () => {
               flexDirection: "row",
               alignItems: "center",
               marginBottom: 10,
-            }}
-          >
+            }}>
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons
                 style={{ marginRight: 8 }}
-                name="chevron-back-outline"
+                name='chevron-back-outline'
                 size={24}
-                color="black"
+                color='black'
               />
             </TouchableOpacity>
             <Text style={styles.infoTitle}>Track route</Text>
@@ -325,18 +326,17 @@ const TrackRouteScreen: React.FC = () => {
             <Text style={styles.locationLabel}>From:</Text>
             <TouchableOpacity
               style={styles.locationSelector}
-              onPress={() => setShowStartLocationModal(true)}
-            >
+              onPress={() => setShowStartLocationModal(true)}>
               <Ionicons
-                name="location"
+                name='location'
                 size={20}
-                color="#2196F3"
+                color='#2196F3'
                 style={styles.locationIcon}
               />
               <Text numberOfLines={1} style={styles.locationText}>
                 {startLocation.address || startLocation.title}
               </Text>
-              <Ionicons name="pencil" size={16} color="#757575" />
+              <Ionicons name='pencil' size={16} color='#757575' />
             </TouchableOpacity>
           </View>
 
@@ -344,18 +344,16 @@ const TrackRouteScreen: React.FC = () => {
           <View style={styles.locationContainer}>
             <Text style={styles.locationLabel}>To:</Text>
             <View
-              style={[styles.locationSelector, { backgroundColor: "#f8f8f8" }]}
-            >
+              style={[styles.locationSelector, { backgroundColor: "#f8f8f8" }]}>
               <Ionicons
-                name="restaurant"
+                name='restaurant'
                 size={20}
-                color="#F44336"
+                color='#F44336'
                 style={styles.locationIcon}
               />
               <Text
                 numberOfLines={2}
-                style={[styles.locationText, { color: "#333" }]}
-              >
+                style={[styles.locationText, { color: "#333" }]}>
                 {endLocation.title}
                 {endLocation.address ? ` (${endLocation.address})` : ""}
               </Text>
@@ -369,8 +367,8 @@ const TrackRouteScreen: React.FC = () => {
           onClose={() => setShowStartLocationModal(false)}
           userId={userId}
           onSelectLocation={handleSelectStartLocation}
-          title="Select Your Starting Point"
-          purpose="start"
+          title='Select Your Starting Point'
+          purpose='start'
         />
       </View>
     );
@@ -379,12 +377,11 @@ const TrackRouteScreen: React.FC = () => {
   // Original render method with react-native-maps as fallback
   return (
     <View style={styles.container}>
-      <MapView
+      {/* <MapView
         style={styles.map}
         region={getMapRegion()}
         showsUserLocation={true}
-        followsUserLocation={true}
-      >
+        followsUserLocation={true}>
         <Marker
           coordinate={{
             latitude: startLocation.latitude,
@@ -402,7 +399,7 @@ const TrackRouteScreen: React.FC = () => {
         <Polyline
           coordinates={routeCoordinates}
           strokeWidth={4}
-          strokeColor="#2196F3"
+          strokeColor='#2196F3'
         />
       </MapView>
       <View style={styles.infoContainer}>
@@ -410,14 +407,14 @@ const TrackRouteScreen: React.FC = () => {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons
               style={{ marginRight: 8 }}
-              name="chevron-back-outline"
+              name='chevron-back-outline'
               size={24}
-              color="black"
+              color='black'
             />
           </TouchableOpacity>
           <Text style={styles.infoTitle}>Track route</Text>
         </View>
-      </View>
+      </View> */}
     </View>
   );
 };

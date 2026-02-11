@@ -13,8 +13,8 @@ import { transPrice } from "./../../utils/transPrice";
 import { useRouter } from "expo-router";
 import { Stepper } from "react-native-ui-lib";
 import { useMutation } from "@tanstack/react-query";
-import * as CartApi from "@/services/api/cartApi";
-import { CustomToast } from "../components/toast";
+import * as CartApi from "@/apis/cartApi";
+import { CustomToast } from "@/components/ui/toast";
 import { useSelector } from "react-redux";
 
 const DishPage = () => {
@@ -47,7 +47,7 @@ const DishPage = () => {
         dish.topping?.filter((t) => selectedToppings.includes(t._id)) || [];
       const toppingsPrice = selectedToppingsDetails.reduce(
         (acc, cur) => acc + (cur.price || 0),
-        0
+        0,
       );
       setTotalPrice(dish.price * quantity + toppingsPrice);
     }
@@ -58,7 +58,7 @@ const DishPage = () => {
     setSelectedToppings((prev = []) =>
       prev.includes(topping)
         ? prev.filter((t) => t !== topping)
-        : [...prev, topping]
+        : [...prev, topping],
     );
   };
 

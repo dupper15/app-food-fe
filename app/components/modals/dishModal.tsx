@@ -18,14 +18,14 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { fetchAllCategory } from "@/services/api/categoryApi";
-import { DishData } from "@/interfaces/DishInterface";
-import { fetchAllToppingByRestaurant } from "@/services/api/toppingApi";
-import { Topping } from "@/interfaces/ToppingInterface";
-import { Category } from "@/interfaces/CategoryInterface";
-import { createDish, editDish } from "@/services/api/dishApi";
+import { fetchAllCategory } from "@/apis/categoryApi";
+import { DishData } from "@/types/DishInterface";
+import { fetchAllToppingByRestaurant } from "@/apis/toppingApi";
+import { Topping } from "@/types/ToppingInterface";
+import { Category } from "@/types/CategoryInterface";
+import { createDish, editDish } from "@/apis/dishApi";
 import { useSelector } from "react-redux";
-import { CustomToast } from "./toast";
+import { CustomToast } from "../ui/toast";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,14 +44,14 @@ export default function VoucherModal() {
   };
   const parsedDish: DishData = dish ? JSON.parse(dish) : null;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    parsedDish?.category_id || null
+    parsedDish?.category_id || null,
   );
   const [selectedTopping, setSelectedTopping] = useState<string[]>(
-    parsedDish?.topping.map((t) => t._id) || []
+    parsedDish?.topping.map((t) => t._id) || [],
   );
   const restaurantId = useSelector(
     (state: { restaurant: { restaurantId: string } }) =>
-      state.restaurant.restaurantId
+      state.restaurant.restaurantId,
   );
   const [name, setName] = useState(parsedDish?.name);
   const [introduce, setIntroduce] = useState(parsedDish?.introduce);
@@ -66,7 +66,7 @@ export default function VoucherModal() {
   const [contentError, setContentError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAvailable, setIsAvailable] = useState<boolean>(
-    parsedDish?.isAvailable
+    parsedDish?.isAvailable,
   );
   useEffect(() => {
     console.log("isAvailable", isAvailable);

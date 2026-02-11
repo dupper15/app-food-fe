@@ -10,8 +10,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { changePassword } from "@/services/api/userApi";
-import { CustomToast } from "../components/toast";
+import { changePassword } from "@/apis/userApi";
+import { CustomToast } from "@/components/ui/toast";
 import { useSelector } from "react-redux";
 
 export const InputField = ({
@@ -40,7 +40,7 @@ export const InputField = ({
 
 const ChangePasswordPage = () => {
   const userId = useSelector(
-    (state: { user: { userId: string } }) => state.user.userId
+    (state: { user: { userId: string } }) => state.user.userId,
   );
   const router = useRouter();
   const handleRouteBack = () => {
